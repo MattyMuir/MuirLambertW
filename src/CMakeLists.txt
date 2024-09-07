@@ -6,7 +6,7 @@ include(../macros.cmake)
 include(GNUInstallDirs)
 
 # === Create Executable ===
-add_library(MuirLambertW  "MuirLambertWSimd.cpp" "MuirLambertWSimd.h" "mysleef.h")
+add_library(MuirLambertW  "MuirLambertWSimd.cpp" "MuirLambertWSimd.h" "mysleef.h" "MuirLambertWSerial.h" "MuirLambertWSerial.cpp")
 
 # === Link Libraries ===
 find_package(sleef REQUIRED)
