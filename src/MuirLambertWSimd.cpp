@@ -186,6 +186,7 @@ __m256d W0Iterations(__m256d x, __m256d w)
     __m256d temp4 = _mm256_mul_pd(_mm256_div_pd(zn, temp), _mm256_sub_pd(temp2, zn));
     w = _mm256_mul_pd(w, _mm256_add_pd(_mm256_div_pd(temp4, temp3), one));
 
+    /*
     // === Halley Iteration ===
     __m256d expW = Sleef_expd4_u10avx2(w);
     __m256d wExpWSubX = _mm256_fmsub_pd(w, expW, x);
@@ -197,6 +198,7 @@ __m256d W0Iterations(__m256d x, __m256d w)
     newW = _mm256_div_pd(wExpWSubX, newW);
     newW = _mm256_sub_pd(w, newW);
     w = newW;
+    */
 
     return w;
 }

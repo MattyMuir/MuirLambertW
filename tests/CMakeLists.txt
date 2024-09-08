@@ -15,6 +15,8 @@ find_package(PkgConfig)
 pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
 target_link_libraries(tests PRIVATE PkgConfig::mpfr)
 
+target_include_directories(tests PRIVATE "C:/sdks/boost_1_86_0")
+
 # === Feature Enables ===
 target_compile_features(tests PUBLIC cxx_std_20)
 enable_ipo(tests)

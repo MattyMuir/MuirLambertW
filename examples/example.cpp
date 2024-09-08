@@ -1,8 +1,10 @@
 #include <iostream>
+#include <format>
 
 #include "MuirLambertW.h"
 
 int main()
 {
-	std::cout << MuirLambertW0Simd(_mm256_set1_pd(3.0))[0];
+	double res = MuirpairW0(_mm256_set1_pd(36))[0];
+	std::cout << std::format("{}\n", res);
 }

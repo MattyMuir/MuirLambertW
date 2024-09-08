@@ -11,9 +11,11 @@ add_executable(benchwm1 "benchwm1.cpp" "Timer.h" "others/BarryLambertW.cpp" "oth
 # === Libraries ===
 target_link_libraries(benchw0 PUBLIC MuirLambertW)
 target_include_directories(benchw0 PUBLIC "../include/")
+target_include_directories(benchw0 PRIVATE "C:/sdks/boost_1_86_0")
 
 target_link_libraries(benchwm1 PUBLIC MuirLambertW)
 target_include_directories(benchwm1 PUBLIC "../include/")
+target_include_directories(benchwm1 PRIVATE "C:/sdks/boost_1_86_0")
 
 # === Feature Enables ===
 target_compile_features(benchw0 PUBLIC cxx_std_20)

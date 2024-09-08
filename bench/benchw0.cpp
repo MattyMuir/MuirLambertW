@@ -6,68 +6,72 @@
 
 #include "others/FukushimaLambertW.h"
 #include "others/BarryLambertW.h"
+#include "boost/math/special_functions/lambert_w.hpp"
 #include "MuirLambertW.h"
 
 #define BENCH_FUKUSHIMA 0
 #define BENCH_BARRY 0
-#define BENCH_MUIR 0
+#define BENCH_BOOST 1
 #define BENCH_MUIR_SIMD 1
 
-void DoNotOptimize(auto... args)
+#define BENCHMARK(func, name) _ += RunBenchmark(func, name)
+
+// === Parameters ===
+static constexpr size_t NumData = 1'000;
+static constexpr size_t NumIter = 100'000;
+// ==================
+
+using BenchFunction = double(*)(double);
+
+std::vector<double> data;
+
+void PrepareData()
 {
-	(std::cout << ... << args) << '\r';
-	std::cout << "                                    \r";
+	static std::mt19937_64 gen{ std::random_device{}() };
+	static std::uniform_real_distribution<double> dist{ 1e44, 1e300 };
+
+	data.reserve(NumData);
+	for (size_t i = 0; i < NumData; i++)
+		data.push_back(dist(gen));
+}
+
+double RunBenchmark(BenchFunction func, const char* name)
+{
+	double _ = 0.0;
+
+	Timer t;
+	for (size_t i = 0; i < NumIter; i++)
+		for (size_t d = 0; d < NumData; d++)
+			_ += func(data[d]);
+	t.Stop();
+
+	std::cout << std::format("{} took: {:.0f}ms\n", name, t.GetSeconds() * 1000);
+
+	return _;
+}
+
+double MuirSimdMadeSerial(double x)
+{
+	return MuirpairW0(_mm256_set1_pd(x))[0];
 }
 
 int main()
 {
-	// === Parameters ===
-	static constexpr size_t NumData = 1'000;
-	static constexpr size_t NumIter = 100'000;
-	// ==================
+	PrepareData();
 
-	// Prepare data
-	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 1, 1000 };
-
-	std::vector<double> data;
-	data.reserve(NumData);
-	for (size_t i = 0; i < NumData; i++)
-		data.push_back(dist(gen));
-
-	double _0 = 0, _1 = 0, _2 = 0, _3 = 0;
-
+	double _ = 0.0;
 #if BENCH_FUKUSHIMA
-	TIMER(fukushima);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_0 += Fukushima::LambertW0(data[d]);
-	STOP_LOG(fukushima);
+	BENCHMARK(Fukushima::LambertW0, "Fukushima");
 #endif
-
 #if BENCH_BARRY
-	TIMER(barry);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_1 += BarryLambertW0(data[d]);
-	STOP_LOG(barry);
+	BENCHMARK(BarryLambertW0, "Barry");
 #endif
-
-#if BENCH_MUIR
-	TIMER(muir);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_2 += MuirLambertW0(data[d]);
-	STOP_LOG(muir);
+#if BENCH_BOOST
+	BENCHMARK(boost::math::lambert_w0<double>, "Boost");
 #endif
-
 #if BENCH_MUIR_SIMD
-	TIMER(muir_simd);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_3 += MuirLambertW0Simd(_mm256_set1_pd(data[d]))[0];
-	STOP_LOG(muir_simd);
+	BENCHMARK(MuirSimdMadeSerial, "Muir SIMD");
 #endif
 
-	DoNotOptimize(_0, _1, _2, _3);
+	std::cout << _;
 }
