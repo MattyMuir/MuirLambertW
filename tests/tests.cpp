@@ -2,14 +2,16 @@
 
 #include "ulp.h"
 #include "wrappers.h"
+#include "ReciprocalDistributionEx.h"
 
 #include "MuirLambertW.h"
 #include "reference/ReferenceLambertW.h"
+#include "../bench/others/BarryLambertW.h"
 
 int main(int argc, char** argv)
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 1, 1000 };
-
-	MaxULPRounded(ReferenceLambertW0, MakeSerial<MuirLambertW0Simd>, [=]() { return dist(gen); });
+	ReciprocalDistributionEx dist{ EM_UP, -std::numeric_limits<double>::min(), false};
+	
+	MaxULPRounded(ReferenceLambertWM1, MakeSerial<MuirLambertWM1Simd>, [&]() { return dist(gen); });
 }

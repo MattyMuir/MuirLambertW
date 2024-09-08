@@ -28,7 +28,7 @@ int main()
 
 	// Prepare data
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ -0.3, 0 };
+	static std::uniform_real_distribution<double> dist{ -0.3678794411714423, 0 };
 
 	std::vector<double> data;
 	data.reserve(NumData);

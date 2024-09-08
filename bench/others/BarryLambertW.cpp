@@ -1,6 +1,7 @@
 #include "BarryLambertW.h"
 
 #include <cmath>
+#include <iostream>
 
 double BarryLambertW(int64_t branch, double x)
 {

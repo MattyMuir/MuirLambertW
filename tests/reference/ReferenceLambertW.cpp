@@ -1,6 +1,7 @@
 #include "ReferenceLambertW.h"
 
 #include <iostream>
+#include <format>
 #include <bit>
 
 #include <mpfr.h>
@@ -51,7 +52,7 @@ Interval Bisection(double x, mpfr_t low, mpfr_t high, bool increasing, mpfr_prec
 
 		if (lowCmp < 0 && highCmp > 0)
 		{
-			std::cerr << "Error, ambiguous sign:" << x << '\n';
+			std::cerr << std::format("Error, ambiguous sign : {}\n", x);
 			throw;
 		}
 	}
@@ -139,8 +140,8 @@ Interval ReferenceLambertW0(double x)
 
 Interval ReferenceLambertWM1(double x)
 {
-	// -0.0038441181772657855
-	static constexpr mpfr_prec_t WM1Precision = 69;
+	// -0.24969406317656517
+	static constexpr mpfr_prec_t WM1Precision = 71;
 
 	// Edge cases
 	static constexpr double NaN = std::numeric_limits<double>::quiet_NaN();

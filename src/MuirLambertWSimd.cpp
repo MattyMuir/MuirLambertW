@@ -208,11 +208,11 @@ __m256d WM1Iterations(__m256d x, __m256d w)
     __m256d one = _mm256_set1_pd(1.0);
 
     // === Fritsch Iteration ===
-    __m256d negX = _mm256_sub_pd(_mm256_setzero_pd(), x);
-    __m256d negW = _mm256_sub_pd(_mm256_setzero_pd(), w);
-    __m256d lxov = _mm256_sub_pd(Sleef_logd4_u10avx2(negX), Sleef_logd4_u10avx2(negW));
-
-    __m256d zn = _mm256_sub_pd(lxov, w);
+    __m256d xov = _mm256_div_pd(x, w);
+    __m256d valsEq = _mm256_cmp_pd(x, w, EQUAL);
+    xov = _mm256_blendv_pd(xov, one, valsEq);
+    __m256d zn = _mm256_sub_pd(Sleef_logd4_u35avx2(xov), w); // For denormalized arguments, first multiply by a fixed factor and subtract after
+    
     __m256d temp = _mm256_add_pd(w, one);
     __m256d temp2 = _mm256_fmadd_pd(zn, _mm256_set1_pd(c23), temp);
     temp2 = _mm256_mul_pd(temp, temp2);
@@ -220,21 +220,6 @@ __m256d WM1Iterations(__m256d x, __m256d w)
     __m256d temp3 = _mm256_sub_pd(temp2, _mm256_add_pd(zn, zn));
     __m256d temp4 = _mm256_mul_pd(_mm256_div_pd(zn, temp), _mm256_sub_pd(temp2, zn));
     w = _mm256_mul_pd(w, _mm256_add_pd(_mm256_div_pd(temp4, temp3), one));
-
-    // === Halley Iteration ===
-    __m256d expW = Sleef_expd4_u10avx2(w);
-    __m256d wExpWSubX = _mm256_fmsub_pd(w, expW, x);
-
-    __m256d newW = _mm256_add_pd(w, _mm256_set1_pd(2));
-    newW = _mm256_mul_pd(newW, wExpWSubX);
-    newW = _mm256_div_pd(newW, _mm256_fmadd_pd(w, _mm256_set1_pd(2), _mm256_set1_pd(2)));
-    newW = _mm256_sub_pd(_mm256_fmadd_pd(w, expW, expW), newW);
-    newW = _mm256_div_pd(wExpWSubX, newW);
-    newW = _mm256_sub_pd(w, newW);
-
-    static constexpr double DblMin = std::numeric_limits<double>::min();
-    __m256d isDenorm = _mm256_cmp_pd(x, _mm256_set1_pd(-DblMin), GREATER);
-    w = _mm256_blendv_pd(newW, w, isDenorm);
 
     return w;
 }
@@ -318,17 +303,22 @@ __m256d GeneralWM1(__m256d x)
     __m256d tonc = _mm256_set1_pd(-8);
 
     // Approximation
-    __m256d t = Sleef_logd4_u35avx2(_mm256_sub_pd(_mm256_setzero_pd(), x));
-    t = _mm256_sub_pd(negOne, t);
+    // Determine value for 'a'
+    __m256d xQuiteSmall = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-11), GREATER);
+    __m256d xVerySmall = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-96), GREATER);
+    __m256d a = _mm256_blendv_pd(_mm256_set1_pd(127), _mm256_set1_pd(181), xQuiteSmall);
+    a = _mm256_blendv_pd(a, _mm256_set1_pd(317), xVerySmall);
 
-    __m256d approx = _mm256_sqrt_pd(_mm256_mul_pd(t, _mm256_set1_pd(0.5)));
-    approx = _mm256_fmadd_pd(approx, c, one);
-    approx = _mm256_div_pd(one, approx);
-    approx = _mm256_sub_pd(one, approx);
-    approx = _mm256_fmsub_pd(approx, tonc, t);
-    approx = _mm256_sub_pd(approx, one);
-
-    //std::println("{}", approx.m256d_f64[0]);
+    __m256d logX = Sleef_logd4_u35avx2(_mm256_sub_pd(_mm256_setzero_pd(), x));
+    __m256d t = _mm256_sub_pd(negOne, logX);
+    __m256d sqrtT = _mm256_sqrt_pd(t);
+    __m256d approx = _mm256_fmadd_pd(a, sqrtT, _mm256_set1_pd(270));
+    approx = _mm256_div_pd(t, approx);
+    approx = _mm256_sub_pd(_mm256_set1_pd(1.0 / 3.0), approx);
+    approx = _mm256_fmadd_pd(approx, sqrtT, _mm256_set1_pd(1.4142135623730950488));
+    approx = _mm256_div_pd(sqrtT, approx);
+    approx = _mm256_add_pd(approx, approx);
+    approx = _mm256_sub_pd(logX, approx);
 
     return WM1Iterations(x, approx);
 }
