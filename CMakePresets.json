@@ -8,6 +8,9 @@
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
 			"installDir": "${sourceDir}/out/install/${presetName}",
 			"cacheVariables": {
+				"PKG_CONFIG_EXECUTABLE": "C:/vcpkg/installed/x64-windows/tools/pkgconf/pkgconf.exe",
+				"CMAKE_TOOLCHAIN_FILE": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+				"VCPKG_TARGET_TRIPLET": "x64-windows-static",
 				"CMAKE_C_COMPILER": "C:/Program Files/LLVM/bin/clang.exe",
 				"CMAKE_CXX_COMPILER": "C:/Program Files/LLVM/bin/clang.exe",
 				"WARNINGS": "ON"

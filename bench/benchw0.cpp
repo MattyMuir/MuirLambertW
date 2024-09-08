@@ -8,8 +8,8 @@
 #include "others/BarryLambertW.h"
 #include "MuirLambertW.h"
 
-#define BENCH_FUKUSHIMA 1
-#define BENCH_BARRY 1
+#define BENCH_FUKUSHIMA 0
+#define BENCH_BARRY 0
 #define BENCH_MUIR 0
 #define BENCH_MUIR_SIMD 1
 

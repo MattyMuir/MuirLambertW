@@ -1,6 +1,5 @@
 #include "MuirLambertWSimd.h"
 
-#include <print>
 #include <cstdint>
 #include <iostream>
 #include <bit>
@@ -177,8 +176,8 @@ __m256d W0Iterations(__m256d x, __m256d w)
     __m256d xov = _mm256_div_pd(x, w);
     __m256d valsEq = _mm256_cmp_pd(x, w, EQUAL);
     xov = _mm256_blendv_pd(xov, one, valsEq);
-
     __m256d zn = _mm256_sub_pd(Sleef_logd4_u35avx2(xov), w);
+
     __m256d temp = _mm256_add_pd(w, one);
     __m256d temp2 = _mm256_fmadd_pd(zn, _mm256_set1_pd(c23), temp);
     temp2 = _mm256_mul_pd(temp, temp2);
