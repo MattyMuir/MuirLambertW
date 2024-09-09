@@ -46,6 +46,46 @@ static __m256d BetterLogApprox(__m256d x)
     return _mm256_fmadd_pd(exp, ln2, approx);
 }
 
+static __m256d LogAccurate(__m256d x)
+{
+    // === Constants ===
+    __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
+    __m256d one = _mm256_set1_pd(1.0);
+    // =================
+
+    // Extract exponent
+    __m256d xd = _mm256_mul_pd(x, _mm256_set1_pd(1.0 / 0.75));
+    __m256i dpunn = _mm256_castpd_si256(xd);
+    __m256i exp = _mm256_sub_epi64(_mm256_srli_epi64(dpunn, 52), _mm256_set1_epi64x(1023));
+
+    // Extract mantissa
+    __m256i punn = _mm256_castpd_si256(x);
+    punn = _mm256_sub_epi64(punn, _mm256_slli_epi64(exp, 52));
+    __m256d mantissa = _mm256_castsi256_pd(punn);
+
+    __m256d t = _mm256_div_pd(_mm256_sub_pd(mantissa, one), _mm256_add_pd(mantissa, one));
+    __m256d arg = _mm256_mul_pd(t, t);
+    __m256d t3 = _mm256_mul_pd(t, arg);
+
+    // Compute approximation
+    static constexpr double P[] = {
+        0.6666666666667778740063,
+        0.399999999950799600689777,
+        0.285714294746548025383248,
+        0.222221366518767365905163,
+        0.181863266251982985677316,
+        0.152519917006351951593857,
+        0.153487338491425068243146
+    };
+
+    __m256d approx = _mm256_set1_pd(P[6]);
+    for (size_t i = 0; i < 6; i++)
+        approx = _mm256_fmadd_pd(approx, arg, _mm256_set1_pd(P[5 - i]));
+    approx = _mm256_fmadd_pd(t3, approx, _mm256_add_pd(t, t));
+
+    return _mm256_fmadd_pd(Epi64ToPd(exp), ln2, approx);
+}
+
 __m256d Abs(__m256d x)
 {
     __m256d signMask = _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fff'ffff'ffff'ffff));
@@ -148,7 +188,7 @@ __m256d MuirpairW0(__m256d x)
 
     // === Fritsch Iteration ===
     __m256d xov = _mm256_div_pd(x, w);
-    __m256d zn = _mm256_sub_pd(Sleef_logd4_u35avx2(xov), w);
+    __m256d zn = _mm256_sub_pd(LogAccurate(xov), w);
 
     __m256d temp = _mm256_add_pd(w, one);
     __m256d temp2 = _mm256_fmadd_pd(zn, c23, temp);
