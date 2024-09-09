@@ -2,75 +2,88 @@
 
 #include "mysleef.h"
 
+#define LESS 0x11
 #define GREATER 0x1E
 
 #define SHUFFLE_INT(a, b, i) _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), i))
 
-static __m256d LogApprox(__m256d x)
+static inline __m256d Epi64ToPd(__m256i x)
 {
+    __m256i perm = _mm256_setr_epi32(0, 2, 4, 6, 0, 0, 0, 0);
+    x = _mm256_permutevar8x32_epi32(x, perm);
+    return _mm256_cvtepi32_pd(_mm256_castsi256_si128(x));
+}
+
+static __m256d BetterLogApprox(__m256d x)
+{
+    // === Constants ===
+    __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
+    // =================
+
+    // Extract exponent
     __m256i punn = _mm256_castpd_si256(x);
-    __m128i punnTop = _mm256_extractf128_si256(punn, 1);
-    __m128i compressed = _mm256_castsi256_si128(SHUFFLE_INT(punn, _mm256_castsi128_si256(punnTop), 221));
-    compressed = _mm_sub_epi32(compressed, _mm_set1_epi32(1072632447));
-    return _mm256_mul_pd(_mm256_cvtepi32_pd(compressed), _mm256_set1_pd(6.610368362777016e-7));
+    __m256d exp = Epi64ToPd(_mm256_sub_epi64(_mm256_srli_epi64(punn, 52), _mm256_set1_epi64x(1023)));
+
+    // Extract mantissa
+    punn = _mm256_and_si256(punn, _mm256_set1_epi64x(0x3FFFFFFFFFFFFFFF));
+    punn = _mm256_or_si256(punn, _mm256_set1_epi64x(0x3FF0000000000000));
+    __m256d mantissa = _mm256_castsi256_pd(punn);
+
+    // Compute approximation
+    static constexpr double P[] = {
+        -2.001981174757893,
+        3.7491905722285463,
+        -2.77383516599771,
+        1.3494246360270206,
+        -0.36414336579589207,
+        0.04134449829706258
+    };
+
+    __m256d approx = _mm256_set1_pd(P[5]);
+    for (size_t i = 0; i < 5; i++)
+        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[4 - i]));
+
+    return _mm256_fmadd_pd(exp, ln2, approx);
+}
+
+__m256d Abs(__m256d x)
+{
+    __m256d signMask = _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fff'ffff'ffff'ffff));
+    return _mm256_and_pd(x, signMask);
 }
 
 __m256d FirstApprox(__m256d x)
 {
-#if 0
-	// === Constants ===
-	__m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
-	__m256d one = _mm256_set1_pd(1.0);                          // 1
-	__m256d two = _mm256_set1_pd(2.0);							// 2
-	__m256d three = _mm256_set1_pd(3.0);						// 3
-	__m256d b = _mm256_set1_pd(1.09556884765625);				// Barry et al. p.164
-	__m256d a = _mm256_set1_pd(4.612634277343749);				// Barry et al. p.164
-	__m256d rt2m1 = _mm256_set1_pd(0.41421356237309504880);		// sqrt(2) - 1
-	__m256d m = _mm256_set1_pd(0.29289321881345247560);			// (2*sqrt(2)-3)/(sqrt(2)-2)
-	// =================
-
-	__m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
-	__m256d n2 = _mm256_sqrt_pd(_mm256_sqrt_pd(_mm256_add_pd(reta, b)));
-	n2 = _mm256_mul_pd(n2, a);
-	__m256d n1 = _mm256_fmadd_pd(n2, m, rt2m1);
-	__m256d d = _mm256_div_pd(_mm256_mul_pd(n1, reta), _mm256_add_pd(n2, reta));
-	__m256d approx = _mm256_add_pd(d, three);
-	approx = _mm256_div_pd(reta, approx);
-	approx = _mm256_add_pd(approx, one);
-	approx = _mm256_div_pd(reta, approx);
-	approx = _mm256_sub_pd(approx, one);
-
-	return approx;
-#else
     // === Constants ===
     __m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
-    __m256d one = _mm256_set1_pd(1.0);                          // 1
     __m256d two = _mm256_set1_pd(2.0);							// 2
     // =================
 
     static constexpr double P[] = {
-        -0.23191986858281746,
-        0.6035844764912062,
-        -0.11810511452745572,
-        0.03271911845398438,
-        -0.01014348930891587,
-        0.0027659313960321182,
-        -0.0005533012104930129,
-        7.39296672448467e-05,
-        -6.163504673892858e-06,
-        2.88520807118921e-07,
-        -5.7769348302741885e-09
+        -0.9998418255015216,
+        0.9963519639934693,
+        -0.31689383427598367,
+        0.11927961836393368,
+        -0.0389272342299362,
+        0.009587149228046744,
+        -0.0016619725895250465,
+        0.000193387127759057,
+        -1.426313511537818e-05,
+        5.997840674383423e-07,
+        -1.0923174871658654e-08
     };
 
     __m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
-    reta = _mm256_sub_pd(reta, one);
 
     __m256d approx = _mm256_set1_pd(P[10]);
     for (size_t i = 0; i < 10; i++)
         approx = _mm256_fmadd_pd(approx, reta, _mm256_set1_pd(P[9 - i]));
 
+    // Use approx = x for arguments near zero
+    __m256d isNearZero = _mm256_cmp_pd(Abs(x), _mm256_set1_pd(1e-4), LESS);
+    approx = _mm256_blendv_pd(approx, x, isNearZero);
+
     return approx;
-#endif
 }
 
 __m256d SecondApprox(__m256d x)
@@ -90,8 +103,8 @@ __m256d SecondApprox(__m256d x)
        -7.00379652018853621e-11,
        -1.89247635913659556e-13,
        -1.55898770790170598e-16,
-       -4.06109208815303157e-20,
-       -2.21552699006496737e-24,
+       //-4.06109208815303157e-20,
+       //-2.21552699006496737e-24,
     };
     static constexpr double Q[] = {
        1.00000000000000000e+00,
@@ -103,11 +116,11 @@ __m256d SecondApprox(__m256d x)
        1.10667669458467617e-10,
        1.31012240694192289e-13,
        6.53282047177727125e-17,
-       1.11775518708172009e-20,
-       3.78250395617836059e-25,
+       //1.11775518708172009e-20,
+       //3.78250395617836059e-25,
     };
 
-    __m256d logX = Sleef_logd4_u35avx2(_mm256_add_pd(x, offset));
+    __m256d logX = BetterLogApprox(_mm256_add_pd(x, offset));
 
     __m256d numer = _mm256_set1_pd(P[8]);
     __m256d denom = _mm256_set1_pd(Q[8]);
