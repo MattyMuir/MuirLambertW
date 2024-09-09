@@ -17,9 +17,10 @@ static __m256d LogApprox(__m256d x)
 
 __m256d FirstApprox(__m256d x)
 {
+#if 0
 	// === Constants ===
 	__m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
-	__m256d one = _mm256_set1_pd(1.0);
+	__m256d one = _mm256_set1_pd(1.0);                          // 1
 	__m256d two = _mm256_set1_pd(2.0);							// 2
 	__m256d three = _mm256_set1_pd(3.0);						// 3
 	__m256d b = _mm256_set1_pd(1.09556884765625);				// Barry et al. p.164
@@ -40,6 +41,36 @@ __m256d FirstApprox(__m256d x)
 	approx = _mm256_sub_pd(approx, one);
 
 	return approx;
+#else
+    // === Constants ===
+    __m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
+    __m256d one = _mm256_set1_pd(1.0);                          // 1
+    __m256d two = _mm256_set1_pd(2.0);							// 2
+    // =================
+
+    static constexpr double P[] = {
+        -0.23191986858281746,
+        0.6035844764912062,
+        -0.11810511452745572,
+        0.03271911845398438,
+        -0.01014348930891587,
+        0.0027659313960321182,
+        -0.0005533012104930129,
+        7.39296672448467e-05,
+        -6.163504673892858e-06,
+        2.88520807118921e-07,
+        -5.7769348302741885e-09
+    };
+
+    __m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
+    reta = _mm256_sub_pd(reta, one);
+
+    __m256d approx = _mm256_set1_pd(P[10]);
+    for (size_t i = 0; i < 10; i++)
+        approx = _mm256_fmadd_pd(approx, reta, _mm256_set1_pd(P[9 - i]));
+
+    return approx;
+#endif
 }
 
 __m256d SecondApprox(__m256d x)
@@ -76,7 +107,7 @@ __m256d SecondApprox(__m256d x)
        3.78250395617836059e-25,
     };
 
-    __m256d logX = LogApprox(_mm256_add_pd(x, offset));
+    __m256d logX = Sleef_logd4_u35avx2(_mm256_add_pd(x, offset));
 
     __m256d numer = _mm256_set1_pd(P[8]);
     __m256d denom = _mm256_set1_pd(Q[8]);

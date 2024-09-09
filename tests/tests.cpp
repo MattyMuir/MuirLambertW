@@ -17,7 +17,10 @@ double BoostLambertW0(double x)
 int main(int argc, char** argv)
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ 1, Infinity, false};
+	ReciprocalDistributionEx dist{ 0, 20, false};
+
+	double x = 0.0038962123291743506;
+	double res = MakeSerial<MuirpairW0>(x);
 	
 	MaxULPRounded(ReferenceLambertW0, MakeSerial<MuirpairW0>, [&]() { return dist(gen); });
 }

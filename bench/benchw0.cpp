@@ -11,7 +11,7 @@
 
 #define BENCH_FUKUSHIMA 0
 #define BENCH_BARRY 0
-#define BENCH_BOOST 1
+#define BENCH_BOOST 0
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
