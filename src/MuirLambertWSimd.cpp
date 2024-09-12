@@ -20,6 +20,7 @@
 
 #define SHUFFLE_INT(a, b, i) _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), i))
 
+#if 0
 static inline __m256i Lzcnt(__m256i a)
 {
     uint64_t c0 = std::countl_zero((uint64_t)_mm256_extract_epi64(a, 0));
@@ -69,6 +70,29 @@ static inline __m256d AddEm(__m256d x)
 
     return _mm256_castsi256_pd(result);
 }
+
+#else
+struct vdouble2
+{
+    __m256d x, y;
+};
+
+vdouble2 Add(vdouble2 x, vdouble2 y)
+{
+    __m256d s = _mm256_add_pd(x.x, y.x);
+    __m256d v = _mm256_sub_pd(s, x.x);
+    __m256d t = _mm256_add_pd(_mm256_sub_pd(x.x, _mm256_sub_pd(s, v)), _mm256_sub_pd(y.x, v));
+    return { s, _mm256_add_pd(t, _mm256_add_pd(x.y, y.y)) };
+}
+
+__m256d AddEm(__m256d x)
+{
+    vdouble2 em{ _mm256_set1_pd(0.36787944117144232160), _mm256_set1_pd(-1.2428753672788363168e-17) };
+    vdouble2 x2{ x, _mm256_setzero_pd() };
+    vdouble2 res = Add(x2, em);
+    return _mm256_add_pd(res.x, res.y);
+}
+#endif
 
 template <size_t MaxOrder>
 static __m256d NearBranchSeries(__m256d p)
@@ -299,10 +323,7 @@ static __m256d NearBranchWM1(__m256d x)
 __m256d GeneralWM1(__m256d x)
 {
     // Constants
-    __m256d one = _mm256_set1_pd(1.0);
     __m256d negOne = _mm256_set1_pd(-1.0);
-    __m256d c = _mm256_set1_pd(0.25);
-    __m256d tonc = _mm256_set1_pd(-8);
 
     // Approximation
     // Determine value for 'a'

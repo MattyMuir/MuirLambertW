@@ -9,9 +9,9 @@
 #include "boost/math/special_functions/lambert_w.hpp"
 #include "MuirLambertW.h"
 
-#define BENCH_FUKUSHIMA 0
-#define BENCH_BARRY 0
-#define BENCH_BOOST 0
+#define BENCH_FUKUSHIMA 1
+#define BENCH_BARRY 1
+#define BENCH_BOOST 1
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
@@ -28,7 +28,7 @@ std::vector<double> data;
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 1e44, 1e300 };
+	static std::uniform_real_distribution<double> dist{ 1, 1e20 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)

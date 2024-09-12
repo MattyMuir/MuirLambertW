@@ -1,12 +1,15 @@
 #include "MuirpairW0.h"
 
-#include "mysleef.h"
+#include <cstdint>
 
 #define LESS 0x11
 #define GREATER 0x1E
 
 #define SHUFFLE_INT(a, b, i) _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), i))
+#define NONE(p) _mm256_testz_pd(p, p)
+#define ANY(p) (bool)(_mm256_movemask_pd(p))
 
+// ========== Log Functions ==========
 static inline __m256d Epi64ToPd(__m256i x)
 {
     __m256i perm = _mm256_setr_epi32(0, 2, 4, 6, 0, 0, 0, 0);
@@ -14,7 +17,7 @@ static inline __m256d Epi64ToPd(__m256i x)
     return _mm256_cvtepi32_pd(_mm256_castsi256_si128(x));
 }
 
-static __m256d BetterLogApprox(__m256d x)
+static __m256d LogFast(__m256d x)
 {
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
@@ -86,6 +89,7 @@ static __m256d LogAccurate(__m256d x)
     return _mm256_fmadd_pd(Epi64ToPd(exp), ln2, approx);
 }
 
+// ========== General ==========
 __m256d Abs(__m256d x)
 {
     __m256d signMask = _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fff'ffff'ffff'ffff));
@@ -99,6 +103,7 @@ __m256d FirstApprox(__m256d x)
     __m256d two = _mm256_set1_pd(2.0);							// 2
     // =================
 
+#if 1
     static constexpr double P[] = {
         -0.9998418255015216,
         0.9963519639934693,
@@ -124,6 +129,35 @@ __m256d FirstApprox(__m256d x)
     approx = _mm256_blendv_pd(approx, x, isNearZero);
 
     return approx;
+#else
+    static constexpr double P[] = {
+        -1.0,
+        0.999941496640904044459909267686,
+        -0.3318756444333983979255719987122574821115,
+        0.1456506832093031611474742703649098984897,
+        -0.0638525222312049667294786559068597853184,
+        0.0236845051849372927044168335442009265535,
+        -0.0067196890180458105495953091690353176091,
+        0.0013810915789711295919434119738866684202,
+        -0.0001988032504614401895903091910255966468,
+        0.0000193723975900881618950055695904666209,
+        -0.0000012116330584853344531112533111194551,
+        0.0000000437661726042473028299211389949980,
+        -0.0000000006928406708333021054312135438642
+    };
+
+    __m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
+
+    __m256d approx = _mm256_set1_pd(P[12]);
+    for (size_t i = 0; i < 12; i++)
+        approx = _mm256_fmadd_pd(approx, reta, _mm256_set1_pd(P[11 - i]));
+
+    // Use approx = x for arguments near zero
+    __m256d isNearZero = _mm256_cmp_pd(Abs(x), _mm256_set1_pd(1e-4), LESS);
+    approx = _mm256_blendv_pd(approx, x, isNearZero);
+
+    return approx;
+#endif
 }
 
 __m256d SecondApprox(__m256d x)
@@ -160,7 +194,7 @@ __m256d SecondApprox(__m256d x)
        //3.78250395617836059e-25,
     };
 
-    __m256d logX = BetterLogApprox(_mm256_add_pd(x, offset));
+    __m256d logX = LogFast(_mm256_add_pd(x, offset));
 
     __m256d numer = _mm256_set1_pd(P[8]);
     __m256d denom = _mm256_set1_pd(Q[8]);
@@ -175,7 +209,7 @@ __m256d SecondApprox(__m256d x)
     return approx;
 }
 
-__m256d MuirpairW0(__m256d x)
+__m256d GeneralW0(__m256d x)
 {
     __m256d approx1 = FirstApprox(x);
     __m256d approx2 = SecondApprox(x);
@@ -199,4 +233,90 @@ __m256d MuirpairW0(__m256d x)
     w = _mm256_mul_pd(w, _mm256_add_pd(_mm256_div_pd(temp4, temp3), one));
 
     return w;
+}
+
+// ========== Near Branch ==========
+struct vdouble2
+{
+    __m256d x, y;
+};
+
+vdouble2 Add(vdouble2 x, vdouble2 y)
+{
+    __m256d s = _mm256_add_pd(x.x, y.x);
+    __m256d v = _mm256_sub_pd(s, x.x);
+    __m256d t = _mm256_add_pd(_mm256_sub_pd(x.x, _mm256_sub_pd(s, v)), _mm256_sub_pd(y.x, v));
+    return { s, _mm256_add_pd(t, _mm256_add_pd(x.y, y.y)) };
+}
+
+__m256d AddEm(__m256d x)
+{
+    vdouble2 em{ _mm256_set1_pd(0.36787944117144232160), _mm256_set1_pd(-1.2428753672788363168e-17) };
+    vdouble2 x2{ x, _mm256_setzero_pd() };
+    vdouble2 res = Add(x2, em);
+    return _mm256_add_pd(res.x, res.y);
+}
+
+template <size_t MaxOrder>
+static __m256d NearBranchSeries(__m256d p)
+{
+    static constexpr double P[] = {
+      -1,
+      +1,
+      -0.333333333333333333,
+      +0.152777777777777778,
+      -0.0796296296296296296,
+      +0.0445023148148148148,
+      -0.0259847148736037625,
+      +0.0156356325323339212,
+      -0.00961689202429943171,
+      +0.00601454325295611786,
+      -0.00381129803489199923,
+      +0.00244087799114398267,
+      -0.00157693034468678425,
+      +0.00102626332050760715,
+      -0.000672061631156136204,
+      +0.000442473061814620910,
+      -0.000292677224729627445,
+      +0.000194387276054539318,
+      -0.000129574266852748819,
+      +0.0000866503580520812717,
+      -0.0000581136075044138168,
+      +0.00003907668486743905163539558,
+      -0.00002633806474723109873858408,
+      +0.00001779034580507958540073628,
+      -0.00001204035273955997694227412
+    };
+
+    // Evaluate polynomial using Horner's Method
+    __m256d value = _mm256_set1_pd(P[MaxOrder]);
+    for (size_t i = 0; i < MaxOrder; i++)
+        value = _mm256_fmadd_pd(value, p, _mm256_set1_pd(P[MaxOrder - 1 - i]));
+
+    return value;
+}
+
+static __m256d NearBranchW0(__m256d x)
+{
+    static constexpr double s2e = 2.331643981597124;
+    __m256d p = _mm256_mul_pd(_mm256_sqrt_pd(AddEm(x)), _mm256_set1_pd(s2e));
+
+    return NearBranchSeries<24>(p);
+}
+
+// ========== Main Function ==========
+__m256d MuirpairW0(__m256d x)
+{
+    __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.34100), LESS);
+    uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);
+
+    __m256d nearBranchVal = _mm256_setzero_pd();
+    __m256d generalVal = _mm256_setzero_pd();
+
+    if (nearBranchMask)
+        nearBranchVal = NearBranchW0(x);
+    if (~nearBranchMask)
+        generalVal = GeneralW0(x);
+
+    return _mm256_blendv_pd(generalVal, nearBranchVal, isNearBranch);
 }
