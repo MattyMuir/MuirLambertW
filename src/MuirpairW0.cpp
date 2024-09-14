@@ -315,7 +315,7 @@ __m256d MuirpairW0(__m256d x)
 
     if (nearBranchMask)
         nearBranchVal = NearBranchW0(x);
-    if (~nearBranchMask)
+    if (~nearBranchMask & 0b1111)
         generalVal = GeneralW0(x);
 
     return _mm256_blendv_pd(generalVal, nearBranchVal, isNearBranch);

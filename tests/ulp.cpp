@@ -30,7 +30,7 @@ uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, Ran
 
 		double approx = approxFunc(x);
         if (!std::isfinite(approx))
-            continue;
+            std::cout << std::format("NaN: {}\n", x);
 		auto [inf, sup] = boundedFunc(x);
 
         uint64_t error = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
