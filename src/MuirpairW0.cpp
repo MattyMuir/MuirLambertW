@@ -310,13 +310,13 @@ __m256d MuirpairW0(__m256d x)
     __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.34100), LESS);
     uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);
 
-    __m256d nearBranchVal = _mm256_setzero_pd();
-    __m256d generalVal = _mm256_setzero_pd();
-
-    if (nearBranchMask)
-        nearBranchVal = NearBranchW0(x);
-    if (~nearBranchMask & 0b1111)
-        generalVal = GeneralW0(x);
-
-    return _mm256_blendv_pd(generalVal, nearBranchVal, isNearBranch);
+    switch (nearBranchMask)
+    {
+    case 0b0000: [[likely]]
+        return GeneralW0(x);
+    case 0b1111: [[unlikely]]
+        return NearBranchW0(x);
+    default: [[unlikely]]
+        return _mm256_blendv_pd(GeneralW0(x), NearBranchW0(x), isNearBranch);
+    }
 }

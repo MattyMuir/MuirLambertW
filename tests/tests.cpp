@@ -21,6 +21,10 @@ int main(int argc, char** argv)
 	// Last 5 (-0.33900 - -0.33800: 5) with fixed first coefficient
 	// Last 5 (-0.34200 - -0.34100: 5)
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ 0, Infinity, false };
-	MaxULPRounded(ReferenceLambertW0, MakeSerial<MuirpairW0>, [&]() { return dist(gen); });
+	ReciprocalDistributionEx dist{ EM_UP, Infinity, false };
+	//MaxULPRounded(ReferenceLambertW0, MakeSerial<MuirLambertW0Simd>, [&]() { return dist(gen); });
+
+	double x = dist(gen);
+
+	std::cout << MakeSerial<MuirpairW0>(x);
 }
