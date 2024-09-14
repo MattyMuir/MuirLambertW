@@ -31,7 +31,7 @@ std::vector<__m256d> simdData;
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 30, 40 };
+	static std::uniform_real_distribution<double> dist{ 1, 10 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
@@ -39,7 +39,7 @@ void PrepareData()
 
 	simdData.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
-		simdData.push_back(_mm256_setr_pd(25.0, dist(gen), 25, 25));
+		simdData.push_back(_mm256_set1_pd(dist(gen)));
 }
 
 double RunBenchmark(BenchFunction func, const char* name)
@@ -93,9 +93,9 @@ int main()
 	BENCHMARK(boost::math::lambert_w0<double>, "Boost");
 #endif
 #if BENCH_MUIR_SIMD
-	SIMD_BENCHMARK(MuirpairW0, "Muir SIMD");
+	BENCHMARK(MuirSimdMadeSerial, "Muir SIMD");
 #endif
 
-	std::cout << _;
+	std::cout << _ << '\n';
 	std::cout << _2[0];
 }

@@ -1,7 +1,9 @@
 #include "MuirpairW0.h"
 
 #include <cstdint>
+#include <limits>
 
+#define EQUAL 0x0
 #define LESS 0x11
 #define GREATER 0x1E
 
@@ -119,6 +121,7 @@ __m256d FirstApprox(__m256d x)
     };
 
     __m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
+    //__m256d reta = _mm256_mul_pd(_mm256_sqrt_pd(AddEm(x)), _mm256_set1_pd(2.3316439815971242034));
 
     __m256d approx = _mm256_set1_pd(P[10]);
     for (size_t i = 0; i < 10; i++)
@@ -247,25 +250,12 @@ __m256d GeneralW0(__m256d x)
 }
 
 // ========== Near Branch ==========
-struct vdouble2
-{
-    __m256d x, y;
-};
-
-vdouble2 Add(vdouble2 x, vdouble2 y)
-{
-    __m256d s = _mm256_add_pd(x.x, y.x);
-    __m256d v = _mm256_sub_pd(s, x.x);
-    __m256d t = _mm256_add_pd(_mm256_sub_pd(x.x, _mm256_sub_pd(s, v)), _mm256_sub_pd(y.x, v));
-    return { s, _mm256_add_pd(t, _mm256_add_pd(x.y, y.y)) };
-}
-
 __m256d AddEm(__m256d x)
 {
-    vdouble2 em{ _mm256_set1_pd(0.36787944117144232160), _mm256_set1_pd(-1.2428753672788363168e-17) };
-    vdouble2 x2{ x, _mm256_setzero_pd() };
-    vdouble2 res = Add(x2, em);
-    return _mm256_add_pd(res.x, res.y);
+    __m256d emHigh = _mm256_set1_pd(0.36787944117144232160);
+    __m256d emLow = _mm256_set1_pd(-1.2428753672788363168e-17);
+
+    return _mm256_add_pd(_mm256_add_pd(x, emHigh), emLow);
 }
 
 template <size_t MaxOrder>
@@ -321,13 +311,23 @@ __m256d MuirpairW0(__m256d x)
     __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.34100), LESS);
     uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);
 
+    __m256d result;
     switch (nearBranchMask)
     {
     case 0b0000: [[likely]]
-        return GeneralW0(x);
+        result = GeneralW0(x);
+        break;
     case 0b1111: [[unlikely]]
-        return NearBranchW0(x);
+        result = NearBranchW0(x);
+        break;
     default: [[unlikely]]
-        return _mm256_blendv_pd(GeneralW0(x), NearBranchW0(x), isNearBranch);
+        result = _mm256_blendv_pd(GeneralW0(x), NearBranchW0(x), isNearBranch);
+        break;
     }
+
+    // Fix infinity
+    __m256d infinity = _mm256_set1_pd(std::numeric_limits<double>::infinity());
+    result = _mm256_blendv_pd(result, infinity, _mm256_cmp_pd(x, infinity, EQUAL));
+
+    return result;
 }

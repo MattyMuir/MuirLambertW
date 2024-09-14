@@ -4,7 +4,7 @@
 #include <format>
 #include <bit>
 
-#define LOGGING 1
+#define LOGGING 0
 
 uint64_t ULPDistance(double a, double b)
 {
@@ -21,7 +21,7 @@ uint64_t ULPDistance(double a, double b)
     return (aPunn - 0x8000000000000000) + bPunn;
 }
 
-uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, RandomFunction randFunc, uint64_t iter)
+uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, const RandomFunction& randFunc, uint64_t iter)
 {
     uint64_t maxError = 0;
 	for (uint64_t i = 0; (i < iter) || !iter; i++)
@@ -47,7 +47,7 @@ uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, Ran
     return maxError;
 }
 
-double AvgULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, RandomFunction randFunc, uint64_t iter)
+double AvgULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, const RandomFunction& randFunc, uint64_t iter)
 {
     double totalError = 0;
     for (uint64_t i = 0; (i < iter) || !iter; i++)

@@ -16,11 +16,7 @@ double BoostLambertW0(double x)
 	return boost::math::lambert_w0(x);
 }
 
-int main(int argc, char** argv)
+int main()
 {
-	// Last 5 (-0.33900 - -0.33800: 5) with fixed first coefficient
-	// Last 5 (-0.34200 - -0.34100: 5)
-	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ EM_UP, Infinity, false };
-	MaxULPRounded(ReferenceLambertW0, MakeSerial<MuirLambertW0Simd>, [&]() { return dist(gen); });
+	ULPHistogram(ReferenceLambertW0, boost::math::lambert_w0, -20, 20, 0.5, [](double x) { return EM_UP + exp(x); });
 }
