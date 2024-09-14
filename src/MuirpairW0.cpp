@@ -211,10 +211,21 @@ __m256d SecondApprox(__m256d x)
 
 __m256d GeneralW0(__m256d x)
 {
-    __m256d approx1 = FirstApprox(x);
-    __m256d approx2 = SecondApprox(x);
     __m256d isOver20 = _mm256_cmp_pd(x, _mm256_set1_pd(20.0), GREATER);
-    __m256d w = _mm256_blendv_pd(approx1, approx2, isOver20);;
+    uint32_t isOver20Mask = _mm256_movemask_pd(isOver20);
+
+    __m256d w;
+    switch (isOver20Mask)
+    {
+    case 0b0000:
+        w = FirstApprox(x);
+        break;
+    case 0b1111:
+        w = SecondApprox(x);
+        break;
+    default:
+        w = _mm256_blendv_pd(FirstApprox(x), SecondApprox(x), isOver20);
+    }
 
     // Constants
     __m256d c23 = _mm256_set1_pd(2.0 / 3.0);
