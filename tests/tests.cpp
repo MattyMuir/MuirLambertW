@@ -18,5 +18,33 @@ double BoostLambertW0(double x)
 
 int main()
 {
-	ULPHistogram(ReferenceLambertW0, boost::math::lambert_w0, -20, 20, 0.5, [](double x) { return EM_UP + exp(x); });
+	/*
+	static std::mt19937_64 gen{ std::random_device{}() };
+	std::uniform_real_distribution<double> dist{ EM_UP, 0 };
+
+	double worst = -1;
+	for (;;)
+	{
+		double x = dist(gen);
+		auto [inf, sup] = ReferenceLambertWM1(x);
+
+		double approx = BarryLambertWM1(x);
+
+		uint64_t dist = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
+
+		if (dist <= 5)
+			continue;
+
+		if (x > worst)
+		{
+			worst = x;
+			std::cout << std::format("{}\n", worst);
+		}
+	}
+	*/
+
+	static std::mt19937_64 gen{ std::random_device{}() };
+	ReciprocalDistributionEx dist{ -0.2, -1e-300, false };
+
+	MaxULPRounded(ReferenceLambertWM1, MakeSerial<MuirpairWm1>, [&]() { return dist(gen); });
 }

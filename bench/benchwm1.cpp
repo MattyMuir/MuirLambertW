@@ -1,73 +1,88 @@
 #include <vector>
 #include <random>
 
+#include "../tests/ReciprocalDistributionEx.h"
+
 #define TIMER_NPRINT
 #include "Timer.h"
 
 #include "others/FukushimaLambertW.h"
 #include "others/BarryLambertW.h"
+#include "boost/math/special_functions/lambert_w.hpp"
 #include "MuirLambertW.h"
 
-#define BENCH_FUKUSHIMA 1
-#define BENCH_BARRY 1
-#define BENCH_MUIR 0
+#define BENCH_FUKUSHIMA 0
+#define BENCH_BARRY 0
+#define BENCH_BOOST 0
 #define BENCH_MUIR_SIMD 1
 
-void DoNotOptimize(auto... args)
-{
-	(std::cout << ... << args) << '\r';
-	std::cout << "                                    \r";
-}
+#define BENCHMARK(func, name) _ += RunBenchmark(func, name)
+#define SIMD_BENCHMARK(func, name) _2 = _mm256_add_pd(_2, RunBenchmark(func, name))
 
-int main()
-{
-	// === Parameters ===
-	static constexpr size_t NumData = 1'000;
-	static constexpr size_t NumIter = 100'000;
-	// ==================
+// === Parameters ===
+static constexpr size_t NumData = 1'000;
+static constexpr size_t NumIter = 100'000;
+// ==================
 
-	// Prepare data
+using BenchFunction = double(*)(double);
+using SimdFunction = __m256d(*)(__m256d);
+
+std::vector<double> data;
+std::vector<__m256d> simdData;
+
+void PrepareData()
+{
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ -0.3678794411714423, 0 };
+	static ReciprocalDistributionEx dist{ -0.3678794411714423, -1e-20, false };
 
-	std::vector<double> data;
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
 		data.push_back(dist(gen));
 
-	double _0 = 0, _1 = 0, _2 = 0, _3 = 0;
+	simdData.reserve(NumData);
+	for (size_t i = 0; i < NumData; i++)
+		simdData.push_back(_mm256_set1_pd(dist(gen)));
+}
 
+double RunBenchmark(BenchFunction func, const char* name)
+{
+	double _ = 0.0;
+
+	Timer t;
+	for (size_t i = 0; i < NumIter; i++)
+		for (size_t d = 0; d < NumData; d++)
+			_ += func(data[d]);
+	t.Stop();
+
+	std::cout << std::format("{} took: {:.0f}ms\n", name, t.GetSeconds() * 1000);
+
+	return _;
+}
+
+double MuirSimdMadeSerial(double x)
+{
+	return MuirpairWm1(_mm256_set1_pd(x))[0];
+}
+
+int main()
+{
+	PrepareData();
+
+	double _ = 0.0;
+	__m256d _2 = _mm256_setzero_pd();
 #if BENCH_FUKUSHIMA
-	TIMER(fukushima);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_0 += Fukushima::LambertWm1(data[d]);
-	STOP_LOG(fukushima);
+	BENCHMARK(Fukushima::LambertWm1, "Fukushima");
 #endif
-
 #if BENCH_BARRY
-	TIMER(barry);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_1 += BarryLambertWM1(data[d]);
-	STOP_LOG(barry);
+	BENCHMARK(BarryLambertWM1, "Barry");
 #endif
-
-#if BENCH_MUIR
-	TIMER(muir);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_2 += MuirLambertW0(data[d]);
-	STOP_LOG(muir);
+#if BENCH_BOOST
+	BENCHMARK(boost::math::lambert_wm1<double>, "Boost");
 #endif
-
 #if BENCH_MUIR_SIMD
-	TIMER(muir_simd);
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_3 += MuirLambertWM1Simd(_mm256_set1_pd(data[d]))[0];
-	STOP_LOG(muir_simd);
+	BENCHMARK(MuirSimdMadeSerial, "Muir SIMD");
 #endif
 
-	DoNotOptimize(_0, _1, _2, _3);
+	std::cout << _ << '\n';
+	std::cout << _2[0];
 }

@@ -8,8 +8,6 @@
 #define GREATER 0x1E
 
 #define SHUFFLE_INT(a, b, i) _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), i))
-#define NONE(p) _mm256_testz_pd(p, p)
-#define ANY(p) (bool)(_mm256_movemask_pd(p))
 
 // ========== Log Functions ==========
 static inline __m256d Epi64ToPd(__m256i x)
@@ -328,6 +326,10 @@ __m256d MuirpairW0(__m256d x)
     // Fix infinity
     __m256d infinity = _mm256_set1_pd(std::numeric_limits<double>::infinity());
     result = _mm256_blendv_pd(result, infinity, _mm256_cmp_pd(x, infinity, EQUAL));
+
+    // Fix zero
+    __m256d isZero = _mm256_cmp_pd(x, _mm256_setzero_pd(), EQUAL);
+    result = _mm256_blendv_pd(result, x, isZero);
 
     return result;
 }

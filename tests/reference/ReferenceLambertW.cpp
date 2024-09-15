@@ -140,8 +140,8 @@ Interval ReferenceLambertW0(double x)
 
 Interval ReferenceLambertWM1(double x)
 {
-	// -0.24969406317656517
-	static constexpr mpfr_prec_t WM1Precision = 71;
+	// -0.3678794304802449
+	static constexpr mpfr_prec_t WM1Precision = 82;
 
 	// Edge cases
 	static constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
