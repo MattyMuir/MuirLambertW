@@ -43,8 +43,14 @@ int main()
 	}
 	*/
 
+	//constexpr double d = std::numeric_limits<double>::min();
+
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ -0.2, -1e-300, false };
+	ReciprocalDistributionEx dist{ -0.2, 0, false };
 
 	MaxULPRounded(ReferenceLambertWM1, MakeSerial<MuirpairWm1>, [&]() { return dist(gen); });
+
+	double x = -5e-324;
+	auto [inf, sup] = ReferenceLambertWM1(x);
+	double res = MakeSerial<MuirpairWm1>(x);
 }

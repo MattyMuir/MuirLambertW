@@ -1,5 +1,7 @@
 #include "MuirpairWm1.h"
 
+#include <limits>
+
 #define LESS 0x11
 #define GREATER 0x1E
 
@@ -14,7 +16,14 @@ static __m256d LogFast(__m256d x)
 {
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
+    __m256d dblMin = _mm256_set1_pd(std::numeric_limits<double>::min());
+    __m256d denormScale = _mm256_set1_pd(4503599627370496.0);               // 2^52
+    __m256d denormOffset = _mm256_set1_pd(36.043653389117156090);           // ln(2^52)
     // =================
+
+    // Fix for denormalized values
+    __m256d isDenorm = _mm256_cmp_pd(x, dblMin, LESS);
+    x = _mm256_blendv_pd(x, _mm256_mul_pd(x, denormScale), isDenorm);
 
     // Extract exponent
     __m256i punn = _mm256_castpd_si256(x);
@@ -38,6 +47,9 @@ static __m256d LogFast(__m256d x)
     __m256d approx = _mm256_set1_pd(P[5]);
     for (size_t i = 0; i < 5; i++)
         approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[4 - i]));
+
+    // Fix for denormalized values
+    approx = _mm256_blendv_pd(approx, _mm256_sub_pd(approx, denormOffset), isDenorm);
 
     return _mm256_fmadd_pd(exp, ln2, approx);
 }
@@ -155,15 +167,23 @@ __m256d Approx(__m256d x)
 __m256d MuirpairWm1(__m256d x)
 {
     __m256d w = Approx(x);
-    //return w;
 
-    // Constants
+    // === Constants ===
     __m256d c23 = _mm256_set1_pd(2.0 / 3.0);
     __m256d one = _mm256_set1_pd(1.0);
+    __m256d smallThreshold = _mm256_set1_pd(-1e-300);
+    __m256d smallScale = _mm256_set1_pd(4611686018427387904.0);     // 2^62
+    __m256d smallOffset = _mm256_set1_pd(42.975125194716609184);    // ln(2^62)
+    // =================
 
     // === Fritsch Iteration ===
-    __m256d xov = _mm256_div_pd(x, w);
-    __m256d zn = _mm256_sub_pd(LogAccurate(xov), w);
+    // Compute zn
+    __m256d isSmall = _mm256_cmp_pd(x, smallThreshold, GREATER);
+    __m256d xScale = _mm256_blendv_pd(x, _mm256_mul_pd(x, smallScale), isSmall);
+    __m256d xow = _mm256_div_pd(xScale, w);
+    __m256d zn = LogAccurate(xow);
+    zn = _mm256_blendv_pd(zn, _mm256_sub_pd(zn, smallOffset), isSmall);
+    zn = _mm256_sub_pd(zn, w);
 
     __m256d temp = _mm256_add_pd(w, one);
     __m256d temp2 = _mm256_fmadd_pd(zn, c23, temp);
