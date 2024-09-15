@@ -1,5 +1,6 @@
 #include "MuirpairWm1.h"
 
+#include <cstdint>
 #include <limits>
 
 #define LESS 0x11
@@ -36,17 +37,16 @@ static __m256d LogFast(__m256d x)
 
     // Compute approximation
     static constexpr double P[] = {
-        -2.001981174757893,
-        3.7491905722285463,
-        -2.77383516599771,
-        1.3494246360270206,
-        -0.36414336579589207,
-        0.04134449829706258
+        -1.7289291561920494e+00,
+        2.78901155791566960e+00,
+        -1.44093748876198707e+00,
+        4.36015488686681152e-01,
+        -5.50266844824230939e-02
     };
 
-    __m256d approx = _mm256_set1_pd(P[5]);
-    for (size_t i = 0; i < 5; i++)
-        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[4 - i]));
+    __m256d approx = _mm256_set1_pd(P[4]);
+    for (size_t i = 0; i < 4; i++)
+        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[3 - i]));
 
     // Fix for denormalized values
     approx = _mm256_blendv_pd(approx, _mm256_sub_pd(approx, denormOffset), isDenorm);
@@ -96,7 +96,7 @@ static __m256d LogAccurate(__m256d x)
 
 __m256d Approx(__m256d x)
 {
-#if 1
+#if 0
     // === Constants ===
     __m256d zero = _mm256_setzero_pd();
     __m256d half = _mm256_set1_pd(0.5);
@@ -107,7 +107,7 @@ __m256d Approx(__m256d x)
     // =================
 
 	// Compute t
-    __m256d t = _mm256_sub_pd(negOne, LogFast(_mm256_sub_pd(zero, x)));
+    __m256d t = _mm256_sub_pd(negOne, LogAccurate(_mm256_sub_pd(zero, x)));
 
 	// Compute x1
 	static constexpr double P1[] = {
@@ -119,10 +119,11 @@ __m256d Approx(__m256d x)
 		-1.23057197181254966e-14
 	};
 
+    //3.00034140628619717*10^{+00},-5.15654510610554290*10^{-03},-1.13873366980070844*10^{-03},9.88231607008033285*10^{-05},-3.10110048923035139*10^{-06}
 	static constexpr double P2[] = {
-		3.00142773717038159e+00,
-		-8.00996540237069126e-03,
-		-1.80448428405709059e-04
+        3.00154719163439900e+00,
+        -8.18302417096426201e-03,
+        -1.59272314739640301e-04
 	};
 
 	__m256d x11 = _mm256_set1_pd(P1[5]);
@@ -144,10 +145,15 @@ __m256d Approx(__m256d x)
 
     return approx;
 #else
-    __m256d xQuiteSmall = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-11), GREATER);
-    __m256d xVerySmall = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-96), GREATER);
-    __m256d a = _mm256_blendv_pd(_mm256_set1_pd(127), _mm256_set1_pd(181), xQuiteSmall);
-    a = _mm256_blendv_pd(a, _mm256_set1_pd(317), xVerySmall);
+    // Determine a
+    __m256d xgt0 = _mm256_cmp_pd(x, _mm256_set1_pd(-0.29),      GREATER);
+    __m256d xgt1 = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-11),     GREATER);
+    __m256d xgt2 = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-96),     GREATER);
+
+    __m256d a = _mm256_set1_pd(101.815);                    // [-1/e,       -0.29]
+    a = _mm256_blendv_pd(a, _mm256_set1_pd(127), xgt0);     // [-0.29,      -1e-11]
+    a = _mm256_blendv_pd(a, _mm256_set1_pd(181), xgt1);     // [-1e-11,     -1e-96]
+    a = _mm256_blendv_pd(a, _mm256_set1_pd(317), xgt2);     // [-1e-96,     0]
 
     __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
     __m256d t = _mm256_sub_pd(_mm256_set1_pd(-1.0), logX);
@@ -164,7 +170,7 @@ __m256d Approx(__m256d x)
 #endif
 }
 
-__m256d MuirpairWm1(__m256d x)
+__m256d GeneralWm1(__m256d x)
 {
     __m256d w = Approx(x);
 
@@ -194,4 +200,74 @@ __m256d MuirpairWm1(__m256d x)
     w = _mm256_mul_pd(w, _mm256_add_pd(_mm256_div_pd(temp4, temp3), one));
 
     return w;
+}
+
+__m256d AddEm(__m256d x)
+{
+    __m256d emHigh = _mm256_set1_pd(0.36787944117144232160);
+    __m256d emLow = _mm256_set1_pd(-1.2428753672788363168e-17);
+
+    return _mm256_add_pd(_mm256_add_pd(x, emHigh), emLow);
+}
+
+static __m256d NearBranchSeries(__m256d p)
+{
+    static constexpr double P[] = {
+        -1,
+        -1.0,
+        -0.3333333333333541,
+        -0.15277777777431498,
+        -0.07962962987272035,
+        -0.04450230570332159,
+        -0.025984922563234557,
+        -0.015632512810478675,
+        -0.009649445492147113,
+        -0.005770083012226024,
+        -0.005163414562922193,
+        0.0031436878589083165,
+        -0.018896695310179182,
+        0.039198284461860786,
+        -0.06976021744518182,
+        0.08503367255292672,
+        -0.0727660465563074,
+        0.03791119550268545,
+        -0.009752484727467035
+    };
+
+    // Evaluate polynomial using Horner's Method
+    __m256d value = _mm256_set1_pd(P[18]);
+    for (size_t i = 0; i < 18; i++)
+        value = _mm256_fmadd_pd(value, p, _mm256_set1_pd(P[17 - i]));
+
+    return value;
+}
+
+static __m256d NearBranchWm1(__m256d x)
+{
+    static constexpr double s2e = 2.331643981597124;
+    __m256d p = _mm256_mul_pd(_mm256_sqrt_pd(AddEm(x)), _mm256_set1_pd(s2e));
+
+    return NearBranchSeries(p);
+}
+
+__m256d MuirpairWm1(__m256d x)
+{
+    __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.3039), LESS);
+    uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);
+
+    __m256d result;
+    switch (nearBranchMask)
+    {
+    case 0b0000: [[likely]]
+        result = GeneralWm1(x);
+        break;
+    case 0b1111: [[unlikely]]
+        result = NearBranchWm1(x);
+        break;
+    default: [[unlikely]]
+        result = _mm256_blendv_pd(GeneralWm1(x), NearBranchWm1(x), isNearBranch);
+        break;
+    }
+
+    return result;
 }
