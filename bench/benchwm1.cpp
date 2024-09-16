@@ -11,9 +11,10 @@
 #include "MuirLambertW.h"
 
 #define BENCH_FUKUSHIMA 0
-#define BENCH_BARRY 1
-#define BENCH_BOOST 1
-#define BENCH_MUIR_SIMD 1
+#define BENCH_BARRY 0
+#define BENCH_BOOST 0
+#define BENCH_MUIR_SERIAL 1
+#define BENCH_MUIR_SIMD 0
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
 #define SIMD_BENCHMARK(func, name) _2 = _mm256_add_pd(_2, RunBenchmark(func, name))
@@ -79,6 +80,9 @@ int main()
 #endif
 #if BENCH_BOOST
 	BENCHMARK(boost::math::lambert_wm1<double>, "Boost");
+#endif
+#if BENCH_MUIR_SERIAL
+	BENCHMARK(MuirWm1, "Muir Serial");
 #endif
 #if BENCH_MUIR_SIMD
 	BENCHMARK(MuirSimdMadeSerial, "Muir SIMD");

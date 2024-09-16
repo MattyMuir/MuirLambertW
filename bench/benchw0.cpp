@@ -13,6 +13,7 @@
 #define BENCH_FUKUSHIMA 0
 #define BENCH_BARRY 0
 #define BENCH_BOOST 0
+#define BENCH_MUIR_SERIAL 1
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
@@ -30,20 +31,15 @@ using BenchFunction = double(*)(double);
 using SimdFunction = __m256d(*)(__m256d);
 
 std::vector<double> data;
-std::vector<__m256d> simdData;
 
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx dist{ 0, 15, false };
+	static std::uniform_real_distribution<double> dist{ 0, 15 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
 		data.push_back(dist(gen));
-
-	simdData.reserve(NumData);
-	for (size_t i = 0; i < NumData; i++)
-		simdData.push_back(_mm256_set1_pd(dist(gen)));
 }
 
 double RunBenchmark(BenchFunction func, const char* name)
@@ -54,21 +50,6 @@ double RunBenchmark(BenchFunction func, const char* name)
 	for (size_t i = 0; i < NumIter; i++)
 		for (size_t d = 0; d < NumData; d++)
 			_ += func(data[d]);
-	t.Stop();
-
-	std::cout << std::format("{} took: {:.0f}ms\n", name, t.GetSeconds() * 1000);
-
-	return _;
-}
-
-__m256d RunBenchmark(SimdFunction func, const char* name)
-{
-	__m256d _ = _mm256_setzero_pd();
-
-	Timer t;
-	for (size_t i = 0; i < NumIter; i++)
-		for (size_t d = 0; d < NumData; d++)
-			_ = _mm256_add_pd(_, func(simdData[d]));
 	t.Stop();
 
 	std::cout << std::format("{} took: {:.0f}ms\n", name, t.GetSeconds() * 1000);
@@ -95,6 +76,9 @@ int main()
 #endif
 #if BENCH_BOOST
 	BENCHMARK(boost::math::lambert_w0<double>, "Boost");
+#endif
+#if BENCH_MUIR_SERIAL
+	BENCHMARK(MuirW0, "Muir Serial");
 #endif
 #if BENCH_MUIR_SIMD
 	BENCHMARK(MuirSimdMadeSerial, "Muir SIMD");

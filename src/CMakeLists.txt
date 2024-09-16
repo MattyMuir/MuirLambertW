@@ -6,7 +6,7 @@ include(../macros.cmake)
 include(GNUInstallDirs)
 
 # === Create Executable ===
-add_library(MuirLambertW       "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp")
+add_library(MuirLambertW       "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp")
 
 # === Feature Enables ===
 set_property(TARGET MuirLambertW PROPERTY CXX_STANDARD 20)

@@ -13,6 +13,7 @@
 
 int main()
 {
+	/*
 	static std::mt19937_64 gen{ std::random_device{}() };
 	std::uniform_real_distribution<double> dist{ EM_UP, -0.25 };
 
@@ -20,9 +21,9 @@ int main()
 	for (;;)
 	{
 		double x = dist(gen);
-		auto [inf, sup] = ReferenceLambertW0(x);
+		auto [inf, sup] = ReferenceLambertWm1(x);
 
-		double approx = MakeSerial<MuirW0>(x);
+		double approx = MuirWm1(x);
 
 		uint64_t err = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
@@ -36,4 +37,9 @@ int main()
 			std::cout << std::format("{}\n", worst);
 		}
 	}
+	*/
+
+	static std::mt19937_64 gen{ std::random_device{}() };
+	ReciprocalDistributionEx dist{ EM_UP, -0.1, false };
+	MaxULPRounded(ReferenceLambertWm1, MuirWm1, [&]() { return dist(gen); });
 }
