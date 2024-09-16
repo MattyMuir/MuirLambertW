@@ -62,7 +62,7 @@ double RunBenchmark(BenchFunction func, const char* name)
 
 double MuirSimdMadeSerial(double x)
 {
-	return MuirpairWm1(_mm256_set1_pd(x))[0];
+	return MuirWm1(_mm256_set1_pd(x))[0];
 }
 
 int main()

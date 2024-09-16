@@ -1,3 +1,3 @@
 #pragma once
-#include "../src/MuirpairW0.h"
-#include "../src/MuirpairWm1.h"
+#include "../src/w0.h"
+#include "../src/wm1.h"

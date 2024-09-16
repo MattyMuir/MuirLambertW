@@ -1,4 +1,4 @@
-#include "MuirpairW0.h"
+#include "w0.h"
 
 #include <cstdint>
 #include <limits>
@@ -295,7 +295,7 @@ static __m256d NearBranchW0(__m256d x)
 }
 
 // ========== Main Function ==========
-__m256d MuirpairW0(__m256d x)
+__m256d MuirW0(__m256d x)
 {
     __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.29), LESS);
     uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);

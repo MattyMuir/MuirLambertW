@@ -22,7 +22,7 @@ int main()
 		double x = dist(gen);
 		auto [inf, sup] = ReferenceLambertW0(x);
 
-		double approx = MakeSerial<MuirpairW0>(x);
+		double approx = MakeSerial<MuirW0>(x);
 
 		uint64_t err = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
