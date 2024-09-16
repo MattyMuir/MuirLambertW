@@ -101,7 +101,6 @@ __m256d Test(__m256d x)
 
 int main()
 {
-	/*
 	static std::mt19937_64 gen{ std::random_device{}() };
 	std::uniform_real_distribution<double> dist{ EM_UP, -0.25 };
 
@@ -109,9 +108,9 @@ int main()
 	for (;;)
 	{
 		double x = dist(gen);
-		auto [inf, sup] = ReferenceLambertWM1(x);
+		auto [inf, sup] = ReferenceLambertW0(x);
 
-		double approx = MakeSerial<MuirpairWm1>(x);
+		double approx = MakeSerial<MuirpairW0>(x);
 
 		uint64_t err = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
@@ -125,10 +124,4 @@ int main()
 			std::cout << std::format("{}\n", worst);
 		}
 	}
-	*/
-
-	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ EM_UP, 0, false};
-
-	MaxULPRounded(ReferenceLambertWM1, MakeSerial<MuirpairWm1>, [&]() { return dist(gen); });
 }
