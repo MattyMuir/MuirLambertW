@@ -21,9 +21,9 @@ int main()
 	for (;;)
 	{
 		double x = dist(gen);
-		auto [inf, sup] = ReferenceLambertW0(x);
+		auto [inf, sup] = ReferenceLambertWm1(x);
 
-		double approx = MakeSerial<MuirpairW0>(x);
+		double approx = MakeSerial<MuirpairWm1>(x);
 
 		uint64_t err = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
@@ -39,5 +39,8 @@ int main()
 	}
 	*/
 
-	ULPHistogram(ReferenceLambertWm1, MakeSerial<MuirpairWm1>, -20, 20, 0.5, [](double x) { return EM_UP / (1 + exp(x)); });
+	static std::mt19937_64 gen{ std::random_device{}() };
+	std::uniform_real_distribution<double> dist{ EM_UP, -0.27 };
+
+	MaxULPRounded(ReferenceLambertWm1, MakeSerial<MuirpairWm1>, [&]() {return dist(gen); });
 }
