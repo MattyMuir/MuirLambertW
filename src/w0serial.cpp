@@ -5,34 +5,6 @@
 #include <bit>
 #include <limits>
 
-double LogFast(double x)
-{
-    // === Constants ===
-    static constexpr double ln2 = 0.69314718055994530942;
-    // =================
-
-    // Extract exponent and mantissa
-    uint64_t punn = std::bit_cast<uint64_t>(x);
-    int64_t exp = ((punn >> 52) - 1023);
-    double mantissa = std::bit_cast<double>((punn & 0x3fffffffffffffff) | 0x3ff0000000000000);
-
-    static constexpr double P[] = {
-        -2.001981174757893,
-        3.7491905722285463,
-        -2.77383516599771,
-        1.3494246360270206,
-        -0.36414336579589207,
-        0.04134449829706258
-    };
-
-    // Compute approximation using Horner's Method
-    double approx = P[5];
-    for (size_t i = 0; i < 5; i++)
-        approx = approx * mantissa + P[4 - i];
-
-    return (double)exp * ln2 + approx;
-}
-
 double FirstApprox(double x)
 {
     // === Constants ===
@@ -95,7 +67,7 @@ double SecondApprox(double x)
        6.53282047177727125e-17,
     };
 
-    double logX = LogFast(x + offset);
+    double logX = log(x + offset);
 
     double numer = P[8];
     double denom = Q[8];

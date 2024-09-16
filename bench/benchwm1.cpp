@@ -14,7 +14,7 @@
 #define BENCH_BARRY 0
 #define BENCH_BOOST 0
 #define BENCH_MUIR_SERIAL 1
-#define BENCH_MUIR_SIMD 0
+#define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
 #define SIMD_BENCHMARK(func, name) _2 = _mm256_add_pd(_2, RunBenchmark(func, name))
