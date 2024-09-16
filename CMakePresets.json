@@ -6,7 +6,7 @@
 			"hidden": true,
 			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/out/build/${presetName}",
-			"installDir": "${sourceDir}/out/install/${presetName}",
+			"installDir": "C:/sdks/MuirLambertW",
 			"cacheVariables": {
 				"CMAKE_TOOLCHAIN_FILE": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
 				"VCPKG_TARGET_TRIPLET": "x64-windows-static",
