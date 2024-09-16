@@ -48,6 +48,7 @@ double LogFast(double x)
 
 double Approx(double x)
 {
+#if 0
     // === Constants ===
     static constexpr double s2 = 1.4142135623730950488;     // sqrt(2)
     static constexpr double c13 = 1.0 / 3.0;
@@ -65,6 +66,51 @@ double Approx(double x)
         / (270.0 + ts * a)) * ts);
 
     return approx;
+#else
+    // Compute t
+    double t = -1.0 - LogFast(-x);
+
+    // Compute x1
+    static constexpr double P1[] = {
+        3.00735538504012242e+00,
+        -1.11079558616957819e-02,
+        1.64300407704260418e-05,
+        -2.87179186820882765e-08,
+        2.93030279922565400e-11,
+        -1.23057197181254966e-14
+    };
+
+    static constexpr double P2[] = {
+        3.00154719163439900e+00,
+        -8.18302417096426201e-03,
+        -1.59272314739640301e-04
+    };
+
+    double x1;
+    if (t < 13.0)
+    {
+        x1 = P2[2];
+        for (size_t i = 0; i < 2; i++)
+            x1 = x1 * t + P2[1 - i];
+    }
+    else
+    {
+        x1 = P1[5];
+        for (size_t i = 0; i < 5; i++)
+            x1 = x1 * t + P1[4 - i];
+    }
+
+    x1 = 1.0 / x1;
+
+    double approx = sqrt(t * 0.5);
+    approx = approx * x1 + 1.0;
+    approx = 6.0 / approx;
+    approx = approx - t;
+    approx = approx - 7.0;
+
+    return approx;
+
+#endif
 }
 
 double GeneralWm1(double x)
@@ -137,9 +183,5 @@ double NearBranchWm1(double x)
 
 double MuirWm1(double x)
 {
-    if (x < -0.346)
-        return NearBranchWm1(x);
-    
-    return GeneralWm1(x);
-    //return (x < -0.346) ? NearBranchWm1(x) : GeneralWm1(x);
+    return (x < -0.346) ? NearBranchWm1(x) : GeneralWm1(x);
 }

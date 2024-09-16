@@ -21,9 +21,9 @@ int main()
 	for (;;)
 	{
 		double x = dist(gen);
-		auto [inf, sup] = ReferenceLambertWm1(x);
+		auto [inf, sup] = ReferenceLambertW0(x);
 
-		double approx = MuirWm1(x);
+		double approx = MuirW0(x);
 
 		uint64_t err = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
@@ -40,6 +40,6 @@ int main()
 	*/
 
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx dist{ EM_UP, -0.1, false };
-	MaxULPRounded(ReferenceLambertWm1, MuirWm1, [&]() { return dist(gen); });
+	ReciprocalDistributionEx dist{ EM_UP, 0, false };
+	MaxULPRounded(ReferenceLambertW0, MuirW0, [&]() { return dist(gen); });
 }
