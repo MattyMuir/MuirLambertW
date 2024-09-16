@@ -225,7 +225,7 @@ __m256d W0Iterations(__m256d x, __m256d w)
     return w;
 }
 
-__m256d WM1Iterations(__m256d x, __m256d w)
+__m256d Wm1Iterations(__m256d x, __m256d w)
 {
     // Constants
     static constexpr double c23 = 0.6666666666666666;
@@ -308,7 +308,7 @@ __m256d MuirLambertW0Simd(__m256d x)
     return results;
 }
 
-static __m256d NearBranchWM1(__m256d x)
+static __m256d NearBranchWm1(__m256d x)
 {
     static constexpr double s2e = 2.331643981597124;
 
@@ -318,7 +318,7 @@ static __m256d NearBranchWM1(__m256d x)
     return NearBranchSeries<22>(p);
 }
 
-__m256d GeneralWM1(__m256d x)
+__m256d GeneralWm1(__m256d x)
 {
     // Constants
     __m256d negOne = _mm256_set1_pd(-1.0);
@@ -341,19 +341,19 @@ __m256d GeneralWM1(__m256d x)
     approx = _mm256_add_pd(approx, approx);
     approx = _mm256_sub_pd(logX, approx);
 
-    return WM1Iterations(x, approx);
+    return Wm1Iterations(x, approx);
 }
 
-__m256d MuirLambertWM1Simd(__m256d x)
+__m256d MuirLambertWm1Simd(__m256d x)
 {
     __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.345), LESS);
     
     // Compute values
     __m256d values, nbValues;
     if (ANY(isNearBranch))
-        nbValues = NearBranchWM1(x);
+        nbValues = NearBranchWm1(x);
     if (ANY(NOT(isNearBranch)))
-        values = GeneralWM1(x);
+        values = GeneralWm1(x);
 
     // Blend
     __m256d results = _mm256_blendv_pd(values, nbValues, isNearBranch);

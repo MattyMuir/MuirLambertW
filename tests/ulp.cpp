@@ -4,7 +4,7 @@
 #include <format>
 #include <bit>
 
-#define LOGGING 1
+#define LOGGING 0
 
 uint64_t ULPDistance(double a, double b)
 {

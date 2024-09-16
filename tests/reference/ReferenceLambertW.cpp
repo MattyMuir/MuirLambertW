@@ -138,10 +138,10 @@ Interval ReferenceLambertW0(double x)
 	return ret;
 }
 
-Interval ReferenceLambertWM1(double x)
+Interval ReferenceLambertWm1(double x)
 {
 	// -0.3678794304802449
-	static constexpr mpfr_prec_t WM1Precision = 82;
+	static constexpr mpfr_prec_t Wm1Precision = 82;
 
 	// Edge cases
 	static constexpr double NaN = std::numeric_limits<double>::quiet_NaN();
@@ -190,7 +190,7 @@ Interval ReferenceLambertWM1(double x)
 	mpfr_clear(uUp);
 
 	// === Bisection ===
-	auto ret = Bisection(x, low, high, false, WM1Precision);
+	auto ret = Bisection(x, low, high, false, Wm1Precision);
 
 	mpfr_clear(xMpfr);
 	mpfr_clear(low);

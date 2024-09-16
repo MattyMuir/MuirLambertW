@@ -158,7 +158,7 @@ double BarryLambertW0(double x)
     return BarryLambertW(0, x);
 }
 
-double BarryLambertWM1(double x)
+double BarryLambertWm1(double x)
 {
     return BarryLambertW(-1, x);
 }
