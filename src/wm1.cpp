@@ -13,7 +13,7 @@ static inline __m256d Epi64ToPd(__m256i x)
     return _mm256_cvtepi32_pd(_mm256_castsi256_si128(x));
 }
 
-static __m256d LogFast(__m256d x)
+static inline __m256d LogFast(__m256d x)
 {
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
@@ -54,7 +54,7 @@ static __m256d LogFast(__m256d x)
     return _mm256_fmadd_pd(exp, ln2, approx);
 }
 
-static __m256d LogAccurate(__m256d x)
+static inline __m256d LogAccurate(__m256d x)
 {
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
@@ -94,7 +94,7 @@ static __m256d LogAccurate(__m256d x)
     return _mm256_fmadd_pd(Epi64ToPd(exp), ln2, approx);
 }
 
-__m256d Approx(__m256d x)
+static inline __m256d Approx(__m256d x)
 {
 #if 0
     // === Constants ===
@@ -170,7 +170,7 @@ __m256d Approx(__m256d x)
 #endif
 }
 
-__m256d GeneralWm1(__m256d x)
+static inline __m256d GeneralWm1(__m256d x)
 {
     __m256d w = Approx(x);
 
@@ -202,7 +202,7 @@ __m256d GeneralWm1(__m256d x)
     return w;
 }
 
-__m256d AddEm(__m256d x)
+static inline __m256d AddEm(__m256d x)
 {
     __m256d emHigh = _mm256_set1_pd(0.36787944117144232160);
     __m256d emLow = _mm256_set1_pd(-1.2428753672788363168e-17);
@@ -210,7 +210,7 @@ __m256d AddEm(__m256d x)
     return _mm256_add_pd(_mm256_add_pd(x, emHigh), emLow);
 }
 
-static __m256d NearBranchSeries(__m256d p)
+static inline __m256d NearBranchSeries(__m256d p)
 {
     static constexpr double P[] = {
         -1,
@@ -243,7 +243,7 @@ static __m256d NearBranchSeries(__m256d p)
     return value;
 }
 
-static __m256d NearBranchWm1(__m256d x)
+static inline __m256d NearBranchWm1(__m256d x)
 {
     static constexpr double s2e = 2.331643981597124;
     __m256d p = _mm256_mul_pd(_mm256_sqrt_pd(AddEm(x)), _mm256_set1_pd(s2e));

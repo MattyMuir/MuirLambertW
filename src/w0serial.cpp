@@ -5,7 +5,7 @@
 #include <bit>
 #include <limits>
 
-double FirstApprox(double x)
+static inline double FirstApprox(double x)
 {
     // === Constants ===
     static constexpr double e2 = 5.4365636569180904707;     // e * 2
@@ -37,7 +37,7 @@ double FirstApprox(double x)
     return approx;
 }
 
-double SecondApprox(double x)
+static inline double SecondApprox(double x)
 {
     // === Constants ===
     static constexpr double y = -5.70115661621093750e+00;
@@ -82,7 +82,7 @@ double SecondApprox(double x)
     return approx;
 }
 
-double GeneralW0(double x)
+static inline double GeneralW0(double x)
 {
     double w = (x > 20.0) ? SecondApprox(x) : FirstApprox(x);
 
@@ -97,7 +97,7 @@ double GeneralW0(double x)
     return w;
 }
 
-double AddEm(double x)
+static inline double AddEm(double x)
 {
     static constexpr double emHigh = 0.36787944117144232160;
     static constexpr double emLow = -1.2428753672788363168e-17;
@@ -105,7 +105,7 @@ double AddEm(double x)
     return (x + emHigh) + emLow;
 }
 
-double NearBranchSeries(double p)
+static inline double NearBranchSeries(double p)
 {
     static constexpr double P[] = {
         -1,
@@ -131,7 +131,7 @@ double NearBranchSeries(double p)
     return value;
 }
 
-double NearBranchW0(double x)
+static inline double NearBranchW0(double x)
 {
     static constexpr double s2e = 2.331643981597124;
     double p = sqrt(AddEm(x)) * s2e;

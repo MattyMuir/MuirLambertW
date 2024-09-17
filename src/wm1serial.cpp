@@ -7,7 +7,7 @@
 
 #define GREATER 0x1E
 
-double Approx(double x)
+static inline double Approx(double x)
 {
     // === Constants ===
     static constexpr double s2 = 1.4142135623730950488;     // sqrt(2)
@@ -28,7 +28,7 @@ double Approx(double x)
     return approx;
 }
 
-double GeneralWm1(double x)
+static inline double GeneralWm1(double x)
 {
     double w = Approx(x);
 
@@ -53,7 +53,7 @@ double GeneralWm1(double x)
     return w;
 }
 
-double AddEm(double x)
+static inline double AddEm(double x)
 {
     static constexpr double emHigh = 0.36787944117144232160;
     static constexpr double emLow = -1.2428753672788363168e-17;
@@ -61,7 +61,7 @@ double AddEm(double x)
     return (x + emHigh) + emLow;
 }
 
-double NearBranchSeries(double p)
+static inline double NearBranchSeries(double p)
 {
     static constexpr double P[] = {
         -1,
@@ -88,7 +88,7 @@ double NearBranchSeries(double p)
     return value;
 }
 
-double NearBranchWm1(double x)
+static inline double NearBranchWm1(double x)
 {
     static constexpr double s2e = 2.331643981597124;
     double p = sqrt(AddEm(x)) * s2e;

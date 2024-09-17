@@ -35,7 +35,7 @@ std::vector<double> data;
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 100, 1e40 };
+	static std::uniform_real_distribution<double> dist{ 1, 10 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
