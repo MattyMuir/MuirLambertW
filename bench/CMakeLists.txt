@@ -23,14 +23,23 @@ target_include_directories(arraybench PUBLIC "../include/")
 target_include_directories(arraybench PRIVATE "C:/sdks/boost_1_86_0")
 
 # === Feature Enables ===
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    set_property(TARGET benchw0 PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 target_compile_features(benchw0 PUBLIC cxx_std_20)
 enable_ipo(benchw0)
 set_arch(benchw0)
 
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    set_property(TARGET benchwm1 PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 target_compile_features(benchwm1 PUBLIC cxx_std_20)
 enable_ipo(benchwm1)
 set_arch(benchwm1)
 
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    set_property(TARGET arraybench PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 target_compile_features(arraybench PUBLIC cxx_std_20)
 enable_ipo(arraybench)
 set_arch(arraybench)

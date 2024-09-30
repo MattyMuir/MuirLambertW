@@ -18,6 +18,9 @@ target_link_libraries(tests PRIVATE PkgConfig::mpfr)
 target_include_directories(tests PRIVATE "C:/sdks/boost_1_86_0")
 
 # === Feature Enables ===
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    set_property(TARGET tests PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 target_compile_features(tests PUBLIC cxx_std_20)
 enable_ipo(tests)
 set_arch(tests)
