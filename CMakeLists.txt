@@ -11,12 +11,22 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_mp()
 
 # Options
-option(WARNINGS "Enables warnings" ON)
+set(WARNINGS ON CACHE BOOL "Enables clang warnings")
 if (WARNINGS)
 	add_compile_options("-Wall")
     add_compile_options("-Wextra")
     add_compile_options("-Wpedantic")
     enable_clangtidy()
+endif()
+
+set(MUIRW_NO_ITERATOR_DEBUGGING OFF CACHE BOOL "Disable iterator debugging")
+if (MUIRW_NO_ITERATOR_DEBUGGING)
+    add_compile_definitions(_HAS_ITERATOR_DEBUGGING=0)
+endif()
+
+set(MUIRW_MSVC_STATIC_RUNTIME, OFF CACHE BOOL "Use static C runtime library when taregting MSVC ABI")
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    use_static_msvc_crt()
 endif()
 
 # === Projects ===

@@ -6,9 +6,13 @@ include(../macros.cmake)
 include(GNUInstallDirs)
 
 # === Create Executable ===
-add_library(MuirLambertW       "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp")
+add_library(MuirLambertW "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp")
 
 # === Feature Enables ===
+if (MUIRW_MSVC_STATIC_RUNTIME)
+    set_property(TARGET MuirLambertW PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 set_property(TARGET MuirLambertW PROPERTY CXX_STANDARD 20)
 enable_ipo(MuirLambertW)
 set_arch(MuirLambertW)

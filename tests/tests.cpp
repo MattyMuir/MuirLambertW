@@ -44,7 +44,7 @@ int main()
 	static std::mt19937_64 gen{ std::random_device{}() };
 	static std::uniform_real_distribution<double> dist{ EM_UP, 0 };
 
-	size_t NumData = 10'000;
+	size_t NumData = 10000;
 
 	std::vector<double> data;
 	for (size_t i = 0; i < NumData; i++)
@@ -53,7 +53,7 @@ int main()
 	auto start = std::chrono::steady_clock::now();
 	double _ = 0.0;
 	for (double d : data)
-		_ += ReferenceLambertW0(d).inf;
+		_ += ReferenceLambertWm1(d).inf;
 	auto end = std::chrono::steady_clock::now();
 
 	std::cout << _ << '\n';
