@@ -4,7 +4,7 @@
 include(macros.cmake)
 
 # === Configuration ===
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.21)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Enable multi-processor build
