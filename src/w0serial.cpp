@@ -39,46 +39,31 @@ static inline double FirstApprox(double x)
 
 static inline double SecondApprox(double x)
 {
-    // === Constants ===
-    static constexpr double y = -5.70115661621093750e+00;
-    static constexpr double offset = -0.132;
-    // =================
-
     static constexpr double P[] = {
-       6.42275660145116698e+00,
-       1.33047964073367945e+00,
-       6.72008923401652816e-02,
-       1.16444069958125895e-03,
-       7.06966760237470501e-06,
-       5.48974896149039165e-09,
-       -7.00379652018853621e-11,
-       -1.89247635913659556e-13,
-       -1.55898770790170598e-16,
+        64393.137450661044568,
+        43204.949550002405886,
+        20295.724800471609342,
+        453.37964270930132216,
+        1.0
     };
     static constexpr double Q[] = {
-       1.00000000000000000e+00,
-       3.34498588416632854e-01,
-       2.51519862456384983e-02,
-       6.81223810622416254e-04,
-       7.94450897106903537e-06,
-       4.30675039872881342e-08,
-       1.10667669458467617e-10,
-       1.31012240694192289e-13,
-       6.53282047177727125e-17,
+        104344.40703457256313,
+        22558.64516691800236,
+        461.09954435682880103,
+        0.9999372708768251572
     };
 
-    double logX = log(x + offset);
+    double logX = log(x);
 
-    double numer = P[8];
-    double denom = Q[8];
-    for (size_t i = 0; i < 8; i++)
-    {
-        numer = numer * logX + P[7 - i];
-        denom = denom * logX + Q[7 - i];
-    }
+    double numer = P[4];
+    for (size_t i = 0; i < 4; i++)
+        numer = numer * logX + P[3 - i];
+
+    double denom = Q[3];
+    for (size_t i = 0; i < 3; i++)
+        denom = denom * logX + Q[2 - i];
 
     double approx = numer / denom;
-    approx = approx + y + logX;
     return approx;
 }
 
