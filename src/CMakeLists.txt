@@ -5,7 +5,7 @@ cmake_policy(SET CMP0069 NEW)
 include(../macros.cmake)
 include(GNUInstallDirs)
 
-# === Create Executable ===
+# === Create Library ===
 add_library(MuirLambertW "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp")
 
 # === Feature Enables ===

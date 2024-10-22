@@ -3,10 +3,7 @@
 
 #include <functional>
 
-#include "mpfr.h"
-
-// Arithmetic types
-struct Interval { double inf, sup; };
+#include <ReferenceW.h>
 
 // Function types
 using Function1D = double(*)(double);
