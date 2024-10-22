@@ -10,10 +10,10 @@
 #include "boost/math/special_functions/lambert_w.hpp"
 #include "MuirLambertW.h"
 
-#define BENCH_FUKUSHIMA 0
-#define BENCH_BARRY 0
-#define BENCH_BOOST 0
-#define BENCH_MUIR_SERIAL 1
+#define BENCH_FUKUSHIMA 1
+#define BENCH_BARRY 1
+#define BENCH_BOOST 1
+#define BENCH_MUIR_SERIAL 0
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)

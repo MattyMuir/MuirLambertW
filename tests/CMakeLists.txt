@@ -18,7 +18,9 @@ target_link_libraries(tests PRIVATE PkgConfig::mpfr)
 find_package(ReferenceLambertW)
 target_link_libraries(tests PRIVATE ReferenceLambertW::ReferenceLambertW)
 
-target_include_directories(tests PRIVATE "C:/sdks/boost_1_86_0")
+find_package(boost_math REQUIRED CONFIG)
+
+target_include_directories(tests PRIVATE Boost::math)
 
 # === Feature Enables ===
 if (MUIRW_MSVC_STATIC_RUNTIME)

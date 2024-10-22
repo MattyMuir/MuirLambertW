@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_mp()
 
 # Options
-set(WARNINGS ON CACHE BOOL "Enables clang warnings")
+set(WARNINGS OFF CACHE BOOL "Enables clang-tidy and warnings on clang-like compilers")
 if (WARNINGS)
 	add_compile_options("-Wall")
     add_compile_options("-Wextra")
