@@ -26,13 +26,18 @@ uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, con
     uint64_t maxError = 0;
 	for (uint64_t i = 0; (i < iter) || !iter; i++)
 	{
+        // Sample random input
 		double x = randFunc();
 
+        // Evaluate approx
 		double approx = approxFunc(x);
         if (!std::isfinite(approx))
             std::cout << std::format("NaN: {}\n", x);
+
+        // Evaluate reference
 		auto [inf, sup] = boundedFunc(x);
 
+        // Calculate error
         uint64_t error = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
 
         if (error > maxError)
