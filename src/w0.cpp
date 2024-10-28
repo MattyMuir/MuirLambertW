@@ -34,17 +34,15 @@ static inline __m256d LogFast(__m256d x)
 
     // Compute approximation
     static constexpr double P[] = {
-        -2.001981174757893,
-        3.7491905722285463,
-        -2.77383516599771,
-        1.3494246360270206,
-        -0.36414336579589207,
-        0.04134449829706258
+        -1.4976283869142268,
+        2.1229729992413895,
+        -0.7362283025393341,
+        0.11127972835311338
     };
 
-    __m256d approx = _mm256_set1_pd(P[5]);
-    for (size_t i = 0; i < 5; i++)
-        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[4 - i]));
+    __m256d approx = _mm256_set1_pd(P[3]);
+    for (size_t i = 0; i < 3; i++)
+        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[2 - i]));
 
     return _mm256_fmadd_pd(exp, ln2, approx);
 }
@@ -98,6 +96,7 @@ static inline __m256d Abs(__m256d x)
 
 static inline __m256d FirstApprox(__m256d x)
 {
+#if 1
     // === Constants ===
     __m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
     __m256d two = _mm256_set1_pd(2.0);							// 2
@@ -128,6 +127,41 @@ static inline __m256d FirstApprox(__m256d x)
     approx = _mm256_blendv_pd(approx, x, isNearZero);
 
     return approx;
+#else
+    static constexpr double P[] = {
+        0,
+        810.8417464502003,
+        2372.4945068042407,
+        1581.878759697207,
+        224.10169908298582,
+        4.420196050919542
+    };
+
+    static constexpr double Q[] = {
+        810.8511630902697,
+        3182.1361682278834,
+        3545.937817132696,
+        1172.6816431962184,
+        92.41288592456523,
+        1
+    };
+
+    __m256d numer = _mm256_set1_pd(P[5]);
+    for (size_t i = 0; i < 5; i++)
+        numer = _mm256_fmadd_pd(numer, x, _mm256_set1_pd(P[4 - i]));
+
+    __m256d denom = _mm256_set1_pd(Q[5]);
+    for (size_t i = 0; i < 5; i++)
+        denom = _mm256_fmadd_pd(denom, x, _mm256_set1_pd(Q[4 - i]));
+
+    __m256d approx = _mm256_div_pd(numer, denom);
+
+    // Use approx = x for arguments near zero
+    __m256d isNearZero = _mm256_cmp_pd(Abs(x), _mm256_set1_pd(1e-4), LESS);
+    approx = _mm256_blendv_pd(approx, x, isNearZero);
+
+    return approx;
+#endif
 }
 
 static inline __m256d SecondApprox(__m256d x)
