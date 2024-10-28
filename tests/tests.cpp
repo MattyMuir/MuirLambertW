@@ -27,7 +27,7 @@ Interval ReferenceWm1(double x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx dist{ EM_UP, 0, false };
+	static ReciprocalDistributionEx dist{ -0.28, -0.25, false };
 
-	MaxULPRounded(ReferenceWm1, MakeSerial<MuirWm1>, [&]() { return dist(gen); });
+	MaxULPRounded(ReferenceW0, MakeSerial<MuirW0>, [&]() { return dist(gen); });
 }

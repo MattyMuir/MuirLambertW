@@ -96,7 +96,7 @@ static inline __m256d Abs(__m256d x)
 
 static inline __m256d FirstApprox(__m256d x)
 {
-#if 1
+#if 0
     // === Constants ===
     __m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
     __m256d two = _mm256_set1_pd(2.0);							// 2
@@ -130,29 +130,27 @@ static inline __m256d FirstApprox(__m256d x)
 #else
     static constexpr double P[] = {
         0,
-        810.8417464502003,
-        2372.4945068042407,
-        1581.878759697207,
-        224.10169908298582,
-        4.420196050919542
+        30.580056454638136,
+        83.95836185597197,
+        46.16620637664877,
+        3.4636816277252214
     };
 
     static constexpr double Q[] = {
-        810.8511630902697,
-        3182.1361682278834,
-        3545.937817132696,
-        1172.6816431962184,
-        92.41288592456523,
+        30.578403642151667,
+        114.49011569793561,
+        114.80618615998705,
+        28.635096582884064,
         1
     };
 
-    __m256d numer = _mm256_set1_pd(P[5]);
-    for (size_t i = 0; i < 5; i++)
-        numer = _mm256_fmadd_pd(numer, x, _mm256_set1_pd(P[4 - i]));
+    __m256d numer = _mm256_set1_pd(P[4]);
+    for (size_t i = 0; i < 4; i++)
+        numer = _mm256_fmadd_pd(numer, x, _mm256_set1_pd(P[3 - i]));
 
-    __m256d denom = _mm256_set1_pd(Q[5]);
-    for (size_t i = 0; i < 5; i++)
-        denom = _mm256_fmadd_pd(denom, x, _mm256_set1_pd(Q[4 - i]));
+    __m256d denom = _mm256_set1_pd(Q[4]);
+    for (size_t i = 0; i < 4; i++)
+        denom = _mm256_fmadd_pd(denom, x, _mm256_set1_pd(Q[3 - i]));
 
     __m256d approx = _mm256_div_pd(numer, denom);
 
@@ -167,17 +165,17 @@ static inline __m256d FirstApprox(__m256d x)
 static inline __m256d SecondApprox(__m256d x)
 {
     static constexpr double P[] = {
-        64393.137450661044568,
-        43204.949550002405886,
-        20295.724800471609342,
-        453.37964270930132216,
-        1.0
+        64312.7454007891,
+        43264.12227598657,
+        20243.65384336377,
+        453.17656235798086,
+        1.0000432316050645
     };
     static constexpr double Q[] = {
-        104344.40703457256313,
-        22558.64516691800236,
-        461.09954435682880103,
-        0.9999372708768251572
+        104342.57917932322,
+        22499.368605590193,
+        460.93750724715477,
+        1
     };
 
     __m256d logX = LogFast(x);
@@ -196,11 +194,11 @@ static inline __m256d SecondApprox(__m256d x)
 
 static inline __m256d GeneralW0(__m256d x)
 {
-    __m256d isOver20 = _mm256_cmp_pd(x, _mm256_set1_pd(20.0), GREATER);
-    uint32_t isOver20Mask = _mm256_movemask_pd(isOver20);
+    __m256d useLarge = _mm256_cmp_pd(x, _mm256_set1_pd(7.34), GREATER);
+    uint32_t useLargeMask = _mm256_movemask_pd(useLarge);
 
     __m256d w;
-    switch (isOver20Mask)
+    switch (useLargeMask)
     {
     case 0b0000:
         w = FirstApprox(x);
@@ -209,7 +207,7 @@ static inline __m256d GeneralW0(__m256d x)
         w = SecondApprox(x);
         break;
     default:
-        w = _mm256_blendv_pd(FirstApprox(x), SecondApprox(x), isOver20);
+        w = _mm256_blendv_pd(FirstApprox(x), SecondApprox(x), useLarge);
     }
 
     // Constants
@@ -243,29 +241,28 @@ static inline __m256d AddEm(__m256d x)
 static inline __m256d NearBranchSeries(__m256d p)
 {
     static constexpr double P[] = {
-        -1,
-        1.0,
-        -0.3333333333333297,
-        0.1527777777773187,
-        -0.07962962960594742,
-        0.04450231416408525,
-        -0.025984703964189882,
-        0.01563551165669095,
-        -0.00961596052642643,
-        0.006009378381399107,
-        -0.0037902230498085155,
-        0.002376673069259283,
-        -0.0014296490725648598,
-        0.000770653337014657,
-        -0.00033482607204654753,
-        9.991363954176918e-05,
-        -1.4853323115219712e-05
+        -1.00000000000000000000,
+        0.99999999999998689937,
+        - 0.33333333333171155655,
+        0.15277777769847986078,
+        - 0.07962962759798784818,
+        0.04450228328389740917,
+        - 0.02598439214142129680,
+        0.01563333375832150554,
+        - 0.00960508856297833703,
+        0.00596982547465134492,
+        - 0.00368441824865070513,
+        0.00216878673408957843,
+        - 0.00113330227139719539,
+        0.00047252681627728467,
+        - 0.00013420111092875102,
+        0.00001887878365359131,
     };
 
     // Evaluate polynomial using Horner's Method
-    __m256d value = _mm256_set1_pd(P[16]);
-    for (size_t i = 0; i < 16; i++)
-        value = _mm256_fmadd_pd(value, p, _mm256_set1_pd(P[15 - i]));
+    __m256d value = _mm256_set1_pd(P[15]);
+    for (size_t i = 0; i < 15; i++)
+        value = _mm256_fmadd_pd(value, p, _mm256_set1_pd(P[14 - i]));
 
     return value;
 }
@@ -281,7 +278,7 @@ static inline __m256d NearBranchW0(__m256d x)
 // ========== Main Function ==========
 __m256d MuirW0(__m256d x)
 {
-    __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.29), LESS);
+    __m256d isNearBranch = _mm256_cmp_pd(x, _mm256_set1_pd(-0.28), LESS);
     uint32_t nearBranchMask = _mm256_movemask_pd(isNearBranch);
 
     __m256d result;
