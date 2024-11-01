@@ -97,6 +97,7 @@ static inline __m256d LogAccurate(__m256d x)
 static inline __m256d Approx(__m256d x)
 {
 #if 0
+    // Rational approximation - Faster but not quite accurate enough
     static constexpr double P[] = {
         -3124471.3164382777,
         -15775308.57071049,

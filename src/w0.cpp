@@ -7,8 +7,6 @@
 #define LESS 0x11
 #define GREATER 0x1E
 
-#define SHUFFLE_INT(a, b, i) _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), i))
-
 // ========== Log Functions ==========
 static inline __m256d Epi64ToPd(__m256i x)
 {
@@ -96,38 +94,6 @@ static inline __m256d Abs(__m256d x)
 
 static inline __m256d FirstApprox(__m256d x)
 {
-#if 0
-    // === Constants ===
-    __m256d e2 = _mm256_set1_pd(5.4365636569180904707);			// e * 2
-    __m256d two = _mm256_set1_pd(2.0);							// 2
-    // =================
-
-    static constexpr double P[] = {
-        -0.9998418255015216,
-        0.9963519639934693,
-        -0.31689383427598367,
-        0.11927961836393368,
-        -0.0389272342299362,
-        0.009587149228046744,
-        -0.0016619725895250465,
-        0.000193387127759057,
-        -1.426313511537818e-05,
-        5.997840674383423e-07,
-        -1.0923174871658654e-08
-    };
-
-    __m256d reta = _mm256_sqrt_pd(_mm256_fmadd_pd(x, e2, two));
-
-    __m256d approx = _mm256_set1_pd(P[10]);
-    for (size_t i = 0; i < 10; i++)
-        approx = _mm256_fmadd_pd(approx, reta, _mm256_set1_pd(P[9 - i]));
-
-    // Use approx = x for arguments near zero
-    __m256d isNearZero = _mm256_cmp_pd(Abs(x), _mm256_set1_pd(1e-4), LESS);
-    approx = _mm256_blendv_pd(approx, x, isNearZero);
-
-    return approx;
-#else
     static constexpr double P[] = {
         0,
         30.580056454638136,
@@ -159,7 +125,6 @@ static inline __m256d FirstApprox(__m256d x)
     approx = _mm256_blendv_pd(approx, x, isNearZero);
 
     return approx;
-#endif
 }
 
 static inline __m256d SecondApprox(__m256d x)
@@ -243,19 +208,19 @@ static inline __m256d NearBranchSeries(__m256d p)
     static constexpr double P[] = {
         -1.00000000000000000000,
         0.99999999999998689937,
-        - 0.33333333333171155655,
+        -0.33333333333171155655,
         0.15277777769847986078,
-        - 0.07962962759798784818,
+        -0.07962962759798784818,
         0.04450228328389740917,
-        - 0.02598439214142129680,
+        -0.02598439214142129680,
         0.01563333375832150554,
-        - 0.00960508856297833703,
+        -0.00960508856297833703,
         0.00596982547465134492,
-        - 0.00368441824865070513,
+        -0.00368441824865070513,
         0.00216878673408957843,
-        - 0.00113330227139719539,
+        -0.00113330227139719539,
         0.00047252681627728467,
-        - 0.00013420111092875102,
+        -0.00013420111092875102,
         0.00001887878365359131,
     };
 

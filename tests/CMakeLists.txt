@@ -15,6 +15,10 @@ find_package(PkgConfig)
 pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
 target_link_libraries(tests PRIVATE PkgConfig::mpfr)
 
+find_package(sleef REQUIRED)
+target_link_libraries(tests PUBLIC sleef::sleef)
+target_include_directories(tests PRIVATE ${SLEEF_INCLUDE_DIR})
+
 find_package(ReferenceLambertW)
 target_link_libraries(tests PRIVATE ReferenceLambertW::ReferenceLambertW)
 

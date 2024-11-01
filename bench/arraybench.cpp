@@ -74,7 +74,7 @@ int main()
 {
 	// === Parameters ===
 	static constexpr size_t ArrSize = 1'000'000;
-	static constexpr size_t Repeats = 10;
+	static constexpr size_t Repeats = 30;
 	double binMin = -20;
 	double binMax = 20;
 	double binWidth = 0.5;
@@ -86,15 +86,15 @@ int main()
 	for (double min = binMin; min < binMax; min += binWidth)
 	{
 		double max = min + binWidth;
-		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
+		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapW0(max));
 
 		double fukushimaTime = 0, barryTime = 0, boostTime = 0, muirTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
-			barryTime += TimeFunction(BarryLambertWm1, src);
-			boostTime += TimeFunction(boost::math::lambert_wm1<double>, src);
-			muirTime += TimeFunction([](__m256d x) { return MuirWm1(x); }, src);
+			fukushimaTime += TimeFunction(Fukushima::LambertW0, src);
+			barryTime += TimeFunction(BarryLambertW0, src);
+			boostTime += TimeFunction(boost::math::lambert_w0<double>, src);
+			muirTime += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
 		}
 
 		fukushimaTime /= Repeats;
