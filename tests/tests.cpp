@@ -27,9 +27,8 @@ Interval ReferenceWm1(double x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx dist{ 7, 20, false };
+	static ReciprocalDistributionEx dist{ EM_UP, -std::numeric_limits<double>::denorm_min(), false};
 
-	// 14.77479680495827 has error of 5ULP
-
-	MaxULPRounded(ReferenceW0, MakeSerial<MuirW0>, [&]() { return dist(gen); });
+	// 14.776442463189579 has error of 5ULP
+	MaxULPRounded(ReferenceWm1, MakeSerial<MuirWm1>, [&]() { return dist(gen); });
 }

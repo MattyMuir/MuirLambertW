@@ -12,8 +12,8 @@
 
 #define BENCH_FUKUSHIMA 0
 #define BENCH_BARRY 0
-#define BENCH_BOOST 0
-#define BENCH_MUIR_SERIAL 1
+#define BENCH_BOOST 1
+#define BENCH_MUIR_SERIAL 0
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
@@ -35,7 +35,7 @@ std::vector<__m256d> simdData;
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx dist{ EM_UP, -std::numeric_limits<double>::min(), false};
+	static std::uniform_real_distribution<double> dist{ -1e-50, -1e-60 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)

@@ -32,15 +32,16 @@ static inline __m256d LogFast(__m256d x)
 
     // Compute approximation
     static constexpr double P[] = {
-        -1.4976283869142268,
-        2.1229729992413895,
-        -0.7362283025393341,
-        0.11127972835311338
+        -1.74883843293730611990,
+        2.84123605882110430443,
+        -1.49089059863615602808,
+        0.45671004396616393661,
+        -0.05816743246573453929
     };
 
-    __m256d approx = _mm256_set1_pd(P[3]);
-    for (size_t i = 0; i < 3; i++)
-        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[2 - i]));
+    __m256d approx = _mm256_set1_pd(P[4]);
+    for (size_t i = 0; i < 4; i++)
+        approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[3 - i]));
 
     return _mm256_fmadd_pd(exp, ln2, approx);
 }

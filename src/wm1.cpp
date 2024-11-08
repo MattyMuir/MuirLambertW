@@ -96,65 +96,29 @@ static inline __m256d LogAccurate(__m256d x)
 
 static inline __m256d Approx(__m256d x)
 {
-#if 0
-    // Rational approximation - Faster but not quite accurate enough
+    // === Constants ===
+    __m256d one = _mm256_set1_pd(1.0);
+    __m256d negTwo = _mm256_set1_pd(-2.0);
+    // =================
+
     static constexpr double P[] = {
-        -3124471.3164382777,
-        -15775308.57071049,
-        -12327804.079866277,
-        -2229314.713013764,
-        -93595.13035044406,
-        -795.0910172631161,
-        -0.9968160831572623
-    };
-
-    static constexpr double Q[] = {
-        2496481.832558956,
-        6287971.194535033,
-        1787683.9621086929,
-        88671.4686848304,
-        783.8672654532386,
-        1
+        0,
+        -5.503669322365275,
+        -2.8265315635721815,
+        -0.4995568134894467
     };
 
     __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
-    __m256d t = _mm256_sub_pd(_mm256_set1_pd(-1.0), logX);
+    __m256d t = _mm256_sqrt_pd(_mm256_fmadd_pd(logX, negTwo, negTwo));
 
-    __m256d numer = _mm256_set1_pd(P[6]);
-    for (size_t i = 0; i < 6; i++)
-        numer = _mm256_fmadd_pd(numer, t, _mm256_set1_pd(P[5 - i]));
+    __m256d numer = _mm256_set1_pd(P[3]);
+    for (size_t i = 0; i < 3; i++)
+        numer = _mm256_fmadd_pd(numer, t, _mm256_set1_pd(P[2 - i]));
 
-    __m256d denom = _mm256_set1_pd(Q[5]);
-    for (size_t i = 0; i < 5; i++)
-        denom = _mm256_fmadd_pd(denom, t, _mm256_set1_pd(Q[4 - i]));
-
-    __m256d approx = _mm256_div_pd(numer, denom);
+    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(5.504868255680624));
+    __m256d approx = _mm256_sub_pd(_mm256_div_pd(numer, denom), one);
 
     return approx;
-#else
-    // Determine a
-    __m256d xgt0 = _mm256_cmp_pd(x, _mm256_set1_pd(-0.29),      GREATER);
-    __m256d xgt1 = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-11),     GREATER);
-    __m256d xgt2 = _mm256_cmp_pd(x, _mm256_set1_pd(-1e-96),     GREATER);
-
-    __m256d a = _mm256_set1_pd(101.815);                    // [-1/e,       -0.29]
-    a = _mm256_blendv_pd(a, _mm256_set1_pd(127), xgt0);     // [-0.29,      -1e-11]
-    a = _mm256_blendv_pd(a, _mm256_set1_pd(181), xgt1);     // [-1e-11,     -1e-96]
-    a = _mm256_blendv_pd(a, _mm256_set1_pd(317), xgt2);     // [-1e-96,     0]
-
-    __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
-    __m256d t = _mm256_sub_pd(_mm256_set1_pd(-1.0), logX);
-    __m256d sqrtT = _mm256_sqrt_pd(t);
-    __m256d approx = _mm256_fmadd_pd(a, sqrtT, _mm256_set1_pd(270));
-    approx = _mm256_div_pd(t, approx);
-    approx = _mm256_sub_pd(_mm256_set1_pd(1.0 / 3.0), approx);
-    approx = _mm256_fmadd_pd(approx, sqrtT, _mm256_set1_pd(1.4142135623730950488));
-    approx = _mm256_div_pd(sqrtT, approx);
-    approx = _mm256_add_pd(approx, approx);
-    approx = _mm256_sub_pd(logX, approx);
-
-    return approx;
-#endif
 }
 
 static inline __m256d GeneralWm1(__m256d x)
