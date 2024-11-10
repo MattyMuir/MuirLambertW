@@ -21,6 +21,11 @@ uint64_t ULPDistance(double a, double b)
     return (aPunn - 0x8000000000000000) + bPunn;
 }
 
+uint64_t ULPDistance(double approx, Interval exact)
+{
+    return std::max(ULPDistance(approx, exact.inf), ULPDistance(approx, exact.sup));
+}
+
 uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, const RandomFunction& randFunc, uint64_t iter)
 {
     uint64_t maxError = 0;
@@ -29,16 +34,14 @@ uint64_t MaxULPRounded(BoundedFunction1D boundedFunc, Function1D approxFunc, con
         // Sample random input
 		double x = randFunc();
 
-        // Evaluate approx
+        // Evaluate approx and exact
 		double approx = approxFunc(x);
-        if (!std::isfinite(approx))
-            std::cout << std::format("NaN: {}\n", x);
+        Interval exact = boundedFunc(x);
 
-        // Evaluate reference
-		auto [inf, sup] = boundedFunc(x);
+        if (!std::isfinite(approx) && std::isfinite(exact.inf) && std::isfinite(exact.sup))
+            std::cout << std::format("Bad NaN: {}\n", x);
 
-        // Calculate error
-        uint64_t error = std::max(ULPDistance(approx, inf), ULPDistance(approx, sup));
+        uint64_t error = ULPDistance(approx, exact);
 
         if (error > maxError)
         {

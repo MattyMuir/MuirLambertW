@@ -103,9 +103,9 @@ static inline __m256d Approx(__m256d x)
 
     static constexpr double P[] = {
         0,
-        -5.503669322365275,
-        -2.8265315635721815,
-        -0.4995568134894467
+        -5.415413805902706,
+        -2.787876451002007,
+        -0.4992978139443087
     };
 
     __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
@@ -115,7 +115,7 @@ static inline __m256d Approx(__m256d x)
     for (size_t i = 0; i < 3; i++)
         numer = _mm256_fmadd_pd(numer, t, _mm256_set1_pd(P[2 - i]));
 
-    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(5.504868255680624));
+    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(5.410664283026123));
     __m256d approx = _mm256_sub_pd(_mm256_div_pd(numer, denom), one);
 
     return approx;

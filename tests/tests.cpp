@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <random>
 #include <format>
@@ -27,9 +28,20 @@ Interval ReferenceWm1(double x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx dist{ -0.27, -0.1, false};
+	std::uniform_real_distribution<double> dist{ EM_UP, -0.2 };
 
-	// W0:	14.776442463189579		has error of 5ULP
-	// Wm1: -0.25002227407391364	has error of 6ULP
-	MaxULPRounded(ReferenceWm1, MakeSerial<MuirWm1>, [&]() { return dist(gen); });
+	double largestFailing = -INFINITY;
+	for (;;)
+	{
+		double x = dist(gen);
+
+		double approx = MakeSerial<MuirWm1>(x);
+		auto exact = ReferenceWm1(x);
+		if (ULPDistance(approx, exact) >= 5 && x > largestFailing)
+		{
+			std::cout << std::format("{}\n", x);
+			largestFailing = x;
+			dist = std::uniform_real_distribution<double>{ largestFailing, -0.2 };
+		}
+	}
 }
