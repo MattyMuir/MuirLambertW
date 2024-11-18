@@ -11,7 +11,19 @@
 #include "constants.h"
 
 #include "MuirLambertW.h"
-#include "ReferenceW.h"
+#include <ReferenceLambertW.h>
+
+Intervalf ReferenceW0f(float x)
+{
+	static ReferenceWf evaluator;
+	return evaluator.W0(x);
+}
+
+Intervalf ReferenceWm1f(float x)
+{
+	static ReferenceWf evaluator;
+	return evaluator.Wm1(x);
+}
 
 Interval ReferenceW0(double x)
 {
@@ -25,23 +37,27 @@ Interval ReferenceWm1(double x)
 	return evaluator.Wm1(x);
 }
 
+float ExpMapWm1(float x)
+{
+	static constexpr float EM_UP = -0.36787942f;
+	return EM_UP / (1 + exp(x));
+}
+
+float MuirWm1MadeSerial(float x)
+{
+	__m256 p = _mm256_set1_ps(x);
+	int res = _mm_extract_ps(_mm256_castps256_ps128(MuirWm1(p)), 0);
+	return std::bit_cast<float>(res);
+}
+
 int main()
 {
+#if 1
 	static std::mt19937_64 gen{ std::random_device{}() };
-	std::uniform_real_distribution<double> dist{ EM_UP, -0.2 };
+	ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
 
-	double largestFailing = -INFINITY;
-	for (;;)
-	{
-		double x = dist(gen);
+	MaxULPRounded(ReferenceWm1f, MuirWm1MadeSerial, [&]() { return dist(gen); });
+#endif
 
-		double approx = MakeSerial<MuirWm1>(x);
-		auto exact = ReferenceWm1(x);
-		if (ULPDistance(approx, exact) >= 5 && x > largestFailing)
-		{
-			std::cout << std::format("{}\n", x);
-			largestFailing = x;
-			dist = std::uniform_real_distribution<double>{ largestFailing, -0.2 };
-		}
-	}
+	ULPHistogramSigned(ReferenceWm1f, MuirWm1MadeSerial, -15, 50, 0.2, ExpMapWm1);
 }

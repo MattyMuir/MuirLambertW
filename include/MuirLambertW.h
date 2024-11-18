@@ -3,3 +3,6 @@
 #include "../src/wm1serial.h"
 #include "../src/w0.h"
 #include "../src/wm1.h"
+
+#include "../src/wm1fserial.h"
+#include "../src/wm1f.h"

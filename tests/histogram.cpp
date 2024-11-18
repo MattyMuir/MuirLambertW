@@ -6,6 +6,25 @@
 
 #include "ulp.h"
 
+float IdentityMap(float x)
+{
+	return x;
+}
+
+void ULPHistogramSigned(BoundedFunction1Df boundedFunc, Function1Df approxFunc, float min, float max, float step, RandMapf map)
+{
+	static std::mt19937_64 gen{ std::random_device{}() };
+
+	for (float low = min; low < max; low += step)
+	{
+		float high = low + step;
+		std::uniform_real_distribution<float> dist{ low, high };
+
+		auto [errLow, errHigh] = MaxULPSigned(boundedFunc, approxFunc, [&]() { return map(dist(gen)); }, 10'000);
+		std::cout << std::format("{:.1f},{:.1f},{},{}\n", low, high, errLow, errHigh);
+	}
+}
+
 double IdentityMap(double x)
 {
 	return x;
@@ -21,6 +40,6 @@ void ULPHistogram(BoundedFunction1D boundedFunc, Function1D approxFunc, double m
 		std::uniform_real_distribution<double> dist{ low, high };
 
 		uint64_t err = MaxULPRounded(boundedFunc, approxFunc, [&]() { return map(dist(gen)); }, 10'000);
-		std::cout << std::format("[{:.5f} - {:.5f}],{}\n", low, high, err);
+		std::cout << std::format("{:.5f},{:.5f},{}\n", low, high, err);
 	}
 }

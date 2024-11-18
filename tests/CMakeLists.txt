@@ -5,7 +5,7 @@ cmake_policy(SET CMP0069 NEW)
 include(../macros.cmake)
 
 # === Create Executable ===
-add_executable(tests "tests.cpp" "types.h" "ulp.cpp" "ulp.h" "wrappers.h" "ReciprocalDistribution.cpp" "ReciprocalDistribution.h" "ReciprocalDistributionEx.cpp" "ReciprocalDistributionEx.h" "../bench/others/BarryLambertW.cpp" "../bench/others/FukushimaLambertW.cc" "histogram.h" "histogram.cpp" "constants.h")
+add_executable(tests "tests.cpp" "types.h" "ulp.cpp" "ulp.h" "wrappers.h"  "ReciprocalDistribution.h"  "ReciprocalDistributionEx.h" "../bench/others/BarryLambertW.cpp" "../bench/others/FukushimaLambertW.cc" "histogram.h" "histogram.cpp" "constants.h")
 
 # === Libraries ===
 target_link_libraries(tests PUBLIC MuirLambertW)

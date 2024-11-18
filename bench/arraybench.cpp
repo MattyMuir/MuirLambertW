@@ -2,6 +2,7 @@
 #include <vector>
 #include <format>
 #include <random>
+#include <fstream>
 
 #include <immintrin.h>
 
@@ -80,21 +81,21 @@ int main()
 	double binWidth = 0.5;
 	// ==================
 
-	freopen("arraybench.csv", "w", stdout);
+	std::ofstream file{ "arraybench.csv" };
 
-	std::cout << "Min,Max,Fukushima,Barry,Boost,Muir\n";
+	file << "Min,Max,Fukushima,Barry,Boost,Muir\n";
 	for (double min = binMin; min < binMax; min += binWidth)
 	{
 		double max = min + binWidth;
-		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapW0(max));
+		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
 		double fukushimaTime = 0, barryTime = 0, boostTime = 0, muirTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			fukushimaTime += TimeFunction(Fukushima::LambertW0, src);
-			barryTime += TimeFunction(BarryLambertW0, src);
-			boostTime += TimeFunction(boost::math::lambert_w0<double>, src);
-			muirTime += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
+			fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
+			barryTime += TimeFunction(BarryLambertWm1, src);
+			boostTime += TimeFunction(boost::math::lambert_wm1<double>, src);
+			muirTime += TimeFunction([](__m256d x) { return MuirWm1(x); }, src);
 		}
 
 		fukushimaTime /= Repeats;
@@ -102,6 +103,7 @@ int main()
 		boostTime /= Repeats;
 		muirTime /= Repeats;
 
-		std::cout << std::format("{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, fukushimaTime, barryTime, boostTime, muirTime);
+		file << std::format("{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, fukushimaTime, barryTime, boostTime, muirTime);
+		std::cout << min << " - " << max << '\n';
 	}
 }
