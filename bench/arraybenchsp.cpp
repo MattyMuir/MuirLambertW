@@ -15,16 +15,16 @@
 #include "others/BarryLambertW.h"
 #include "boost/math/special_functions/lambert_w.hpp"
 
-using Function1D = float(*)(float);
-using SimdFunction1D = __m256(*)(__m256);
+using Function1Df = float(*)(float);
+using SimdFunction1Df = __m256(*)(__m256);
 
-void ApplyFunction(Function1D func, std::vector<float>& dst, const std::vector<float>& src)
+void ApplyFunction(Function1Df func, std::vector<float>& dst, const std::vector<float>& src)
 {
 	for (size_t i = 0; i < src.size(); i++)
 		dst[i] = func(src[i]);
 }
 
-void ApplyFunction(SimdFunction1D func, std::vector<float>& dst, const std::vector<float>& src)
+void ApplyFunction(SimdFunction1Df func, std::vector<float>& dst, const std::vector<float>& src)
 {
 	for (size_t i = 0; i < src.size(); i += 8)
 	{

@@ -10,22 +10,21 @@
 static inline double Approx(double x)
 {
     // === Constants ===
-    static constexpr double s2 = 1.4142135623730950488;     // sqrt(2)
-    static constexpr double c13 = 1.0 / 3.0;
+    static constexpr double P[] = {
+        0,
+        -5.415413805902706,
+        -2.787876451002007,
+        -0.4992978139443087
+    };
+    static constexpr double Q = 5.410664283026123;
     // =================
 
-    double a =  (x < -0.29) ? 101.815 :
-                (x < -1e-11) ? 127.0 :
-                (x < -1e-96) ? 181.0 :
-                317.0;
+    double t = sqrt(-2 - 2 * log(-x));
+    double w = P[3];
+    for (size_t i = 0; i < 3; i++)
+        w = w * t + P[2 - i];
 
-    double zl = log(-x);
-    double t = -1.0 - zl;
-    double ts = sqrt(t);
-    double approx = zl - (2.0 * ts) / (s2 + (c13 - t
-        / (270.0 + ts * a)) * ts);
-
-    return approx;
+    return w / (t + Q) - 1.0;
 }
 
 static inline double GeneralWm1(double x)

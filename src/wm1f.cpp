@@ -96,33 +96,6 @@ __m256 GeneralWm1(__m256 x)
 	__m256 t = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
 	t = _mm256_sqrt_ps(_mm256_fmadd_ps(t, negTwo, negTwo));
 
-#if 0
-	static constexpr float P[] = {
-		-267.8300777397339,
-		-407.4454791494287,
-		-252.50850702263386,
-		-78.3862537680316,
-		-11.777477920266723,
-		-0.49977575135967434
-	};
-
-	static constexpr float Q[] = {
-		267.82043977154206,
-		139.66929254973005,
-		23.481105194552338,
-		1
-	};
-
-	__m256 numer = _mm256_set1_ps(P[5]);
-	for (size_t i = 0; i < 5; i++)
-		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[4 - i]));
-
-	__m256 denom = _mm256_set1_ps(Q[3]);
-	for (size_t i = 0; i < 3; i++)
-		denom = _mm256_fmadd_ps(denom, t, _mm256_set1_ps(Q[2 - i]));
-
-	return _mm256_div_ps(numer, denom);
-#else
 	static constexpr float P[] = {
 		-0.9999492423798767,
 		-1.0002532686721437,
@@ -144,60 +117,10 @@ __m256 GeneralWm1(__m256 x)
 		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[11 - i]));
 
 	return res;
-#endif
 }
 
 __m256 MuirWm1(__m256 x)
 {
-#if 0
-	// === Constants ===
-	__m256 negOne = _mm256_set1_ps(-1.0f);
-	__m256 negE = _mm256_set1_ps(-2.7182817f);
-	__m256 negTwo = _mm256_set1_ps(-2.0f);
-	// =================
-
-	// Compute t
-	__m256 nearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.367849011206f), LESS);
-	__m256 arg = _mm256_blendv_ps(x, AddEm(x), nearBranch);
-	arg = _mm256_mul_ps(arg, _mm256_blendv_ps(negOne, negE, nearBranch));
-
-	__m256 t = Sleef_logf8_u35avx2(arg);
-	t = _mm256_blendv_ps(t, arg, nearBranch);
-	t = _mm256_fmadd_ps(t, negTwo, _mm256_andnot_ps(nearBranch, negTwo));
-
-	t = _mm256_sqrt_ps(t);
-
-	// Evaluate rational approx
-	static constexpr float P[] = {
-		0.0f,
-		-775.846669858888f,
-		-869.712104557702f,
-		-411.696629665943f,
-		-100.601001722587f,
-		-12.230662731677f,
-		-0.4994929301872f,
-		-4.04431805144266e-06f
-	};
-
-	static constexpr float Q[] = {
-		775.84618883946f,
-		611.10071342493f,
-		186.434267056385f,
-		24.3695096706907f,
-		1.0f
-	};
-
-	__m256 numer = _mm256_set1_ps(P[7]);
-	for (size_t i = 0; i < 7; i++)
-		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[6 - i]));
-
-	__m256 denom = _mm256_set1_ps(Q[4]);
-	for (size_t i = 0; i < 4; i++)
-		denom = _mm256_fmadd_ps(denom, t, _mm256_set1_ps(Q[3 - i]));
-
-	__m256 approx = _mm256_div_ps(numer, denom);
-	return _mm256_add_ps(approx, negOne);
-#else
 	__m256 isNearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.277689970954), LESS);
 	uint32_t nearBranchMask = _mm256_movemask_ps(isNearBranch);
 
@@ -216,5 +139,4 @@ __m256 MuirWm1(__m256 x)
 	}
 
 	return result;
-#endif
 }

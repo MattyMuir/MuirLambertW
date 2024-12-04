@@ -1,17 +1,10 @@
 ﻿# LIBRARY PROJECT - MuirLambertW
 
 # === Includes ===
-cmake_policy(SET CMP0069 NEW)
-include(../macros.cmake)
 include(GNUInstallDirs)
 
 # === Create Library ===
 add_library(MuirLambertW "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp" "wm1fserial.h" "wm1fserial.cpp" "wm1f.h" "wm1f.cpp")
-
-# === Libraries ===
-find_package(sleef REQUIRED)
-target_link_libraries(MuirLambertW PUBLIC sleef::sleef)
-target_include_directories(MuirLambertW PRIVATE ${SLEEF_INCLUDE_DIR})
 
 # === Feature Enables ===
 if (MUIRW_MSVC_STATIC_RUNTIME)

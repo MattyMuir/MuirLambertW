@@ -37,6 +37,12 @@ Interval ReferenceWm1(double x)
 	return evaluator.Wm1(x);
 }
 
+double ExpMapWm1(double x)
+{
+	static constexpr double EM_UP = -0.3678794411714423;
+	return EM_UP / (1 + exp(x));
+}
+
 float ExpMapWm1(float x)
 {
 	static constexpr float EM_UP = -0.36787942f;
@@ -52,12 +58,5 @@ float MuirWm1MadeSerial(float x)
 
 int main()
 {
-#if 1
-	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
-
-	MaxULPRounded(ReferenceWm1f, MuirWm1MadeSerial, [&]() { return dist(gen); });
-#endif
-
-	ULPHistogramSigned(ReferenceWm1f, MuirWm1MadeSerial, -15, 50, 0.2, ExpMapWm1);
+	ULPHistogram(ReferenceWm1, MuirWm1, -30, 30, 0.5, ExpMapWm1);
 }

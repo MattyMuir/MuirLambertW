@@ -11,6 +11,11 @@ float IdentityMap(float x)
 	return x;
 }
 
+double IdentityMap(double x)
+{
+	return x;
+}
+
 void ULPHistogramSigned(BoundedFunction1Df boundedFunc, Function1Df approxFunc, float min, float max, float step, RandMapf map)
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
@@ -23,11 +28,6 @@ void ULPHistogramSigned(BoundedFunction1Df boundedFunc, Function1Df approxFunc, 
 		auto [errLow, errHigh] = MaxULPSigned(boundedFunc, approxFunc, [&]() { return map(dist(gen)); }, 10'000);
 		std::cout << std::format("{:.1f},{:.1f},{},{}\n", low, high, errLow, errHigh);
 	}
-}
-
-double IdentityMap(double x)
-{
-	return x;
 }
 
 void ULPHistogram(BoundedFunction1D boundedFunc, Function1D approxFunc, double min, double max, double step, RandMap map)
