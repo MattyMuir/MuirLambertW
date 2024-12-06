@@ -4,7 +4,7 @@
 #include <format>
 #include <bit>
 
-#define LOGGING 0
+#define LOGGING 1
 
 uint32_t ULPDistance(float a, float b)
 {

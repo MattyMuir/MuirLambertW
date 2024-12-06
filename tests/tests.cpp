@@ -56,7 +56,30 @@ float MuirWm1MadeSerial(float x)
 	return std::bit_cast<float>(res);
 }
 
+double MuirW0MadeSerial(double x)
+{
+	__m256d p = _mm256_set1_pd(x);
+	int64_t res = _mm256_extract_epi64(_mm256_castpd_si256(MuirW0(p)), 0);
+	return std::bit_cast<double>(res);
+}
+
 int main()
 {
-	ULPHistogram(ReferenceWm1, MuirWm1, -30, 30, 0.5, ExpMapWm1);
+	static std::mt19937_64 gen{ std::random_device{}() };
+	std::uniform_real_distribution<double> dist{ EM_UP, -0.28 };
+
+	MaxULPRounded(ReferenceW0, MuirW0, [&]() { return dist(gen); });
+
+	for (;;)
+	{
+		double x = dist(gen);
+		double wApprox = MuirW0(x);
+		Interval wExact = ReferenceW0(x);
+
+		if (ULPDistance(wApprox, wExact) >= 5)
+		{
+			std::cout << std::format("{}\n", x);
+			dist = std::uniform_real_distribution<double>{ x, -0.28 };
+		}
+	}
 }

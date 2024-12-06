@@ -7,50 +7,52 @@
 
 static inline double FirstApprox(double x)
 {
-    // === Constants ===
-    static constexpr double e2 = 5.4365636569180904707;     // e * 2
-    // =================
-
     if (abs(x) < 1e-4)
         return x;
 
     static constexpr double P[] = {
-        -0.9998418255015216,
-        0.9963519639934693,
-        -0.31689383427598367,
-        0.11927961836393368,
-        -0.0389272342299362,
-        0.009587149228046744,
-        -0.0016619725895250465,
-        0.000193387127759057,
-        -1.426313511537818e-05,
-        5.997840674383423e-07,
-        -1.0923174871658654e-08
+        0,
+        28.81244221654313,
+        131.14615617307527,
+        172.3834180355456,
+        62.332230968272896,
+        3.6088782677342017
     };
 
-    double reta = sqrt(x * e2 + 2);
+    static constexpr double Q[] = {
+        28.813739177487342,
+        159.9633664467659,
+        289.069078387009,
+        188.23555138648206,
+        35.16238622673435,
+        1
+    };
 
-    double approx = P[10];
-    for (size_t i = 0; i < 10; i++)
-        approx = approx * reta + P[9 - i];
+    double numer = P[5];
+    for (size_t i = 0; i < 5; i++)
+        numer = numer * x + P[4 - i];
 
-    return approx;
+    double denom = Q[5];
+    for (size_t i = 0; i < 5; i++)
+        denom = denom * x + Q[4 - i];
+
+    return numer / denom;
 }
 
 static inline double SecondApprox(double x)
 {
     static constexpr double P[] = {
-        64393.137450661044568,
-        43204.949550002405886,
-        20295.724800471609342,
-        453.37964270930132216,
-        1.0
+        64312.7454007891,
+        43264.12227598657,
+        20243.65384336377,
+        453.17656235798086,
+        1.0000432316050645
     };
     static constexpr double Q[] = {
-        104344.40703457256313,
-        22558.64516691800236,
-        461.09954435682880103,
-        0.9999372708768251572
+        104342.57917932322,
+        22499.368605590193,
+        460.93750724715477,
+        1
     };
 
     double logX = log(x);
@@ -69,7 +71,7 @@ static inline double SecondApprox(double x)
 
 static inline double GeneralW0(double x)
 {
-    double w = (x > 20.0) ? SecondApprox(x) : FirstApprox(x);
+    double w = (x > 7.34) ? SecondApprox(x) : FirstApprox(x);
 
     // === Fritsch Iteration ===
     static constexpr double c23 = 2.0 / 3.0;
@@ -93,19 +95,19 @@ static inline double AddEm(double x)
 static inline double NearBranchSeries(double p)
 {
     static constexpr double P[] = {
-        -1,
-        0.9999999999999997,
-        -0.3333333333330709,
-        0.15277777774435128,
-        -0.07962962801673715,
-        0.044502274633980064,
-        -0.025984120008670515,
-        0.01562999136067536,
-        -0.00958118607573627,
-        0.00586072464198908,
-        -0.003358979213132348,
-        0.0015430644746481945,
-        -0.0003975110776657685
+        -1.0,
+        0.999999999999952,
+        -0.3333333333272104,
+        0.15277777746385043,
+        -0.07962962100934082,
+        0.04450217060974618,
+        -0.02598313708983362,
+        0.015623864373809608,
+        -0.009555681655574338,
+        0.0057905732001774755,
+        -0.0032366081259528625,
+        0.0014204580219827356,
+        -0.00034378172909336254
     };
 
     // Evaluate polynomial using Horner's Method
@@ -129,5 +131,5 @@ double MuirW0(double x)
     if (x == 0 || x == std::numeric_limits<double>::infinity())
         return x;
 
-    return (x < -0.3407) ? NearBranchW0(x) : GeneralW0(x);
+    return (x < -0.34) ? NearBranchW0(x) : GeneralW0(x);
 }
