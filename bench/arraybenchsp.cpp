@@ -77,33 +77,31 @@ int main()
 	static constexpr size_t ArrSize = 1'000'000;
 	static constexpr size_t Repeats = 30;
 	float binMin = -10;
-	float binMax = 10;
-	float binWidth = 0.5;
+	float binMax = 2;
+	float binWidth = 0.2;
 	// ==================
 
 	std::ofstream file{ "arraybench.csv" };
 
-	file << "Min,Max,Fukushima,Barry,Boost,Muir\n";
+	file << "Min,Max,Boost,Muir,MuirSerial\n";
 	for (float min = binMin; min < binMax; min += binWidth)
 	{
 		float max = min + binWidth;
 		std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
-		float fukushimaTime = 0, barryTime = 0, boostTime = 0, muirTime = 0;
+		float boostTime = 0, muirTime = 0, muirSerialTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			//fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
-			//barryTime += TimeFunction(BarryLambertWm1, src);
 			boostTime += TimeFunction(boost::math::lambert_wm1<float>, src);
 			muirTime += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
+			muirSerialTime += TimeFunction([](float x) { return MuirWm1(x); }, src);
 		}
 
-		fukushimaTime /= Repeats;
-		barryTime /= Repeats;
 		boostTime /= Repeats;
 		muirTime /= Repeats;
+		muirSerialTime /= Repeats;
 
-		file << std::format("{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, fukushimaTime, barryTime, boostTime, muirTime);
+		file << std::format("{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, boostTime, muirTime, muirSerialTime);
 		std::cout << min << " - " << max << '\n';
 	}
 }

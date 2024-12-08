@@ -1,5 +1,3 @@
-#include "w0serial.h"
-
 #include <cstdint>
 #include <cmath>
 #include <bit>

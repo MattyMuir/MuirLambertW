@@ -1,7 +1,7 @@
-#include "wm1.h"
-
 #include <cstdint>
 #include <limits>
+
+#include <immintrin.h>
 
 #define LESS 0x11
 #define GREATER 0x1E

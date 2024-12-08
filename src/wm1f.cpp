@@ -1,7 +1,7 @@
-#include "wm1f.h"
-
 #include <cstdint>
 #include <cfloat>
+
+#include <immintrin.h>
 
 #define LESS 0x11
 #define BLEND_INT(a, b, mask) _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), mask))

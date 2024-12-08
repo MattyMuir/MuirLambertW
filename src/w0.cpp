@@ -1,7 +1,7 @@
-#include "w0.h"
-
 #include <cstdint>
 #include <limits>
+
+#include <immintrin.h>
 
 #define EQUAL 0x0
 #define LESS 0x11

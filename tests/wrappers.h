@@ -1,5 +1,6 @@
 #pragma once
 #include <numeric>
+#include <mpfr.h>
 
 #include "types.h"
 

@@ -3,6 +3,8 @@
 
 #include <functional>
 
+#include <mpfr.h>
+
 #include <ReferenceLambertW.h>
 
 // === Function types ===

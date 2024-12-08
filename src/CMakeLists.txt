@@ -4,7 +4,7 @@
 include(GNUInstallDirs)
 
 # === Create Library ===
-add_library(MuirLambertW "w0.h" "w0.cpp"  "wm1.h" "wm1.cpp" "w0serial.h" "wm1serial.h" "wm1serial.cpp" "w0serial.cpp" "wm1fserial.h" "wm1fserial.cpp" "wm1f.h" "wm1f.cpp")
+add_library(MuirLambertW  "w0.cpp"   "wm1.cpp"   "wm1serial.cpp" "w0serial.cpp"  "wm1fserial.cpp"  "wm1f.cpp")
 
 # === Feature Enables ===
 if (MUIRW_MSVC_STATIC_RUNTIME)

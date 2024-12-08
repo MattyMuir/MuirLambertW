@@ -1,64 +1,61 @@
-#include "wm1fserial.h"
-
 #include <cmath>
-#include <cfenv>
 
-// TODO - remove
-#include <iostream>
-#include <format>
-
-float AddEm(float x)
+static inline float NearBranchWm1(float x)
 {
-	static constexpr float emHigh = 0.36787945f;
-	static constexpr float emLow = -9.149756e-09f;
-	return (x + emHigh) + emLow;
+	static constexpr double s2e = 2.331643981597124;
+
+	double p = s2e * sqrt((double)x + 0.36787944117144233);
+
+	static constexpr double P[] = {
+		-0.9999999811456308,
+		-1.0000044654258957,
+		-0.3331646630001799,
+		-0.1550676095217873,
+		-0.06595497662216744,
+		-0.07987153028272707
+	};
+
+	double res = P[5];
+	for (size_t i = 0; i < 5; i++)
+		res = res * p + P[4 - i];
+
+	return res;
 }
 
-float IntPow(float f, uint64_t p)
+static inline float GeneralWm1(float x)
 {
-	float ret = 1.0f;
-	for (uint64_t i = 0; i < p; i++)
-		ret *= f;
-	return ret;
+	static constexpr double P[] = {
+		-2101.555169658076,
+		-3413.0457024602106,
+		-2345.4071921263444,
+		-864.1804177336671,
+		-175.99964384176346,
+		-17.64071303855079,
+		-0.4998769261313046
+	};
+
+	static constexpr double Q[] = {
+		2101.5551872949245,
+		1311.4898275251383,
+		333.4030604186147,
+		35.228646667156625,
+		1
+	};
+
+	double t = sqrt(-2 - 2 * log((double)-x));
+
+	double numer = P[6];
+	for (size_t i = 0; i < 6; i++)
+		numer = numer * t + P[5 - i];
+
+	double denom = Q[4];
+	for (size_t i = 0; i < 4; i++)
+		denom = denom * t + Q[3 - i];
+
+	return numer / denom;
 }
 
 float MuirWm1(float x)
 {
-	float t;
-	if (x < -0.2f)
-		t = std::sqrt(std::log1p(AddEm(x) * -2.7182817f) * -2.0f);
-	else
-		t = std::sqrt(std::log(-x) * -2.0f - 2.0f);
-
-	float P[] = {
-		0.0f,
-		-775.846669858888f,
-		-869.712104557702f,
-		-411.696629665943f,
-		-100.601001722587f,
-		-12.230662731677f,
-		-0.4994929301872f,
-		-4.04431805144266e-06f
-	};
-
-	float Q[] = {
-		775.84618883946f,
-		611.10071342493f,
-		186.434267056385f,
-		24.3695096706907f,
-		1.0f
-	};
-
-	float numer = P[7];
-	for (size_t i = 0; i < 7; i++)
-		numer = numer * t + P[6 - i];
-
-	float denom = Q[4];
-	for (size_t i = 0; i < 4; i++)
-		denom = denom * t + Q[3 - i];
-
-	//std::cout << std::format("{}\n", numer);
-	//std::cout << std::format("{}\n", denom);
-
-	return numer / denom - 1.0f;
+	return (x < -0.3498715f) ? NearBranchWm1(x) : GeneralWm1(x);
 }

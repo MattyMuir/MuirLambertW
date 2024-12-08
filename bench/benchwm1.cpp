@@ -19,8 +19,6 @@
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
 #define SIMD_BENCHMARK(func, name) _2 = _mm256_add_pd(_2, RunBenchmark(func, name))
 
-static constexpr double EM_UP = -0.3678794411714423;
-
 // === Parameters ===
 static constexpr size_t NumData = 1'000;
 static constexpr size_t NumIter = 100'000;

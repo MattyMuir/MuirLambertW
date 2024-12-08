@@ -1,11 +1,4 @@
-#include "wm1serial.h"
-
-#include <cstdint>
 #include <cmath>
-#include <bit>
-#include <limits>
-
-#define GREATER 0x1E
 
 static inline double Approx(double x)
 {
