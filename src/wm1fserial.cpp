@@ -2,9 +2,8 @@
 
 static inline float NearBranchWm1(float x)
 {
-	static constexpr double s2e = 2.331643981597124;
-
-	double p = s2e * sqrt((double)x + 0.36787944117144233);
+	static constexpr double e2 = 5.43656365691809;
+	double p = sqrt(e2 * x + 2.0);
 
 	static constexpr double P[] = {
 		-0.9999999811456308,
@@ -25,32 +24,30 @@ static inline float NearBranchWm1(float x)
 static inline float GeneralWm1(float x)
 {
 	static constexpr double P[] = {
-		-2101.555169658076,
-		-3413.0457024602106,
-		-2345.4071921263444,
-		-864.1804177336671,
-		-175.99964384176346,
-		-17.64071303855079,
-		-0.4998769261313046
+		-246.9023719292306,
+		-368.15952949040997,
+		-224.1791808874142,
+		-68.85182301857488,
+		-10.34301280940623,
+		-0.4996779961653583
 	};
 
 	static constexpr double Q[] = {
-		2101.5551872949245,
-		1311.4898275251383,
-		333.4030604186147,
-		35.228646667156625,
+		246.90158428606017,
+		121.26384144163241,
+		20.59776676808664,
 		1
 	};
 
 	double t = sqrt(-2 - 2 * log((double)-x));
 
-	double numer = P[6];
-	for (size_t i = 0; i < 6; i++)
-		numer = numer * t + P[5 - i];
+	double numer = P[5];
+	for (size_t i = 0; i < 5; i++)
+		numer = numer * t + P[4 - i];
 
-	double denom = Q[4];
-	for (size_t i = 0; i < 4; i++)
-		denom = denom * t + Q[3 - i];
+	double denom = Q[3];
+	for (size_t i = 0; i < 3; i++)
+		denom = denom * t + Q[2 - i];
 
 	return numer / denom;
 }
