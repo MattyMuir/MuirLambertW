@@ -3,6 +3,10 @@
 
 #include <immintrin.h>
 
+#define __AVX__
+#define SLEEF_STATIC_LIBS
+#include <sleef.h>
+
 #define LESS 0x11
 #define BLEND_INT(a, b, mask) _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), mask))
 
@@ -86,6 +90,47 @@ __m256 NearBranchWm1(__m256 x)
 	return res;
 }
 
+__m256 FirstApprox(__m256 t)
+{
+	static constexpr float P[] = {
+		-0.9999947f,
+		-1.0000472f,
+		-0.3331734f,
+		-0.028060034f,
+		0.0040001357f,
+		-0.00043049827f,
+		3.0040927e-05f,
+		-9.943928e-07f
+	};
+
+	__m256 res = _mm256_set1_ps(P[7]);
+	for (size_t i = 0; i < 7; i++)
+		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[6 - i]));
+
+	return res;
+}
+
+__m256 SecondApprox(__m256 t)
+{
+	static constexpr float P[] = {
+		-1.0550607f,
+		-0.93156487f,
+		-0.37120903f,
+		-0.01570655f,
+		0.0014473839f,
+		-9.42589e-05f,
+		4.0561445e-06f,
+		-1.02992956e-07f,
+		1.1653037e-09f,
+	};
+
+	__m256 res = _mm256_set1_ps(P[8]);
+	for (size_t i = 0; i < 8; i++)
+		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[7 - i]));
+
+	return res;
+}
+
 __m256 GeneralWm1(__m256 x)
 {
 	// === Constants ===
@@ -96,6 +141,7 @@ __m256 GeneralWm1(__m256 x)
 	__m256 t = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
 	t = _mm256_sqrt_ps(_mm256_fmadd_ps(t, negTwo, negTwo));
 
+#if 0
 	static constexpr float P[] = {
 		-0.9999492423798767,
 		-1.0002532686721437,
@@ -117,11 +163,31 @@ __m256 GeneralWm1(__m256 x)
 		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[11 - i]));
 
 	return res;
+#else
+	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(-0.00000224905596703), LESS);
+	uint32_t useFirstMask = _mm256_movemask_ps(useFirst);
+
+	__m256 result;
+	switch (useFirstMask)
+	{
+	case 0b00000000: [[likely]]
+					   result = SecondApprox(t);
+					   break;
+	case 0b11111111: [[unlikely]]
+					   result = FirstApprox(t);
+					   break;
+	default: [[unlikely]]
+			   result = _mm256_blendv_ps(SecondApprox(t), FirstApprox(t), useFirst);
+			   break;
+	}
+
+	return result;
+#endif
 }
 
 __m256 MuirWm1(__m256 x)
 {
-	__m256 isNearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.277689970954), LESS);
+	__m256 isNearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.307278738601), LESS);
 	uint32_t nearBranchMask = _mm256_movemask_ps(isNearBranch);
 
 	__m256 result;

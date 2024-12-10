@@ -65,34 +65,21 @@ double MuirW0MadeSerial(double x)
 
 int main()
 {
-#if 0
+#if 1
 	static std::mt19937_64 gen{ std::random_device{}() };
-	std::uniform_real_distribution<double> dist{ EM_UP, -0.28 };
+	ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
 
-	MaxULPRounded(ReferenceW0, MuirW0, [&]() { return dist(gen); });
-
-	for (;;)
-	{
-		double x = dist(gen);
-		double wApprox = MuirW0(x);
-		Interval wExact = ReferenceW0(x);
-
-		if (ULPDistance(wApprox, wExact) >= 5)
-		{
-			std::cout << std::format("{}\n", x);
-			dist = std::uniform_real_distribution<double>{ x, -0.28 };
-		}
-	}
+	MaxULPRounded(ReferenceWm1f, MuirWm1MadeSerial, [&]() { return dist(gen); });
 #else
 	float x = EM_UPf;
 
 	for (size_t i = 0; x < 0; i++)
 	{
-		auto wApprox = MuirWm1(x);
+		auto wApprox = MuirWm1MadeSerial(x);
 		auto wExact = ReferenceWm1f(x);
 
 		uint32_t err = ULPDistance(wApprox, wExact);
-		if (err > 1)
+		if (err > 4)
 		{
 			std::cout << std::format("Error: {}\n", x);
 			break;

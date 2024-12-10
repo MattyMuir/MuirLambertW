@@ -6,6 +6,9 @@ include(GNUInstallDirs)
 # === Create Library ===
 add_library(MuirLambertW  "w0.cpp"   "wm1.cpp"   "wm1serial.cpp" "w0serial.cpp"  "wm1fserial.cpp"  "wm1f.cpp")
 
+find_package(sleef REQUIRED)
+target_link_libraries(MuirLambertW PUBLIC sleef::sleef)
+
 # === Feature Enables ===
 if (MUIRW_MSVC_STATIC_RUNTIME)
     set_property(TARGET MuirLambertW PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
