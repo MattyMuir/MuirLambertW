@@ -3,10 +3,6 @@
 
 #include <immintrin.h>
 
-#define __AVX__
-#define SLEEF_STATIC_LIBS
-#include <sleef.h>
-
 #define LESS 0x11
 #define BLEND_INT(a, b, mask) _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), mask))
 
@@ -141,29 +137,6 @@ __m256 GeneralWm1(__m256 x)
 	__m256 t = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
 	t = _mm256_sqrt_ps(_mm256_fmadd_ps(t, negTwo, negTwo));
 
-#if 0
-	static constexpr float P[] = {
-		-0.9999492423798767,
-		-1.0002532686721437,
-		-0.33279221980879625,
-		-0.028436955137531802,
-		0.004219360823001216,
-		-0.0005080457276522693,
-		4.65793262714409e-05,
-		-2.9923469210392722e-06,
-		1.1273454917460403e-07,
-		-6.441939908321432e-10,
-		-1.562062365956019e-10,
-		7.014581753864945e-12,
-		-1.0236004967997851e-13
-	};
-
-	__m256 res = _mm256_set1_ps(P[12]);
-	for (size_t i = 0; i < 12; i++)
-		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[11 - i]));
-
-	return res;
-#else
 	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(-0.00000224905596703), LESS);
 	uint32_t useFirstMask = _mm256_movemask_ps(useFirst);
 
@@ -182,7 +155,6 @@ __m256 GeneralWm1(__m256 x)
 	}
 
 	return result;
-#endif
 }
 
 __m256 MuirWm1(__m256 x)
