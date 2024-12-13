@@ -52,10 +52,13 @@ public:
 	template <typename Engine>
 	Ty operator()(Engine& eng)
 	{
+		// Generate branch seed if needed
 		uint64_t branch;
+		if (favorEndpoints || rangeType == RangeType::PosNeg)
+			branch = eng();
+
 		if (favorEndpoints)
 		{
-			branch = eng();
 			if (branch < (uint64_t)((double)Engine::max() * 0.05))
 				return min;
 			if (branch > (uint64_t)((double)Engine::max() * 0.95))
@@ -67,11 +70,7 @@ public:
 		case RangeType::JustNeg:
 			return -negDist(eng);
 		case RangeType::PosNeg:
-			if (!favorEndpoints)
-				branch = eng();
-			if (branch % 2)
-				return -negDist(eng);
-			return posDist(eng);
+			return (branch % 2) ? -negDist(eng) : posDist(eng);
 		case RangeType::Zero:
 			return 0.0;
 		case RangeType::JustPos:

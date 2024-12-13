@@ -20,16 +20,17 @@ public:
 		else
 			logWidth = std::log1p((max - min) / min);
 
+		// Check if mean is needed
+		Ty expMidpoint = exp(logWidth / 2);
+		useMean = !std::isfinite(min * expMidpoint) || !std::isfinite(max / expMidpoint);
+		if (!useMean) return;
+
 		// Compute geometricMean
 		Ty meanMan = sqrt(minMan * maxMan);
 		int expSum = minExp + maxExp;
 		geometricMean = std::ldexp(meanMan, expSum / 2);
 		if (expSum % 2)
 			geometricMean *= (Ty)1.4142135623730950488;
-
-		// Check if mean is needed
-		Ty expMidpoint = exp(logWidth / 2);
-		useMean = !std::isfinite(min * expMidpoint) || !std::isfinite(max / expMidpoint);
 	}
 
 	Ty Min() const
@@ -55,7 +56,7 @@ public:
 	}
 
 protected:
-	Ty min, max, logWidth, geometricMean;
+	Ty min, max, logWidth, geometricMean = 0;
 	bool useMean;
 	std::uniform_real_distribution<Ty> dist;
 

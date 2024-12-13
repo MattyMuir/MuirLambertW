@@ -4,6 +4,8 @@
 #include <format>
 #include <chrono>
 
+#include <boost/math/special_functions/lambert_w.hpp>
+
 #include "ulp.h"
 #include "wrappers.h"
 #include "ReciprocalDistributionEx.h"
@@ -67,9 +69,9 @@ int main()
 {
 #if 1
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
+	ReciprocalDistributionEx<float> dist{ 7.34, INFINITY, false };
 
-	MaxULPRounded(ReferenceWm1f, MuirWm1MadeSerial, [&]() { return dist(gen); });
+	MaxULPRounded(ReferenceW0, MuirW0MadeSerial, [&]() { return dist(gen); });
 #else
 	float x = EM_UPf;
 

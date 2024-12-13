@@ -13,7 +13,7 @@
 #include <MuirLambertW.h>
 #include "others/FukushimaLambertW.h"
 #include "others/BarryLambertW.h"
-#include "boost/math/special_functions/lambert_w.hpp"
+#include <boost/math/special_functions/lambert_w.hpp>
 
 using Function1Df = float(*)(float);
 using SimdFunction1Df = __m256(*)(__m256);
@@ -77,7 +77,7 @@ int main()
 	static constexpr size_t ArrSize = 1'000'000;
 	static constexpr size_t Repeats = 30;
 	float binMin = -10;
-	float binMax = 2;
+	float binMax = 10;
 	float binWidth = 0.2;
 	// ==================
 
@@ -87,14 +87,14 @@ int main()
 	for (float min = binMin; min < binMax; min += binWidth)
 	{
 		float max = min + binWidth;
-		std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
+		std::vector<float> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
 		float boostTime = 0, muirTime = 0, muirSerialTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			boostTime += TimeFunction(boost::math::lambert_wm1<float>, src);
-			muirTime += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
-			muirSerialTime += TimeFunction([](float x) { return MuirWm1(x); }, src);
+			boostTime += TimeFunction(boost::math::lambert_w0<float>, src);
+			//muirTime += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
+			muirSerialTime += TimeFunction([](float x) { return MuirW0(x); }, src);
 		}
 
 		boostTime /= Repeats;

@@ -131,28 +131,26 @@ static inline __m256d FirstApprox(__m256d x)
 static inline __m256d SecondApprox(__m256d x)
 {
     static constexpr double P[] = {
-        64312.7454007891,
-        43264.12227598657,
-        20243.65384336377,
-        453.17656235798086,
-        1.0000432316050645
+        266.74662101711755,
+        180.72015154289477,
+        81.03709502548347,
+        0.9987349881680496
     };
     static constexpr double Q[] = {
-        104342.57917932322,
-        22499.368605590193,
-        460.93750724715477,
+        438.5489337661638,
+        87.11265453382124,
         1
     };
 
     __m256d logX = LogFast(x);
 
-    __m256d numer = _mm256_set1_pd(P[4]);
-    for (size_t i = 0; i < 4; i++)
-        numer = _mm256_fmadd_pd(numer, logX, _mm256_set1_pd(P[3 - i]));
-
-    __m256d denom = _mm256_set1_pd(Q[3]);
+    __m256d numer = _mm256_set1_pd(P[3]);
     for (size_t i = 0; i < 3; i++)
-        denom = _mm256_fmadd_pd(denom, logX, _mm256_set1_pd(Q[2 - i]));
+        numer = _mm256_fmadd_pd(numer, logX, _mm256_set1_pd(P[2 - i]));
+
+    __m256d denom = _mm256_set1_pd(Q[2]);
+    for (size_t i = 0; i < 2; i++)
+        denom = _mm256_fmadd_pd(denom, logX, _mm256_set1_pd(Q[1 - i]));
 
     __m256d approx = _mm256_div_pd(numer, denom);
     return approx;
