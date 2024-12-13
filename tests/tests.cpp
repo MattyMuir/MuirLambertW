@@ -69,9 +69,9 @@ int main()
 {
 #if 1
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ 7.34, INFINITY, false };
+	ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
 
-	MaxULPRounded(ReferenceW0, MuirW0MadeSerial, [&]() { return dist(gen); });
+	MaxULPRounded(ReferenceW0f, MuirW0, [&]() { return dist(gen); });
 #else
 	float x = EM_UPf;
 

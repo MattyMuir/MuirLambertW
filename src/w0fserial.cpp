@@ -4,23 +4,23 @@ static inline float FirstApproxW0(float x)
 {
 	static constexpr double P[] = {
 		0,
-		165.51561672164559,
-		1104.9153130867758,
-		2632.284078577963,
-		2689.464120405435,
-		1121.2923665114324,
-		153.3374641092571,
-		4.077322829553558
+		152.91909285006932,
+		1024.8955779609623,
+		2455.092024342446,
+		2528.414753137949,
+		1066.824695440063,
+		148.54000057530493,
+		4.0539143590175835
 	};
 
 	static constexpr double Q[] = {
-		165.51561558818844,
-		1270.4310030077481,
-		3654.442208397931,
-		4879.631928655197,
-		3045.0058891120098,
-		794.8712729472717,
-		67.22857835896016,
+		152.91909349763372,
+		1177.8147226529784,
+		3403.5283401899756,
+		4573.002542975176,
+		2878.913736848507,
+		761.147965396105,
+		65.5632478027466,
 		1
 	};
 
@@ -56,7 +56,7 @@ static inline float SecondApproxW0(float x)
 		1
 	};
 
-	double t = std::logf(x);
+	double t = log((double)x);
 
 	double numer = P[6];
 	for (size_t i = 0; i < 6; i++)
@@ -94,5 +94,6 @@ static inline float NearBranchW0(float x)
 
 float MuirW0(float x)
 {
-	return (x < -0.3f) ? NearBranchW0(x) : ((x < 7.38905609893f) ? FirstApproxW0(x) : SecondApproxW0(x));
+	//return SecondApproxW0(x);
+	return (x < -0.3f) ? NearBranchW0(x) : ((x < 6.9035267829895019531f) ? FirstApproxW0(x) : SecondApproxW0(x));
 }
