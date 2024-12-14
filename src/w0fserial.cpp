@@ -1,6 +1,29 @@
 #include <cmath>
 
-static inline float FirstApproxW0(float x)
+static inline float NearBranchW0(float x)
+{
+	static constexpr double e2 = 5.43656365691809;
+
+	static constexpr double P[] = {
+		-0.9999999781289544,
+		0.9999966080647236,
+		-0.33324531164727067,
+		0.15189891604646868,
+		-0.07530393941472714,
+		0.03290035332102544,
+		-0.008369773627101843
+	};
+
+	double p = sqrt(e2 * x + 2.0);
+
+	double res = P[6];
+	for (size_t i = 0; i < 6; i++)
+		res = res * p + P[5 - i];
+
+	return res;
+}
+
+static inline float FirstApprox(float x)
 {
 	static constexpr double P[] = {
 		0,
@@ -35,7 +58,7 @@ static inline float FirstApproxW0(float x)
 	return numer / denom;
 }
 
-static inline float SecondApproxW0(float x)
+static inline float SecondApprox(float x)
 {
 	static constexpr double P[] = {
 		245182.20097823755,
@@ -69,31 +92,7 @@ static inline float SecondApproxW0(float x)
 	return numer / denom;
 }
 
-static inline float NearBranchW0(float x)
-{
-	static constexpr double e2 = 5.43656365691809;
-
-	static constexpr double P[] = {
-		-0.9999999781289544,
-		0.9999966080647236,
-		-0.33324531164727067,
-		0.15189891604646868,
-		-0.07530393941472714,
-		0.03290035332102544,
-		-0.008369773627101843
-	};
-
-	double p = sqrt(e2 * x + 2.0);
-
-	double res = P[6];
-	for (size_t i = 0; i < 6; i++)
-		res = res * p + P[5 - i];
-
-	return res;
-}
-
 float MuirW0(float x)
 {
-	//return SecondApproxW0(x);
-	return (x < -0.3f) ? NearBranchW0(x) : ((x < 6.9035267829895019531f) ? FirstApproxW0(x) : SecondApproxW0(x));
+	return (x < -0.3f) ? NearBranchW0(x) : ((x < 6.9035267829895019531f) ? FirstApprox(x) : SecondApprox(x));
 }

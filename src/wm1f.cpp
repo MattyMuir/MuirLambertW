@@ -6,7 +6,7 @@
 #define LESS 0x11
 #define BLEND_INT(a, b, mask) _mm256_castps_si256(_mm256_blendv_ps(_mm256_castsi256_ps(a), _mm256_castsi256_ps(b), mask))
 
-__m256 LogAccurate(__m256 x)
+static inline __m256 LogAccurate(__m256 x)
 {
 	// === Constants ===
 	__m256 one = _mm256_set1_ps(1.0f);
@@ -51,14 +51,14 @@ __m256 LogAccurate(__m256 x)
 	return _mm256_fmadd_ps(t, approx, _mm256_mul_ps(ln2, _mm256_cvtepi32_ps(exp)));
 }
 
-__m256 AddEm(__m256 x)
+static inline __m256 AddEm(__m256 x)
 {
 	const __m256 emHigh = _mm256_set1_ps(0.36787945f);
 	const __m256 emLow = _mm256_set1_ps(-9.149756e-09f);
 	return _mm256_add_ps(_mm256_add_ps(x, emHigh), emLow);
 }
 
-__m256 NearBranchWm1(__m256 x)
+static inline __m256 NearBranchWm1(__m256 x)
 {
 	// === Constants ===
 	__m256 rt2e = _mm256_set1_ps(2.331644f);
@@ -86,7 +86,7 @@ __m256 NearBranchWm1(__m256 x)
 	return res;
 }
 
-__m256 FirstApprox(__m256 t)
+static inline __m256 FirstApprox(__m256 t)
 {
 	static constexpr float P[] = {
 		-0.9999947f,
@@ -106,7 +106,7 @@ __m256 FirstApprox(__m256 t)
 	return res;
 }
 
-__m256 SecondApprox(__m256 t)
+static inline __m256 SecondApprox(__m256 t)
 {
 	static constexpr float P[] = {
 		-1.0550607f,
@@ -127,7 +127,7 @@ __m256 SecondApprox(__m256 t)
 	return res;
 }
 
-__m256 GeneralWm1(__m256 x)
+static inline __m256 GeneralWm1(__m256 x)
 {
 	// === Constants ===
 	__m256 negTwo = _mm256_set1_ps(-2.0f);
@@ -144,14 +144,14 @@ __m256 GeneralWm1(__m256 x)
 	switch (useFirstMask)
 	{
 	case 0b00000000: [[likely]]
-					   result = SecondApprox(t);
-					   break;
+		result = SecondApprox(t);
+		break;
 	case 0b11111111: [[unlikely]]
-					   result = FirstApprox(t);
-					   break;
+		result = FirstApprox(t);
+		break;
 	default: [[unlikely]]
-			   result = _mm256_blendv_ps(SecondApprox(t), FirstApprox(t), useFirst);
-			   break;
+		result = _mm256_blendv_ps(SecondApprox(t), FirstApprox(t), useFirst);
+		break;
 	}
 
 	return result;
@@ -166,14 +166,14 @@ __m256 MuirWm1(__m256 x)
 	switch (nearBranchMask)
 	{
 	case 0b00000000: [[likely]]
-				   result = GeneralWm1(x);
-				   break;
+		result = GeneralWm1(x);
+		break;
 	case 0b11111111: [[unlikely]]
-				   result = NearBranchWm1(x);
-				   break;
+		result = NearBranchWm1(x);
+		break;
 	default: [[unlikely]]
-			   result = _mm256_blendv_ps(GeneralWm1(x), NearBranchWm1(x), isNearBranch);
-			   break;
+		result = _mm256_blendv_ps(GeneralWm1(x), NearBranchWm1(x), isNearBranch);
+		break;
 	}
 
 	return result;

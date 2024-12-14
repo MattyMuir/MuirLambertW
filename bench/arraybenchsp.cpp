@@ -93,7 +93,7 @@ int main()
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
 			boostTime += TimeFunction(boost::math::lambert_w0<float>, src);
-			//muirTime += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
+			muirTime += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
 			muirSerialTime += TimeFunction([](float x) { return MuirW0(x); }, src);
 		}
 
@@ -101,7 +101,7 @@ int main()
 		muirTime /= Repeats;
 		muirSerialTime /= Repeats;
 
-		file << std::format("{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, boostTime, muirTime, muirSerialTime);
+		file << std::format("{:.1f},{:.1f},{:.10f},{:.10f},{:.10f}\n", min, max, boostTime, muirTime, muirSerialTime);
 		std::cout << min << " - " << max << '\n';
 	}
 }
