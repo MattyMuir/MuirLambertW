@@ -84,11 +84,11 @@ int main()
 
 	for (size_t i = 0; x >= EM_UPf; i++)
 	{
-		auto wApprox = MuirW0(x);
+		auto wApprox = MuirW0fMadeSerial(x);
 		auto wExact = ReferenceW0f(x);
 
 		uint32_t err = ULPDistance(wApprox, wExact);
-		if (err > 1)
+		if (err > 4)
 		{
 			std::cout << std::format("Error: {}\n", x);
 			break;

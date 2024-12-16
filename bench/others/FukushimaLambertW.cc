@@ -32,7 +32,7 @@
 
 using namespace std;
 
-// NOLINTBEGIN(performance-avoid-endl)
+// NOLINTBEGIN
 namespace Fukushima {
 
 double
@@ -342,4 +342,4 @@ line1:
 }
 
 }
-// NOLINTEND(performance-avoid-endl)
+// NOLINTEND

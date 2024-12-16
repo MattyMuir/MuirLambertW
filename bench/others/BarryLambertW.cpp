@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 
+// NOLINTBEGIN
 double BarryLambertW(int64_t branch, double x)
 {
     double an2;
@@ -162,3 +163,4 @@ double BarryLambertWm1(double x)
 {
     return BarryLambertW(-1, x);
 }
+// NOLINTEND
