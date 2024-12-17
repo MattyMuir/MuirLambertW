@@ -3,7 +3,6 @@
 
 #define TIMER_NPRINT
 #include "Timer.h"
-#include "../tests/ReciprocalDistributionEx.h"
 
 #include "others/FukushimaLambertW.h"
 #include "others/BarryLambertW.h"
