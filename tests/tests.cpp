@@ -51,7 +51,25 @@ float ExpMapWm1(float x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
 
-	MaxULPRounded(ReferenceWm1f, MakeSerial<float, MuirWm1>, [&]() { return dist(gen); }, 0);
+#if 1
+	ReciprocalDistributionEx<double> dist{ EM_UP, 0, false };
+	MaxULPRounded(ReferenceW0, [](double x) { return MuirW0(x); }, [&]() { return dist(gen); }, 0);
+#else
+	std::uniform_real_distribution<double> dist{ EM_UP, -0.2 };
+
+	for (;;)
+	{
+		double x = dist(gen);
+
+		auto approx = MuirW0(x);
+		auto exact = ReferenceW0(x);
+
+		if (ULPDistance(approx, exact) > 4)
+		{
+			dist = std::uniform_real_distribution<double>{ x, -0.2 };
+			std::cout << std::format("{}\n", x);
+		}
+	}
+#endif
 }

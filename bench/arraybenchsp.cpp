@@ -78,7 +78,7 @@ int main()
 	static constexpr size_t Repeats = 30;
 	float binMin = -10;
 	float binMax = 10;
-	float binWidth = 0.2;
+	float binWidth = 0.5;
 	// ==================
 
 	std::ofstream file{ "arraybench.csv" };
@@ -87,15 +87,15 @@ int main()
 	for (float min = binMin; min < binMax; min += binWidth)
 	{
 		float max = min + binWidth;
-		std::vector<float> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
+		std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
 		float boostTime = 0, muirTime = 0, muirTimev2 = 0, muirSerialTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			boostTime += TimeFunction(boost::math::lambert_w0<float>, src);
-			muirTime += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
-			muirTimev2 += TimeFunction([](__m256 x) { return MuirW0v2(x); }, src);
-			muirSerialTime += TimeFunction([](float x) { return MuirW0(x); }, src);
+			boostTime += TimeFunction(boost::math::lambert_wm1<float>, src);
+			muirTime += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
+			//muirTimev2 += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
+			muirSerialTime += TimeFunction([](float x) { return MuirWm1(x); }, src);
 		}
 
 		boostTime /= Repeats;

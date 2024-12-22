@@ -10,19 +10,18 @@ static inline double FirstApprox(double x)
 
     static constexpr double P[] = {
         0,
-        28.81244221654313,
-        131.14615617307527,
-        172.3834180355456,
-        62.332230968272896,
-        3.6088782677342017
+        1.90672114624406,
+        8.128607188367015,
+        9.353551895034446,
+        2.328717384810457,
+        0.02574163263511813
     };
 
     static constexpr double Q[] = {
-        28.813739177487342,
-        159.9633664467659,
-        289.069078387009,
-        188.23555138648206,
-        35.16238622673435,
+        1.9068870342309603,
+        10.0360068543767,
+        16.522152695631256,
+        8.873280807877627,
         1
     };
 
@@ -30,9 +29,9 @@ static inline double FirstApprox(double x)
     for (size_t i = 0; i < 5; i++)
         numer = numer * x + P[4 - i];
 
-    double denom = Q[5];
-    for (size_t i = 0; i < 5; i++)
-        denom = denom * x + Q[4 - i];
+    double denom = Q[4];
+    for (size_t i = 0; i < 4; i++)
+        denom = denom * x + Q[3 - i];
 
     return numer / denom;
 }
@@ -40,28 +39,26 @@ static inline double FirstApprox(double x)
 static inline double SecondApprox(double x)
 {
     static constexpr double P[] = {
-        64312.7454007891,
-        43264.12227598657,
-        20243.65384336377,
-        453.17656235798086,
-        1.0000432316050645
+        266.74662101711755,
+        180.72015154289477,
+        81.03709502548347,
+        0.9987349881680496
     };
     static constexpr double Q[] = {
-        104342.57917932322,
-        22499.368605590193,
-        460.93750724715477,
+        438.5489337661638,
+        87.11265453382124,
         1
     };
 
     double logX = log(x);
 
-    double numer = P[4];
-    for (size_t i = 0; i < 4; i++)
-        numer = numer * logX + P[3 - i];
-
-    double denom = Q[3];
+    double numer = P[3];
     for (size_t i = 0; i < 3; i++)
-        denom = denom * logX + Q[2 - i];
+        numer = numer * logX + P[2 - i];
+
+    double denom = Q[2];
+    for (size_t i = 0; i < 2; i++)
+        denom = denom * logX + Q[1 - i];
 
     double approx = numer / denom;
     return approx;
@@ -94,18 +91,18 @@ static inline double NearBranchSeries(double p)
 {
     static constexpr double P[] = {
         -1.0,
-        0.999999999999952,
-        -0.3333333333272104,
-        0.15277777746385043,
-        -0.07962962100934082,
-        0.04450217060974618,
-        -0.02598313708983362,
-        0.015623864373809608,
-        -0.009555681655574338,
-        0.0057905732001774755,
-        -0.0032366081259528625,
-        0.0014204580219827356,
-        -0.00034378172909336254
+        0.999999999999971,
+        -0.3333333333290947,
+        0.1527777775369985,
+        -0.07962962252727342,
+        0.04450218977764427,
+        -0.025983294377123514,
+        0.015624730774750031,
+        -0.009558915212389768,
+        0.005798644499473038,
+        -0.0032495150699457884,
+        0.0014324144431266657,
+        -0.00034866137251673187
     };
 
     // Evaluate polynomial using Horner's Method
@@ -129,5 +126,5 @@ double MuirW0(double x)
     if (x == 0 || x == std::numeric_limits<double>::infinity())
         return x;
 
-    return (x < -0.34) ? NearBranchW0(x) : GeneralW0(x);
+    return (x < -0.342) ? NearBranchW0(x) : GeneralW0(x);
 }

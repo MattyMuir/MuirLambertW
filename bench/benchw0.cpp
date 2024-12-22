@@ -5,22 +5,24 @@
 #include "Timer.h"
 
 #include "others/FukushimaLambertW.h"
+#include "others/VebericLambertW.h"
 #include "others/BarryLambertW.h"
 #include "boost/math/special_functions/lambert_w.hpp"
 #include "MuirLambertW.h"
 
-#define BENCH_FUKUSHIMA 0
-#define BENCH_BARRY 0
-#define BENCH_BOOST 0
-#define BENCH_MUIR_SERIAL 0
+#define BENCH_VEBERIC 1
+#define BENCH_FUKUSHIMA 1
+#define BENCH_BARRY 1
+#define BENCH_BOOST 1
+#define BENCH_MUIR_SERIAL 1
 #define BENCH_MUIR_SIMD 1
 
 #define BENCHMARK(func, name) _ += RunBenchmark(func, name)
 #define SIMD_BENCHMARK(func, name) _2 = _mm256_add_pd(_2, RunBenchmark(func, name))
 
 // === Parameters ===
-static constexpr size_t NumData = 1'000;
-static constexpr size_t NumIter = 100'000;
+static constexpr size_t NumData = 10;
+static constexpr size_t NumIter = 100000;
 // ==================
 
 using BenchFunction = double(*)(double);
@@ -31,7 +33,7 @@ std::vector<double> data;
 void PrepareData()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static std::uniform_real_distribution<double> dist{ 0, 5 };
+	static std::uniform_real_distribution<double> dist{ 1e10, 1e11 };
 
 	data.reserve(NumData);
 	for (size_t i = 0; i < NumData; i++)
@@ -48,7 +50,7 @@ double RunBenchmark(BenchFunction func, const char* name)
 			_ += func(data[d]);
 	t.Stop();
 
-	std::cout << std::format("{} took: {:.0f}ms\n", name, t.GetSeconds() * 1000);
+	std::cout << std::format("{} took: {:.3}ms\n", name, t.GetSeconds() * 1000);
 
 	return _;
 }
@@ -64,6 +66,10 @@ int main()
 
 	double _ = 0.0;
 	__m256d _2 = _mm256_setzero_pd();
+
+#if BENCH_VEBERIC
+	BENCHMARK(utl::LambertW<0>, "Veberic");
+#endif
 #if BENCH_FUKUSHIMA
 	BENCHMARK(Fukushima::LambertW0, "Fukushima");
 #endif

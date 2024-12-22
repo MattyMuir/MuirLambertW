@@ -17,14 +17,12 @@ static inline __m256d LogFast(__m256d x)
 {
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
-    __m256d dblMin = _mm256_set1_pd(std::numeric_limits<double>::min());
     __m256d denormScale = _mm256_set1_pd(4503599627370496.0);               // 2^52
     __m256d denormOffset = _mm256_set1_pd(36.043653389117156090);           // ln(2^52)
     // =================
 
     // Fix for denormalized values
-    __m256d isDenorm = _mm256_cmp_pd(x, dblMin, LESS);
-    x = _mm256_blendv_pd(x, _mm256_mul_pd(x, denormScale), isDenorm);
+    x = _mm256_mul_pd(x, denormScale);
 
     // Extract exponent
     __m256i punn = _mm256_castpd_si256(x);
@@ -49,7 +47,7 @@ static inline __m256d LogFast(__m256d x)
         approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[3 - i]));
 
     // Fix for denormalized values
-    approx = _mm256_blendv_pd(approx, _mm256_sub_pd(approx, denormOffset), isDenorm);
+    approx = _mm256_sub_pd(approx, denormOffset);
 
     return _mm256_fmadd_pd(exp, ln2, approx);
 }
