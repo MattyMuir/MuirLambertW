@@ -53,14 +53,14 @@ float ExpMapWm1(float x)
 
 int main()
 {
-	//static std::mt19937_64 gen{ std::random_device{}() };
+	static std::mt19937_64 gen{ std::random_device{}() };
 
-	freopen("err.csv", "w", stdout);
-	ULPHistogram(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, 0.0, 744.0, 5.0, ExpMapWm1, 100'000);
+	//freopen("err.csv", "w", stdout);
+	//ULPHistogram(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, 0.0, 744.0, 5.0, ExpMapWm1, 100'000);
 
 #if 1
-	//ReciprocalDistributionEx<double> dist{ -0.1, 0, false };
-	//MaxULPRounded(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, [&]() { return dist(gen); }, 0);
+	ReciprocalDistributionEx<double> dist{ EM_UP, 0, false };
+	MaxULPRounded(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, [&]() { return dist(gen); }, 0);
 #else
 	std::uniform_real_distribution<double> dist{ EM_UP, -0.2 };
 
