@@ -4,20 +4,20 @@ static inline double Approx(double x)
 {
     // === Constants ===
     static constexpr double P[] = {
-        0,
-        -5.415413805902706,
-        -2.787876451002007,
-        -0.4992978139443087
+        -3.8275093535321854,
+        -6.416670530095372,
+        -3.9438756505405625,
+        -0.9985968226777492
     };
-    static constexpr double Q = 5.410664283026123;
+    static constexpr double Q = 3.827222653404185;
     // =================
 
-    double t = sqrt(-2 - 2 * log(-x));
+    double t = sqrt(-1 - log(-x));
     double w = P[3];
     for (size_t i = 0; i < 3; i++)
         w = w * t + P[2 - i];
 
-    return w / (t + Q) - 1.0;
+    return w / (t + Q);
 }
 
 static inline double GeneralWm1(double x)
@@ -29,14 +29,7 @@ static inline double GeneralWm1(double x)
     static constexpr double smallScale = 4611686018427387904.0;     // 2^62
     static constexpr double smallOffset = 42.975125194716609184;    // ln(2^62)
 
-    bool isSmall = x > -1e-300;
-    if (isSmall)
-        x *= smallScale;
-    double zn = log(x / w);
-    if (isSmall)
-        zn -= smallOffset;
-    zn -= w;
-
+    double zn = (x > -1e-300) ? log(x * smallScale / w) - smallOffset - w : log(x / w) - w;
     double temp = 1.0 + w;
     double temp2 = temp + c23 * zn;
     temp2 = 2.0 * temp * temp2;
@@ -53,7 +46,7 @@ static inline double AddEm(double x)
     return (x + emHigh) + emLow;
 }
 
-static inline double NearBranchSeries(double p)
+static inline double NearBranchWm1(double x)
 {
     static constexpr double P[] = {
         -1,
@@ -72,20 +65,15 @@ static inline double NearBranchSeries(double p)
         -0.005427367255942878
     };
 
+    static constexpr double s2e = 2.331643981597124;
+    double p = sqrt(AddEm(x)) * s2e;
+
     // Evaluate polynomial using Horner's Method
     double value = P[13];
     for (size_t i = 0; i < 13; i++)
         value = value * p + P[12 - i];
 
     return value;
-}
-
-static inline double NearBranchWm1(double x)
-{
-    static constexpr double s2e = 2.331643981597124;
-    double p = sqrt(AddEm(x)) * s2e;
-
-    return NearBranchSeries(p);
 }
 
 double MuirWm1(double x)
