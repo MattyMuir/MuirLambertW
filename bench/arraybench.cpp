@@ -78,8 +78,8 @@ int main()
 	// === Parameters ===
 	static constexpr size_t ArrSize = 1'000;
 	static constexpr size_t Repeats = 100;
-	double binMin = -10;
-	double binMax = 100;
+	double binMin = -20;
+	double binMax = 30;
 	double binWidth = 0.5;
 	// ==================
 
@@ -89,19 +89,19 @@ int main()
 	for (double min = binMin; min < binMax; min += binWidth)
 	{
 		double max = min + binWidth;
-		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
+		std::vector<double> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
 		double barryTime = 0, vebericTime = 0, vebericOldTime = 0, fukushimaTime = 0, boostTime = 0, muirTime = 0, muirSerialTime = 0, muirSerialTimev2 = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
-			barryTime += TimeFunction(BarryLambertWm1, src);
-			vebericTime += TimeFunction(utl::LambertW<-1>, src);
-			vebericOldTime += TimeFunction(veberic_old::LambertW<-1>, src);
-			//fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
-			boostTime += TimeFunction(boost::math::lambert_wm1<double>, src);
-			muirTime += TimeFunction([](__m256d x) { return MuirWm1(x); }, src);
-			muirSerialTime += TimeFunction([](double x) { return MuirWm1(x); }, src);
-			muirSerialTimev2 += TimeFunction([](double x) { return MuirWm1v2(x); }, src);
+			barryTime += TimeFunction(BarryLambertW0, src);
+			vebericTime += TimeFunction(utl::LambertW<0>, src);
+			vebericOldTime += TimeFunction(veberic_old::LambertW<0>, src);
+			fukushimaTime += TimeFunction(Fukushima::LambertW0, src);
+			boostTime += TimeFunction(boost::math::lambert_w0<double>, src);
+			muirTime += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
+			muirSerialTime += TimeFunction([](double x) { return MuirW0(x); }, src);
+			//muirSerialTimev2 += TimeFunction([](double x) { return MuirW0v2(x); }, src);
 		}
 
 		barryTime /= Repeats;
