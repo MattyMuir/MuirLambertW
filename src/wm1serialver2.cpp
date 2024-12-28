@@ -365,7 +365,6 @@ static inline double NearBranchWm1(double x)
 	static constexpr double s2e = 2.331643981597124;
 	double p = sqrt(AddEm(x)) * s2e;
 
-	// Evaluate polynomial using Horner's Method
 	double value = P[15];
 	for (size_t i = 0; i < 15; i++)
 		value = value * p + P[14 - i];
