@@ -23,11 +23,10 @@ static inline __m256d LogFast(__m256d x)
 
     // Extract exponent
     __m256i punn = _mm256_castpd_si256(x);
-    __m256d exp = Epi64ToPd(_mm256_sub_epi64(_mm256_srli_epi64(punn, 52), _mm256_set1_epi64x(1023)));
+    __m256i exp = _mm256_sub_epi64(_mm256_srli_epi64(punn, 52), _mm256_set1_epi64x(1023));
 
     // Extract mantissa
-    punn = _mm256_and_si256(punn, _mm256_set1_epi64x(0x3FFFFFFFFFFFFFFF));
-    punn = _mm256_or_si256(punn, _mm256_set1_epi64x(0x3FF0000000000000));
+    punn = _mm256_sub_epi64(punn, _mm256_slli_epi64(exp, 52));
     __m256d mantissa = _mm256_castsi256_pd(punn);
 
     // Compute approximation
@@ -43,7 +42,7 @@ static inline __m256d LogFast(__m256d x)
     for (size_t i = 0; i < 4; i++)
         approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[3 - i]));
 
-    return _mm256_fmadd_pd(exp, ln2, approx);
+    return _mm256_fmadd_pd(Epi64ToPd(exp), ln2, approx);
 }
 
 static inline __m256d LogAccurate(__m256d x)

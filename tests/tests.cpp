@@ -62,9 +62,10 @@ float ExpMapWm1(float x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false };
+	static ReciprocalDistributionEx<double> dist{ -0.3, 0, false };
 
-	MaxULPRounded(ReferenceW0, [](double x) { return MuirW0(x); }, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceWm1, MakeSerial<double, MuirWm1>, []() { return dist(gen); }, 0);
+	//MaxULPRounded(ReferenceW0, MakeSerial<double, MuirW0>, []() { return dist(gen); }, 0);
 	//freopen("err.csv", "w", stdout);
 	//ULPHistogram(ReferenceW0, [](double x) { return MuirW0v2(x); }, -0.365, -0.05, 0.005, IdentityMap, 100'000);
 }

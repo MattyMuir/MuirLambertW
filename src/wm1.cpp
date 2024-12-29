@@ -18,7 +18,7 @@ static inline __m256d LogFast(__m256d x)
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
     __m256d denormScale = _mm256_set1_pd(4503599627370496.0);               // 2^52
-    __m256d denormOffset = _mm256_set1_pd(36.043653389117156090);           // ln(2^52)
+    static constexpr double denormOffset = 36.043653389117156090;           // ln(2^52)
     // =================
 
     // Fix for denormalized values
@@ -26,16 +26,15 @@ static inline __m256d LogFast(__m256d x)
 
     // Extract exponent
     __m256i punn = _mm256_castpd_si256(x);
-    __m256d exp = Epi64ToPd(_mm256_sub_epi64(_mm256_srli_epi64(punn, 52), _mm256_set1_epi64x(1023)));
+    __m256i exp = _mm256_sub_epi64(_mm256_srli_epi64(punn, 52), _mm256_set1_epi64x(1023));
 
     // Extract mantissa
-    punn = _mm256_and_si256(punn, _mm256_set1_epi64x(0x3FFFFFFFFFFFFFFF));
-    punn = _mm256_or_si256(punn, _mm256_set1_epi64x(0x3FF0000000000000));
+    punn = _mm256_sub_epi64(punn, _mm256_slli_epi64(exp, 52));
     __m256d mantissa = _mm256_castsi256_pd(punn);
 
     // Compute approximation
     static constexpr double P[] = {
-        -1.7289291561920494e+00,
+        -1.7289291561920494e+00 - denormOffset,
         2.78901155791566960e+00,
         -1.44093748876198707e+00,
         4.36015488686681152e-01,
@@ -46,10 +45,7 @@ static inline __m256d LogFast(__m256d x)
     for (size_t i = 0; i < 4; i++)
         approx = _mm256_fmadd_pd(approx, mantissa, _mm256_set1_pd(P[3 - i]));
 
-    // Fix for denormalized values
-    approx = _mm256_sub_pd(approx, denormOffset);
-
-    return _mm256_fmadd_pd(exp, ln2, approx);
+    return _mm256_fmadd_pd(Epi64ToPd(exp), ln2, approx);
 }
 
 static inline __m256d LogAccurate(__m256d x)
@@ -95,28 +91,26 @@ static inline __m256d LogAccurate(__m256d x)
 static inline __m256d Approx(__m256d x)
 {
     // === Constants ===
-    __m256d one = _mm256_set1_pd(1.0);
-    __m256d negTwo = _mm256_set1_pd(-2.0);
+    __m256d negOne = _mm256_set1_pd(-1.0);
     // =================
 
     static constexpr double P[] = {
-        0,
-        -5.415413805902706,
-        -2.787876451002007,
-        -0.4992978139443087
+        -3.836813614374928,
+        -6.420188447784658,
+        -3.950370152775716,
+        -0.9985569509992126
     };
 
     __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
-    __m256d t = _mm256_sqrt_pd(_mm256_fmadd_pd(logX, negTwo, negTwo));
+    __m256d t = _mm256_sqrt_pd(_mm256_fmadd_pd(logX, negOne, negOne));
 
     __m256d numer = _mm256_set1_pd(P[3]);
     for (size_t i = 0; i < 3; i++)
         numer = _mm256_fmadd_pd(numer, t, _mm256_set1_pd(P[2 - i]));
 
-    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(5.410664283026123));
-    __m256d approx = _mm256_sub_pd(_mm256_div_pd(numer, denom), one);
+    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(3.8333830077075923));
 
-    return approx;
+    return _mm256_div_pd(numer, denom);
 }
 
 static inline __m256d GeneralWm1(__m256d x)
