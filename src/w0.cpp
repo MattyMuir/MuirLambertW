@@ -197,7 +197,6 @@ static inline __m256d AddEm(__m256d x)
 {
     __m256d emHigh = _mm256_set1_pd(0.36787944117144232160);
     __m256d emLow = _mm256_set1_pd(-1.2428753672788363168e-17);
-
     return _mm256_add_pd(_mm256_add_pd(x, emHigh), emLow);
 }
 

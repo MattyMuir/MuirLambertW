@@ -12,6 +12,7 @@
 
 #include "../bench/others/BarryLambertW.h"
 #include "../bench/others/VebericLambertW.h"
+#include "../bench/others/FukushimaLambertW.h"
 
 #include "constants.h"
 
@@ -59,13 +60,33 @@ float ExpMapWm1(float x)
 	return EM_UP / (1 + exp(x));
 }
 
+template <typename Ty>
+using MapTy = Ty(*)(Ty);
+
+template <typename Ty>
+std::pair<std::vector<Ty>, std::vector<UIntType<Ty>>> ULPHistogramVals(auto referenceFunc, auto approxFunc, Ty min, Ty max, Ty step, MapTy<Ty> map = IdentityMap, size_t iter = 10'000)
+{
+	static std::mt19937_64 gen{ std::random_device{}() };
+
+	std::vector<Ty> xs;
+	std::vector<UIntType<Ty>> errs;
+	for (Ty low = min; low < max; low += step)
+	{
+		Ty high = low + step;
+		std::uniform_real_distribution<Ty> dist{ low, high };
+
+		UIntType<Ty> err = MaxULPRounded(referenceFunc, approxFunc, [&]() { return map(dist(gen)); }, iter);
+		xs.push_back(std::midpoint(low, high));
+		errs.push_back(err);
+	}
+
+	return { xs, errs };
+}
+
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ -0.3, 0, false };
+	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false };
 
-	MaxULPRounded(ReferenceWm1, MakeSerial<double, MuirWm1>, []() { return dist(gen); }, 0);
-	//MaxULPRounded(ReferenceW0, MakeSerial<double, MuirW0>, []() { return dist(gen); }, 0);
-	//freopen("err.csv", "w", stdout);
-	//ULPHistogram(ReferenceW0, [](double x) { return MuirW0v2(x); }, -0.365, -0.05, 0.005, IdentityMap, 100'000);
+	MaxULPRounded(ReferenceW0, [](double x) { return MuirW0(x); }, [](){ return dist(gen); }, 0);
 }

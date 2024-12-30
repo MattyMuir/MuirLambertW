@@ -66,7 +66,6 @@ static inline double Approx2(double x)
 // (-0.2, -0.15]
 static inline double Approx3(double x)
 {
-#if 1
     static constexpr double P[] = {
         -2.00000016065932383e-01L,
         -2.43056034919570645e+00L,
@@ -93,46 +92,26 @@ static inline double Approx3(double x)
         denom = denom * x + Q[3 - i];
 
     return x * (numer / denom + 1.2);
-#else
-    static constexpr double P[] = {
-        -0.9994824884382225,
-        0.9959633394155629,
-        -0.31942619075859574,
-        0.12480107297267266,
-        -0.042764651323137656,
-        0.010109091252480986,
-        -0.0011611261073019958
-    };
-
-    double p = sqrt(x * 5.4365636569180904707 + 2);
-
-    double value = P[6];
-    for (size_t i = 0; i < 6; i++)
-        value = value * p + P[5 - i];
-
-    return value;
-#endif
 }
 
 // (-0.15, -0.1]
 static inline double Approx4(double x)
 {
-#if 1
     static constexpr double P[] = {
         -1.00000000204783974e-01L,
-    -1.68062750181694521e+00L,
-    -6.93814797096171538e+00L,
-    -1.03738544312384574e+01L,
-    -4.96135934908649410e+00L,
-    -8.96693172288665332e-02L
+        -1.68062750181694521e+00L,
+        -6.93814797096171538e+00L,
+        -1.03738544312384574e+01L,
+        -4.96135934908649410e+00L,
+        -8.96693172288665332e-02L
     };
 
     static constexpr double Q[] = {
         1.00000000000000000e+00L,
-    6.80627486726167287e+00L,
-    1.63187261601690365e+01L,
-    1.59786488758684961e+01L,
-    5.18962689407092801e+00L
+        6.80627486726167287e+00L,
+        1.63187261601690365e+01L,
+        1.59786488758684961e+01L,
+        5.18962689407092801e+00L
     };
 
     double numer = P[5];
@@ -144,25 +123,6 @@ static inline double Approx4(double x)
         denom = denom * x + Q[3 - i];
 
     return x * (numer / denom + 1.1);
-#else
-    static constexpr double P[] = {
-        -0.9994824884382225,
-        0.9959633394155629,
-        -0.31942619075859574,
-        0.12480107297267266,
-        -0.042764651323137656,
-        0.010109091252480986,
-        -0.0011611261073019958
-    };
-
-    double p = sqrt(x * 5.4365636569180904707 + 2);
-
-    double value = P[6];
-    for (size_t i = 0; i < 6; i++)
-        value = value * p + P[5 - i];
-
-    return value;
-#endif
 }
 
 // (-0.1, -0.051)
