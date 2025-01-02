@@ -45,6 +45,11 @@ double ExpMapW0(double x)
 	return EM_UP + exp(x);
 }
 
+float ExpMapW0(float x)
+{
+	return EM_UPf + exp(x);
+}
+
 double ExpMapWm1(double x)
 {
 	static constexpr double EM_UP = -0.3678794411714423;
@@ -86,7 +91,24 @@ std::pair<std::vector<Ty>, std::vector<UIntType<Ty>>> ULPHistogramVals(auto refe
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false };
+	ReciprocalDistributionEx<float> dist{ EM_UPf, 1e35, false };
 
-	MaxULPRounded(ReferenceW0, [](double x) { return MuirW0(x); }, [](){ return dist(gen); }, 0);
+	//MaxULPRounded(ReferenceW0f, MakeSerial<float, MuirW0v2>, [&]() { return dist(gen); }, 0);
+
+	ULPHistogram(ReferenceW0f, MakeSerial<float, MuirW0v2>, 87.0f, 88.72f, 0.02f, ExpMapW0, 100'000);
+
+#if 0
+	for (;;)
+	{
+		float x = dist(gen);
+
+		auto exact = ReferenceW0f(x);
+		float approx = MakeSerial<float, MuirW0v2>(x);
+		if (ULPDistance(approx, exact) > 4)
+		{
+			dist = std::uniform_real_distribution<float>{ x, 0 };
+			std::cout << std::format("{}\n", x);
+		}
+	}
+#endif
 }
