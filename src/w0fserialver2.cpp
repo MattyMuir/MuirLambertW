@@ -11,32 +11,24 @@ static inline float AddEm(float x)
 // (-0.3578794411714423215955237701, -0.27]
 static inline float Approx1(float x)
 {
-    static constexpr float Y = 1.220928431e-01f;
     static constexpr float P[] = {
-        -1.221787446e-01f,
-        -6.816155875e+00f,
-        7.144582035e+01f,
-        1.128444390e+03f,
-    };
-    static constexpr float Q[] = {
-        1.000000000e+00f,
-        6.480326790e+01f,
-        1.869145243e+02f,
-        -1.361804274e+03f,
-        1.117826726e+03f,
+        -0.9999900179300805f,
+        0.999825992034222f,
+        -0.3320510417108332f,
+        0.1475469965715199f,
+        -0.06661836087728089f,
+        0.023903508735882057f,
+        -0.004588270097285815f
     };
 
-    float d = AddEm(x);
+    static constexpr float s2e = 2.331644f;
+    float p = sqrtf(AddEm(x)) * s2e;
 
-    float numer = P[3];
-    for (size_t i = 0; i < 3; i++)
-        numer = numer * d + P[2 - i];
+    float value = P[6];
+    for (size_t i = 0; i < 6; i++)
+        value = value * p + P[5 - i];
 
-    float denom = Q[4];
-    for (size_t i = 0; i < 4; i++)
-        denom = denom * d + Q[3 - i];
-
-    return -d / (Y + numer / denom);
+    return value;
 }
 
 // (-0.27, -0.051)
@@ -70,17 +62,21 @@ static inline float Approx2(float x)
 // [-0.051, 0.05]
 static inline float Approx3(float x)
 {
-    float result =
-        x * (1 - // j1 x^1 term = 1
-        x * (1 -  // j2 x^2 term = -1
-        x * (static_cast<float>(3uLL) / 2uLL - // 3/2 // j3 x^3 term = 1.5.
-        x * (2.6666666666666666667F -  // 8/3 // j4
-        x * (5.2083333333333333333F - // -125/24 // j5
-        x * (10.8F - // j6
-        x * (23.343055555555555556F - // j7
-        x * (52.012698412698412698F - // j8
-        x * 118.62522321428571429F)))))))); // j9
-    return result;
+    static constexpr float P[] = {
+        0.0f,
+        1.0f,
+        -1.0000000424879305f,
+        1.499951592926675f,
+        -2.666387307065152f,
+        5.283832465824341f,
+        -11.050509163760704f
+    };
+
+    float numer = P[6];
+    for (size_t i = 0; i < 6; i++)
+        numer = numer * x + P[5 - i];
+
+    return numer;
 }
 
 // (0.05, 0.5)
@@ -256,7 +252,7 @@ static inline float Approx9(float x)
     return t + Y + numer / denom;
 }
 
-// [7.896296e+13, flt_max)
+// [7.896296e+13, FLT_MAX)
 static inline float Approx10(float x)
 {
     static constexpr float Y = -4.012863159e+00f;

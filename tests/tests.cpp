@@ -91,7 +91,7 @@ std::pair<std::vector<Ty>, std::vector<UIntType<Ty>>> ULPHistogramVals(auto refe
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
+	ReciprocalDistributionEx<float> dist{ -0.051, 0.051, false };
 
 	MaxULPRounded(ReferenceW0f, [](float x) { return MuirW0v2(x); }, [&]() { return dist(gen); }, 0);
 }
