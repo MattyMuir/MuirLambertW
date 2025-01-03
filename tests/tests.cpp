@@ -91,24 +91,7 @@ std::pair<std::vector<Ty>, std::vector<UIntType<Ty>>> ULPHistogramVals(auto refe
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	ReciprocalDistributionEx<float> dist{ EM_UPf, 1e35, false };
+	ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
 
-	//MaxULPRounded(ReferenceW0f, MakeSerial<float, MuirW0v2>, [&]() { return dist(gen); }, 0);
-
-	ULPHistogram(ReferenceW0f, MakeSerial<float, MuirW0v2>, 87.0f, 88.72f, 0.02f, ExpMapW0, 100'000);
-
-#if 0
-	for (;;)
-	{
-		float x = dist(gen);
-
-		auto exact = ReferenceW0f(x);
-		float approx = MakeSerial<float, MuirW0v2>(x);
-		if (ULPDistance(approx, exact) > 4)
-		{
-			dist = std::uniform_real_distribution<float>{ x, 0 };
-			std::cout << std::format("{}\n", x);
-		}
-	}
-#endif
+	MaxULPRounded(ReferenceW0f, [](float x) { return MuirW0v2(x); }, [&]() { return dist(gen); }, 0);
 }
