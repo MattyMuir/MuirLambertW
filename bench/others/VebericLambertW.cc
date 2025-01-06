@@ -17,6 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma clang diagnostic ignored "-Weverything"
 #include <cmath>
 #include "Horner.h"
 
@@ -38,7 +39,7 @@ using namespace std;
 #define Y7(d1, c12, d2, c23, d3, c34, d4, c45, d5, c56, d6, c67, d7) \
   Y6(d1, c12, d2, c23, Y2(d3, c34, d4), c45, d5, c56, d6, c67, d7)
 
-
+// NOLINTBEGIN
 namespace utl {
 
   class BranchPoint { };
@@ -334,3 +335,4 @@ namespace utl {
   template double LambertW<-1>(const double x);
 
 }
+// NOLINTEND

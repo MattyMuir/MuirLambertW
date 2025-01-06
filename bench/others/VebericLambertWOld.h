@@ -17,6 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma clang diagnostic ignored "-Weverything"
 #ifndef _LambertW_h_
 #define _LambertW_h_
 

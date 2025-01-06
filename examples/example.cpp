@@ -1,22 +1,50 @@
 #include <iostream>
 #include <format>
 
-#include "MuirLambertW.h"
+#include <ReferenceLambertW.h>
+#include <flttestlib.h>
+#include <MuirLambertW.h>
 
-void PrintPack(__m256d x)
+static constexpr float EM_UPf = -0.36787942f;
+static constexpr double EM_UP = -0.3678794411714423;
+
+Intervalf ReferenceW0f(float x) { static ReferenceWf evaluator; return evaluator.W0(x); }
+Intervalf ReferenceWm1f(float x) { static ReferenceWf evaluator; return evaluator.Wm1(x); }
+Interval ReferenceW0(double x) { static ReferenceW evaluator; return evaluator.W0(x); }
+Interval ReferenceWm1(double x) { static ReferenceW evaluator; return evaluator.Wm1(x); }
+
+float ExpMapW0(float x)
 {
-	double vals[4];
-	_mm256_storeu_pd(vals, x);
-	std::cout << std::format("[{}, {}, {}, {}]\n", vals[0], vals[1], vals[2], vals[3]);
+	return EM_UPf + exp(x);
+}
+
+float ExpMapWm1(float x)
+{
+	if (x < 88.7f)
+		return EM_UPf / (1 + expf(x));
+
+	return EM_UPf / (1 + exp(x - 14)) * 8.315287e-07;
+}
+
+double ExpMapW0(double x)
+{
+	return EM_UP + exp(x);
+}
+
+double ExpMapWm1(double x)
+{
+	if (x < 700)
+		return EM_UP / (1 + exp(x));
+
+	return EM_UP / (1 + exp(x - 62)) * 1.185064864233981e-27;
 }
 
 int main()
 {
-	__m256d x = _mm256_setr_pd(3, 4, 5, 6);
-	std::cout << "Input values: ";
-	PrintPack(x);
+	double x = -0.3018789705422863;
+	double approx = MuirW0(x);
+	auto exact = ReferenceW0(x);
 
-	__m256d res = MuirW0(x);
-	std::cout << "Results: ";
-	PrintPack(res);
+	uint64_t err = ULPDistance(approx, exact);
+	std::cout << err << '\n';
 }

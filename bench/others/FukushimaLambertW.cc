@@ -23,6 +23,7 @@
   transcendental function evaluations", J. Comp. Appl. Math. 244 (2013) 77-89.
 */
 
+#pragma clang diagnostic ignored "-Weverything"
 #include "FukushimaLambertW.h"
 #include <cmath>
 #include <limits>

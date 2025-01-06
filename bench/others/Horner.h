@@ -17,10 +17,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma clang diagnostic ignored "-Weverything"
 #ifndef _utl_Horner_h_
 #define _utl_Horner_h_
 
-
+// NOLINTBEGIN
 namespace utl {
 
   template<typename Float, class Tag, unsigned int order>
@@ -83,3 +84,4 @@ namespace utl {
 
 
 #endif
+// NOLINTEND

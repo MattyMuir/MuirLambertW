@@ -1,9 +1,11 @@
 #include <cfloat>
+#include <cmath>
 #include <cstdint>
 
 #include <immintrin.h>
 
 #define LESS 0x11
+#define EQUAL 0x0
 
 struct double8
 {
@@ -215,6 +217,10 @@ __m256 MuirW0(__m256 x)
 		result = _mm256_blendv_ps(GeneralW0(x), NearBranchW0(x), isNearBranch);
 		break;
 	}
+
+	// Fix infinity
+	__m256 infinity = _mm256_set1_ps(INFINITY);
+	result = _mm256_blendv_ps(result, infinity, _mm256_cmp_ps(x, infinity, EQUAL));
 
 	return result;
 }

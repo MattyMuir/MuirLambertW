@@ -83,29 +83,27 @@ int main()
 
 	std::ofstream file{ "arraybench.csv" };
 
-	file << "Min,Max,Boost,Muir,MuirV2,MuirSerial,MuirSerialV2\n";
+	file << "Min,Max,Boost,Muir,MuirV2,MuirSerial\n";
 	for (float min = binMin; min < binMax; min += binWidth)
 	{
 		float max = min + binWidth;
 		std::vector<float> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
-		float boostTime = 0, muirTime = 0, muirTimev2 = 0, muirSerialTime = 0, muirSerialTimev2 = 0;
+		float boostTime = 0, muirTime = 0, muirTimev2 = 0, muirSerialTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
 			boostTime += TimeFunction(boost::math::lambert_w0<float>, src);
 			muirTime += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
 			muirTimev2 += TimeFunction([](__m256 x) { return MuirW0v2(x); }, src);
 			muirSerialTime += TimeFunction([](float x) { return MuirW0(x); }, src);
-			muirSerialTimev2 += TimeFunction([](float x) { return MuirW0v2(x); }, src);
 		}
 
 		boostTime /= Repeats;
 		muirTime /= Repeats;
 		muirTimev2 /= Repeats;
 		muirSerialTime /= Repeats;
-		muirSerialTimev2 /= Repeats;
 
-		file << std::format("{:.1f},{:.1f},{:.10},{:.10},{:.10},{:.10},{:.10}\n", min, max, boostTime, muirTime, muirTimev2, muirSerialTime, muirSerialTimev2);
+		file << std::format("{:.1f},{:.1f},{:.10},{:.10},{:.10},{:.10}\n", min, max, boostTime, muirTime, muirTimev2, muirSerialTime);
 		std::cout << min << " - " << max << '\n';
 	}
 }

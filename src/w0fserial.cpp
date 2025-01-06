@@ -94,5 +94,6 @@ static inline float NearBranchW0(float x)
 
 float MuirW0(float x)
 {
-	return (x < -0.3f) ? NearBranchW0(x) : ((x < 6.9035267829895019531f) ? FirstApprox(x) : SecondApprox(x));
+	if (x == INFINITY) return INFINITY;
+	return (x < -0.3f) ? NearBranchW0(x) : ((x < 7.0f) ? FirstApprox(x) : SecondApprox(x));
 }

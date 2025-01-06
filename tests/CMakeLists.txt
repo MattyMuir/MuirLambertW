@@ -1,7 +1,7 @@
 # EXECUTABLE PROJECT - tests
 
 # === Create Executable ===
-add_executable(tests "tests.cpp"         "../bench/others/BarryLambertW.cpp" "../bench/others/FukushimaLambertW.cc"   "constants.h" "../bench/others/VebericLambertW.cc")
+add_executable(tests "tests.cpp")
 
 # === Libraries ===
 target_link_libraries(tests PUBLIC MuirLambertW)
