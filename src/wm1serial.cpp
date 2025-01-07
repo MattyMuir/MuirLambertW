@@ -1,82 +1,440 @@
 #include <cmath>
 
-static inline double Approx(double x)
+// [0.4, 0.79]
+static inline double Approx1(double t)
 {
-    // === Constants ===
-    static constexpr double P[] = {
-        -3.8275093535321854,
-        -6.416670530095372,
-        -3.9438756505405625,
-        -0.9985968226777492
-    };
-    static constexpr double Q = 3.827222653404185;
-    // =================
+	static constexpr double P[] = {
+		-0.9999999941229416,
+		-1.414213666694153,
+		-0.6666658409084293,
+		-0.07857125226020724,
+		0.01482632573225921,
+		-0.0013326922503326796,
+		-0.000438877944874127,
+		0.0002620093772182476,
+		-6.700663061738577e-05,
+		7.775177337397004e-06
+	};
 
-    double t = sqrt(-1 - log(-x));
-    double w = P[3];
-    for (size_t i = 0; i < 3; i++)
-        w = w * t + P[2 - i];
-
-    return w / (t + Q);
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
 }
 
-static inline double GeneralWm1(double x)
+// [0.79 - 1.22]
+static inline double Approx2(double t)
 {
-    double w = Approx(x);
+	static constexpr double P[] = {
+		-0.9999991052138872,
+		-1.4142228432466455,
+		-0.6666233526751946,
+		-0.0786872425299455,
+		0.015032421058479434,
+		-0.0015802818965254203,
+		-0.00023746305896627065,
+		0.00015487808233076116,
+		-3.31687051339452e-05,
+		2.937564905389504e-06
+	};
 
-    // === Fritsch Iteration ===
-    static constexpr double c23 = 2.0 / 3.0;
-    static constexpr double smallScale = 4611686018427387904.0;     // 2^62
-    static constexpr double smallOffset = 42.975125194716609184;    // ln(2^62)
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
 
-    double zn = (x > -1e-300) ? log(x * smallScale / w) - smallOffset - w : log(x / w) - w;
-    double temp = 1.0 + w;
-    double temp2 = temp + c23 * zn;
-    temp2 = 2.0 * temp * temp2;
-    w = w * (1.0 + (zn / temp) * (temp2 - zn) / (temp2 - 2.0 * zn));
+// [1.22 - 1.72]
+static inline double Approx3(double t)
+{
+	static constexpr double P[] = {
+		-0.9999837643007623,
+		-1.414330676006523,
+		-0.6662838511310054,
+		-0.07931600956592565,
+		0.015787732414707312,
+		-0.002190848517035432,
+		9.47697556114369e-05,
+		3.751635591470898e-05,
+		-8.74657331151851e-06,
+		6.570100158930688e-07
+	};
 
-    return w;
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [1.72 - 2.35]
+static inline double Approx4(double t)
+{
+	static constexpr double P[] = {
+		-0.9999000278350678,
+		-1.4147589111597965,
+		-0.6653039899082683,
+		-0.08063290032438236,
+		0.01693348860673771,
+		-0.002860128522528426,
+		0.00035724123731703837,
+		-2.9113773771046054e-05,
+		1.1866993772296217e-06,
+		-5.412129857849658e-09
+	};
+
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [2.35 - 3.18]
+static inline double Approx5(double t)
+{
+	static constexpr double P[] = {
+		-0.999850714771072,
+		-1.4149825109462812,
+		-0.6648633657862012,
+		-0.08113151291240682,
+		0.017292127123492998,
+		-0.003030678014864718,
+		0.0004109783316108222,
+		-3.994840432530897e-05,
+		2.456628039334284e-06,
+		-7.139831850730499e-08
+	};
+
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [3.18 - 4.05]
+static inline double Approx6(double t)
+{
+	static constexpr double P[] = {
+		-1.0012901826225655,
+		-1.4110383515930187,
+		-0.6696841902249538,
+		-0.07768098840432018,
+		0.0156980103566251,
+		-0.002537630564579498,
+		0.0003088729349054402,
+		-2.6294660971587267e-05,
+		1.3867535014945948e-06,
+		-3.396906279967354e-08
+	};
+
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [4.05 - 5.05]
+static inline double Approx7(double t)
+{
+	static constexpr double P[] = {
+		-1.0028916969770962,
+		-1.4076729621938682,
+		-0.672741253097402,
+		-0.07614042465009034,
+		0.015248605068640798,
+		-0.002472866003058362,
+		0.00031066276730793883,
+		-2.885095039558755e-05,
+		1.8549780819508655e-06,
+		-7.350622639721097e-08,
+		1.350099262465144e-09
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [5.05 - 6.23]
+static inline double Approx8(double t)
+{
+	static constexpr double P[] = {
+		-1.013212250947975,
+		-1.3875232838247968,
+		-0.6904990995106463,
+		-0.06683709935771869,
+		0.012039800898273311,
+		-0.0017115054392743082,
+		0.00018480562582133956,
+		-1.4538704182956257e-05,
+		7.834701297623202e-07,
+		-2.5818178192600248e-08,
+		3.9206335641645105e-10
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [6.23 - 7.64]
+static inline double Approx9(double t)
+{
+	static constexpr double P[] = {
+		-1.038199841859314,
+		-1.347795831945563,
+		-0.7190060276803912,
+		-0.05467911576117128,
+		0.008626730073946848,
+		-0.0010525178334139912,
+		9.618251854242105e-05,
+		-6.3418142801453205e-06,
+		2.844793008425453e-07,
+		-7.765514753832175e-09,
+		9.733410814867988e-11
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [7.64 - 9.34]
+static inline double Approx10(double t)
+{
+	static constexpr double P[] = {
+		-1.086569307966438,
+		-1.2849090746914886,
+		-0.7559038937183366,
+		-0.041812942640340495,
+		0.005674031698959109,
+		-0.0005865234875735947,
+		4.496494974136239e-05,
+		-2.4708015399370834e-06,
+		9.194718652804322e-08,
+		-2.0754649488513854e-09,
+		2.146072340884991e-11
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [9.34 - 11.42]
+static inline double Approx11(double t)
+{
+	static constexpr double P[] = {
+		-1.1671802393239774,
+		-1.19904203435459,
+		-0.7971804022429897,
+		-0.030021376851996937,
+		0.0034571432507435234,
+		-0.00029991645298811794,
+		1.9161242136271464e-05,
+		-8.733883838774039e-07,
+		2.6875017979620407e-08,
+		-5.004839112875596e-10,
+		4.2625711520480955e-12
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [11.42 - 13.98]
+static inline double Approx12(double t)
+{
+	static constexpr double P[] = {
+		-1.3684016349998525,
+		-1.0299502440550017,
+		-0.8613670517877131,
+		-0.015524906734856384,
+		0.0012996187836371727,
+		-7.87831578320482e-05,
+		3.3526537683325287e-06,
+		-9.49853715781347e-08,
+		1.6096905444416979e-09,
+		-1.2353735397314039e-11
+	};
+
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [13.98 - 17.18]
+static inline double Approx13(double t)
+{
+	static constexpr double P[] = {
+		-1.555380238870257,
+		-0.909839477001033,
+		-0.8957578664454909,
+		-0.009764262966383427,
+		0.0006775228248998383,
+		-3.386913807490711e-05,
+		1.1848245564772124e-06,
+		-2.7537600442056433e-08,
+		3.8230200805706366e-10,
+		-2.4011711339170306e-12
+	};
+
+	double res = P[9];
+	for (size_t i = 0; i < 9; i++)
+		res = res * t + P[8 - i];
+	return res;
+}
+
+// [17.18 - 21.22]
+static inline double Approx14(double t)
+{
+	static constexpr double P[] = {
+		-1.6677047157193747,
+		-0.8512494500185794,
+		-0.9092492377655726,
+		-0.007972609631411205,
+		0.0005275909209376941,
+		-2.581572923989239e-05,
+		9.196151469443577e-07,
+		-2.319634157046027e-08,
+		3.929653138393237e-10,
+		-4.014192190709776e-12,
+		1.8703063650536792e-14
+	};
+
+	double res = P[10];
+	for (size_t i = 0; i < 10; i++)
+		res = res * t + P[9 - i];
+	return res;
+}
+
+// [21.22 - 24.5]
+static inline double Approx15(double t)
+{
+	static constexpr double P[] = {
+		-2.183000555560201,
+		-0.6235321806288036,
+		-0.9547298547577493,
+		-0.0025638003186966114,
+		0.00010322697880102514,
+		-2.85424698746517e-06,
+		5.155939800133333e-08,
+		-5.485961828198585e-10,
+		2.6105125525759856e-12
+	};
+
+	double res = P[8];
+	for (size_t i = 0; i < 8; i++)
+		res = res * t + P[7 - i];
+	return res;
+}
+
+// [24.5 - 27.26]
+static inline double Approx16(double t)
+{
+	static constexpr double P[] = {
+		-2.5717293698125787,
+		-0.499417770415564,
+		-0.9720913792765452,
+		-0.001174002350612326,
+		3.358763511519555e-05,
+		-6.17492213689646e-07,
+		6.585268393986611e-09,
+		-3.100380973930105e-11
+	};
+
+	double res = P[7];
+	for (size_t i = 0; i < 7; i++)
+		res = res * t + P[6 - i];
+	return res;
 }
 
 static inline double AddEm(double x)
 {
-    static constexpr double emHigh = 0.36787944117144232160;
-    static constexpr double emLow = -1.2428753672788363168e-17;
+	static constexpr double emHigh = 0.36787944117144232160;
+	static constexpr double emLow = -1.2428753672788363168e-17;
 
-    return (x + emHigh) + emLow;
+	return (x + emHigh) + emLow;
 }
 
 static inline double NearBranchWm1(double x)
 {
-    static constexpr double P[] = {
-        -1,
-        -1.0000000000000002,
-        -0.333333333333167,
-        -0.15277777780222743,
-        -0.07962962816509019,
-        -0.04450236076137409,
-        -0.02598385679312408,
-        -0.015645891525841612,
-        -0.009535109600029509,
-        -0.006457155334744418,
-        -0.0021889836393367036,
-        -0.006358886656862373,
-        0.004232489664240261,
-        -0.005427367255942878
-    };
+	static constexpr double P[] = {
+		-0.9999999999999998,
+		-1.0000000000002183,
+		-0.3333333332991474,
+		-0.15277777988675093,
+		-0.079629561585163,
+		-0.04450363652960061,
+		-0.025967945747804935,
+		-0.015781789829297576,
+		-0.008713980180658111,
+		-0.010038019576077164,
+		0.009199023794468941,
+		-0.032793012029992144,
+		0.04846364406273077,
+		-0.056801153904189224,
+		0.03763029838961123,
+		-0.013204978244912841
+	};
 
-    static constexpr double s2e = 2.331643981597124;
-    double p = sqrt(AddEm(x)) * s2e;
+	static constexpr double s2e = 2.331643981597124;
+	double p = sqrt(AddEm(x)) * s2e;
 
-    // Evaluate polynomial using Horner's Method
-    double value = P[13];
-    for (size_t i = 0; i < 13; i++)
-        value = value * p + P[12 - i];
+	double value = P[15];
+	for (size_t i = 0; i < 15; i++)
+		value = value * p + P[14 - i];
 
-    return value;
+	return value;
 }
 
 double MuirWm1(double x)
 {
-    return (x < -0.346) ? NearBranchWm1(x) : GeneralWm1(x);
+	if (x < -0.313486180883)
+		return NearBranchWm1(x);
+
+	double t = sqrt(-1 - log(-x));
+	if (t < 6.23)
+	{
+		if (t < 2.35)
+		{
+			if (t < 1.22)
+			{
+				if (t < 0.79) return Approx1(t);
+				return Approx2(t);
+			}
+			if (t < 1.72) return Approx3(t);
+			return Approx4(t);
+		}
+		if (t < 4.05)
+		{
+			if (t < 3.18) return Approx5(t);
+			return Approx6(t);
+		}
+		if (t < 5.05) return Approx7(t);
+		return Approx8(t);
+	}
+	if (t < 13.98)
+	{
+		if (t < 9.34)
+		{
+			if (t < 7.64) return Approx9(t);
+			return Approx10(t);
+		}
+		if (t < 11.42) return Approx11(t);
+		return Approx12(t);
+	}
+	if (t < 21.22)
+	{
+		if (t < 17.18) return Approx13(t);
+		return Approx14(t);
+	}
+	if (t < 24.5) return Approx15(t);
+	return Approx16(t);
 }

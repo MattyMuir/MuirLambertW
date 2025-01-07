@@ -41,10 +41,12 @@ double ExpMapWm1(double x)
 
 int main()
 {
-	double x = -0.3018789705422863;
-	double approx = MuirW0(x);
-	auto exact = ReferenceW0(x);
+	// 744.1332191019412
 
-	uint64_t err = ULPDistance(approx, exact);
-	std::cout << err << '\n';
+	//freopen("err.csv", "w", stdout);
+	//ULPHistogram(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, -36.73680056967711, 744.1332191019412, 1.0, ExpMapWm1, 1'000'000);
+
+	static std::mt19937_64 gen{ std::random_device{}() };
+	static ReciprocalDistributionEx<double> dist{ EM_UP, 0, false };
+	MaxULPRounded(ReferenceWm1, Overload<double, MuirWm1>, []() { return dist(gen); }, 0);
 }

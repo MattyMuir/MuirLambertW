@@ -31,15 +31,6 @@ auto Reference(int64_t branch, Ty x)
 	}
 }
 
-template <typename Ty>
-using FuncPtr = Ty(*)(Ty);
-
-template <typename Ty, FuncPtr<Ty> Func>
-Ty Overload(Ty x)
-{
-	return Func(x);
-}
-
 template <typename Ty> 
 constexpr Ty GetEmUp()
 {
@@ -159,7 +150,7 @@ int RandomTests(auto func, int64_t branch, size_t iter, uint64_t thresh)
 	if (DoRandomTests(func, branch, dist2, iter, thresh, (branch == 0) ? ExpMapW0 : ExpMapWm1)) return 1;
 
 	// Problem area test
-	std::uniform_real_distribution<double> dist3{ -0.35, -0.25 };
+	std::uniform_real_distribution<double> dist3{ -0.35, -0.05 };
 	if (DoRandomTests(func, branch, dist3, iter, thresh)) return 1;
 
 	return 0;
