@@ -261,9 +261,5 @@ __m256d MuirW0(__m256d x)
     __m256d infinity = _mm256_set1_pd(std::numeric_limits<double>::infinity());
     result = _mm256_blendv_pd(result, infinity, _mm256_cmp_pd(x, infinity, EQUAL));
 
-    // Fix zero
-    __m256d isZero = _mm256_cmp_pd(x, _mm256_setzero_pd(), EQUAL);
-    result = _mm256_blendv_pd(result, x, isZero);
-
     return result;
 }

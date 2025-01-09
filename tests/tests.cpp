@@ -162,7 +162,6 @@ int main(int argc, char** argv)
 	static constexpr size_t Iter = 1'000'000;
 	// ==================
 
-#if 1
 	// Check number of arguments is correct
 	if (argc != 2)
 		ERROR("Test must have exactly one extra argument");
@@ -175,9 +174,6 @@ int main(int argc, char** argv)
 	auto convRes = std::from_chars(arg.data(), arg.data() + arg.size(), testIdx);
 	if (convRes.ec != std::errc())
 		ERROR("Test index could not be parsed");
-#else
-	size_t testIdx = 0;
-#endif
 
 	switch (testIdx)
 	{

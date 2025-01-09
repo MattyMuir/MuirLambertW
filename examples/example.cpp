@@ -5,6 +5,9 @@
 #include <flttestlib.h>
 #include <MuirLambertW.h>
 
+#define TIMER_NPRINT
+#include "../bench/Timer.h"
+
 static constexpr float EM_UPf = -0.36787942f;
 static constexpr double EM_UP = -0.3678794411714423;
 
@@ -41,12 +44,10 @@ double ExpMapWm1(double x)
 
 int main()
 {
-	// 744.1332191019412
-
-	//freopen("err.csv", "w", stdout);
-	//ULPHistogram(ReferenceWm1, [](double x) { return MuirWm1v2(x); }, -36.73680056967711, 744.1332191019412, 1.0, ExpMapWm1, 1'000'000);
-
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, 0, false };
-	MaxULPRounded(ReferenceWm1, Overload<double, MuirWm1>, []() { return dist(gen); }, 0);
+	std::uniform_real_distribution<float> dist{ EM_UPf, -0.29f };
+
+	float f = 0;
+	float res = MakeSerial<float, MuirW0>(f);
+	std::cout << res << '\n';
 }

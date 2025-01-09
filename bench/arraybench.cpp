@@ -11,14 +11,16 @@
 
 // Implementations
 #include <MuirLambertW.h>
+#include <boost/math/special_functions/lambert_w.hpp>
 #include "others/FukushimaLambertW.h"
 #include "others/BarryLambertW.h"
-#include "boost/math/special_functions/lambert_w.hpp"
 #include "others/VebericLambertW.h"
 #include "others/VebericLambertWOld.h"
 
 using Function1D = double(*)(double);
 using SimdFunction1D = __m256d(*)(__m256d);
+
+static constexpr double EM_UP = -0.3678794411714423;
 
 void ApplyFunction(Function1D func, std::vector<double>& dst, const std::vector<double>& src)
 {
@@ -63,14 +65,15 @@ std::vector<double> CreateArray(size_t size, double min, double max)
 
 double ExpMapW0(double x)
 {
-	static constexpr double EM_UP = -0.3678794411714423;
 	return EM_UP + exp(x);
 }
 
 double ExpMapWm1(double x)
 {
-	static constexpr double EM_UP = -0.3678794411714423;
-	return EM_UP / (1 + exp(x));
+	if (x < 700)
+		return EM_UP / (1 + exp(x));
+
+	return EM_UP / (1 + exp(x - 62)) * 1.185064864233981e-27;
 }
 
 int main()
@@ -78,30 +81,29 @@ int main()
 	// === Parameters ===
 	static constexpr size_t ArrSize = 1'000;
 	static constexpr size_t Repeats = 100;
-	double binMin = -20;
-	double binMax = 50;
+	double binMin = 600;
+	double binMax = 707;
 	double binWidth = 0.5;
 	// ==================
 
 	std::ofstream file{ "arraybench.csv" };
 
-	file << "Min,Max,Barry,Veberic,VebericOld,Fukushima,Boost,Muir,MuirSerial,MuirSerialv2\n";
+	file << "Min,Max,Barry,Veberic,VebericOld,Fukushima,Boost,Muir,MuirSerial\n";
 	for (double min = binMin; min < binMax; min += binWidth)
 	{
 		double max = min + binWidth;
 		std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
-		double barryTime = 0, vebericTime = 0, vebericOldTime = 0, fukushimaTime = 0, boostTime = 0, muirTime = 0, muirSerialTime = 0, muirSerialTimev2 = 0;
+		double barryTime = 0, vebericTime = 0, vebericOldTime = 0, fukushimaTime = 0, boostTime = 0, muirTime = 0, muirSerialTime = 0;
 		for (size_t repeat = 0; repeat < Repeats; repeat++)
 		{
 			barryTime += TimeFunction(BarryLambertWm1, src);
 			vebericTime += TimeFunction(utl::LambertW<-1>, src);
 			vebericOldTime += TimeFunction(veberic_old::LambertW<-1>, src);
-			fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
+			//fukushimaTime += TimeFunction(Fukushima::LambertWm1, src);
 			boostTime += TimeFunction(boost::math::lambert_wm1<double>, src);
 			muirTime += TimeFunction([](__m256d x) { return MuirWm1(x); }, src);
 			muirSerialTime += TimeFunction([](double x) { return MuirWm1(x); }, src);
-			muirSerialTimev2 += TimeFunction([](double x) { return MuirWm1v2(x); }, src);
 		}
 
 		barryTime /= Repeats;
@@ -111,9 +113,8 @@ int main()
 		boostTime /= Repeats;
 		muirTime /= Repeats;
 		muirSerialTime /= Repeats;
-		muirSerialTimev2 /= Repeats;
 
-		file << std::format("{:.2f},{:.2f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, barryTime, vebericTime, vebericOldTime, fukushimaTime, boostTime, muirTime, muirSerialTime, muirSerialTimev2);
+		file << std::format("{:.2f},{:.2f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f},{:.10f}\n", min, max, barryTime, vebericTime, vebericOldTime, fukushimaTime, boostTime, muirTime, muirSerialTime);
 		std::cout << min << " - " << max << '\n';
 	}
 }

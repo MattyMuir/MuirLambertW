@@ -4,7 +4,7 @@
 add_executable(benchw0 "benchw0.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"   "others/VebericLambertW.cc")
 add_executable(benchwm1 "benchwm1.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"  )
 add_executable(arraybench "arraybench.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc")
-add_executable(arraybenchsp "arraybenchsp.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h")
+add_executable(arraybenchsp "arraybenchsp.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc")
 
 # === Libraries ===
 find_package(boost_math REQUIRED CONFIG)
