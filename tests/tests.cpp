@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 	// Exhaustive tests
 	case 0: return ExhaustiveTest<float>(Overload<float, MuirW0>, 0, 1);
 	case 1: return ExhaustiveTest<float>(Overload<float, MuirWm1>, -1, 1);
-	case 2: return ExhaustiveTest<float>(MakeSerial<float, MuirW0>, 0, 3);
+	case 2: return ExhaustiveTest<float>(MakeSerial<float, MuirW0>, 0, 4);
 	case 3: return ExhaustiveTest<float>(MakeSerial<float, MuirWm1>, -1, 4);
 
 	// Unit tests

@@ -10,13 +10,12 @@
 static inline __m256 LogApprox(__m256 x)
 {
 	// === Constants ===
-	__m256i off = _mm256_set1_epi32(-1064866805);
+	__m256 off = _mm256_set1_ps(-87.9895011677f);
 	__m256 scale = _mm256_set1_ps(8.262958405176314e-8f);
 	// =================
 
-	__m256i punn = _mm256_castps_si256(x);
-	punn = _mm256_add_epi32(punn, off);
-	return _mm256_mul_ps(_mm256_cvtepi32_ps(punn), scale);
+	__m256 punn = _mm256_cvtepi32_ps(_mm256_castps_si256(x));
+	return _mm256_fmadd_ps(punn, scale, off);
 }
 
 static inline __m256 LogAccurate(__m256 x)
