@@ -143,10 +143,10 @@ static inline __m256 GeneralWm1(__m256 x)
 	__m256 result;
 	switch (useFirstMask)
 	{
-	case 0b00000000: [[likely]]
+	case 0b00000000:
 		result = SecondApprox(t);
 		break;
-	case 0b11111111: [[unlikely]]
+	case 0b11111111:
 		result = FirstApprox(t);
 		break;
 	default: [[unlikely]]
