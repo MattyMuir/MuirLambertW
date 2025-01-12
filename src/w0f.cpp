@@ -10,7 +10,7 @@
 static inline __m256 LogApprox(__m256 x)
 {
 	// === Constants ===
-	__m256 off = _mm256_set1_ps(-87.9895011677f);
+	__m256 off = _mm256_set1_ps(-88.0004469843f);
 	__m256 scale = _mm256_set1_ps(8.262958405176314e-8f);
 	// =================
 
