@@ -87,7 +87,7 @@ static inline __m256 SecondApprox(__m256 x)
 		0.987426086605f
 	};
 
-	static constexpr float Q = 6.45416961763;
+	static constexpr float Q = 6.45416961763f;
 
 	__m256 t = LogApprox(x);
 
@@ -133,11 +133,11 @@ static inline __m256 NearBranchW0(__m256 x)
 static inline __m256 GeneralW0(__m256 x)
 {
 	// === Constants ===
-	__m256 c23 = _mm256_set1_ps(2.0 / 3.0);
-	__m256 one = _mm256_set1_ps(1.0);
+	__m256 c23 = _mm256_set1_ps(2.0f / 3.0f);
+	__m256 one = _mm256_set1_ps(1.0f);
 	// =================
 
-	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(1.6487212707), LESS);
+	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(1.6487212f), LESS);
 	__m256 w;
 	switch (_mm256_movemask_ps(useFirst))
 	{

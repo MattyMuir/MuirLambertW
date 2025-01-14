@@ -45,7 +45,7 @@ double ExpMapWm1(double x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
+	static ReciprocalDistributionEx<double> dist{ -0.1, 0.1, false };
 
-	MaxULPRounded(ReferenceW0f, MakeSerial<float, MuirW0>, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceW0, MakeSerial<double, MuirW0>, []() { return dist(gen); }, 0);
 }

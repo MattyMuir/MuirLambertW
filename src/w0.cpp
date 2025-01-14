@@ -86,44 +86,33 @@ static inline __m256d LogAccurate(__m256d x)
 }
 
 // ========== General ==========
-static inline __m256d Abs(__m256d x)
-{
-    __m256d signMask = _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fff'ffff'ffff'ffff));
-    return _mm256_and_pd(x, signMask);
-}
-
 static inline __m256d FirstApprox(__m256d x)
 {
     static constexpr double P[] = {
         0,
-        30.580056454638136,
-        83.95836185597197,
-        46.16620637664877,
-        3.4636816277252214
+        0                       + 0.8115268950222906,
+        -0.8115800403884023     + 3.3053448229779,
+        -2.089061607466412      + 3.7148636123100385,
+        -0.9192571857805398     + 1,
+        -0.0025394283830904394
     };
 
     static constexpr double Q[] = {
-        30.578403642151667,
-        114.49011569793561,
-        114.80618615998705,
-        28.635096582884064,
+        0.8115268950222906,
+        3.3053448229779,
+        3.7148636123100385,
         1
     };
 
-    __m256d numer = _mm256_set1_pd(P[4]);
-    for (size_t i = 0; i < 4; i++)
-        numer = _mm256_fmadd_pd(numer, x, _mm256_set1_pd(P[3 - i]));
+    __m256d numer = _mm256_set1_pd(P[5]);
+    for (size_t i = 0; i < 5; i++)
+        numer = _mm256_fmadd_pd(numer, x, _mm256_set1_pd(P[4 - i]));
 
-    __m256d denom = _mm256_set1_pd(Q[4]);
-    for (size_t i = 0; i < 4; i++)
-        denom = _mm256_fmadd_pd(denom, x, _mm256_set1_pd(Q[3 - i]));
+    __m256d denom = _mm256_set1_pd(Q[3]);
+    for (size_t i = 0; i < 3; i++)
+        denom = _mm256_fmadd_pd(denom, x, _mm256_set1_pd(Q[2 - i]));
 
     __m256d approx = _mm256_div_pd(numer, denom);
-
-    // Use approx = x for arguments near zero
-    __m256d isNearZero = _mm256_cmp_pd(Abs(x), _mm256_set1_pd(1e-4), LESS);
-    approx = _mm256_blendv_pd(approx, x, isNearZero);
-
     return approx;
 }
 
