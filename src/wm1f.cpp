@@ -89,14 +89,14 @@ static inline __m256 NearBranchWm1(__m256 x)
 static inline __m256 FirstApprox(__m256 t)
 {
 	static constexpr float P[] = {
-		-0.9999947f,
-		-1.0000472f,
-		-0.3331734f,
-		-0.028060034f,
-		0.0040001357f,
-		-0.00043049827f,
-		3.0040927e-05f,
-		-9.943928e-07f
+		-0.9999947770248371,
+		-1.4142802274833077,
+		-0.6663468462971003,
+		-0.07936575583288796,
+		0.016000547102702947,
+		-0.0024352660263118973,
+		0.00024032743757630923,
+		-1.1250272634544634e-05
 	};
 
 	__m256 res = _mm256_set1_ps(P[7]);
@@ -109,20 +109,19 @@ static inline __m256 FirstApprox(__m256 t)
 static inline __m256 SecondApprox(__m256 t)
 {
 	static constexpr float P[] = {
-		-1.0550607f,
-		-0.93156487f,
-		-0.37120903f,
-		-0.01570655f,
-		0.0014473839f,
-		-9.42589e-05f,
-		4.0561445e-06f,
-		-1.02992956e-07f,
-		1.1653037e-09f,
+		-1.0918049,
+		-1.2658587,
+		-0.77344185,
+		-0.033979293,
+		0.0036363874,
+		-0.0002548953,
+		1.0409415e-05,
+		-1.8701131e-07
 	};
 
-	__m256 res = _mm256_set1_ps(P[8]);
-	for (size_t i = 0; i < 8; i++)
-		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[7 - i]));
+	__m256 res = _mm256_set1_ps(P[7]);
+	for (size_t i = 0; i < 7; i++)
+		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[6 - i]));
 
 	return res;
 }
@@ -130,12 +129,12 @@ static inline __m256 SecondApprox(__m256 t)
 static inline __m256 GeneralWm1(__m256 x)
 {
 	// === Constants ===
-	__m256 negTwo = _mm256_set1_ps(-2.0f);
+	__m256 negOne = _mm256_set1_ps(-1.0f);
 	// =================
 
 	// Compute t
 	__m256 t = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
-	t = _mm256_sqrt_ps(_mm256_fmadd_ps(t, negTwo, negTwo));
+	t = _mm256_sqrt_ps(_mm256_sub_ps(negOne, t));
 
 	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(-0.00000224905596703), LESS);
 	uint32_t useFirstMask = _mm256_movemask_ps(useFirst);

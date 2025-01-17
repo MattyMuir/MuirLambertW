@@ -365,6 +365,29 @@ static inline double AddEm(double x)
 
 static inline double NearBranchWm1(double x)
 {
+	static constexpr double s2e = 2.331643981597124;
+	double p = sqrt(AddEm(x)) * s2e;
+
+	if (x < -0.367544284167)
+	{
+		static constexpr double P[] = {
+			-1.0,
+			-1.0000000000000107,
+			-0.3333333333280477,
+			-0.15277777876745324,
+			-0.07962953877695327,
+			-0.044506832955790845,
+			-0.025860796725217638,
+			-0.017386309719960576
+		};
+
+		double value = P[7];
+		for (size_t i = 0; i < 7; i++)
+			value = value * p + P[6 - i];
+
+		return value;
+	}
+
 	static constexpr double P[] = {
 		-0.9999999999999998,
 		-1.0000000000002183,
@@ -383,9 +406,6 @@ static inline double NearBranchWm1(double x)
 		0.03763029838961123,
 		-0.013204978244912841
 	};
-
-	static constexpr double s2e = 2.331643981597124;
-	double p = sqrt(AddEm(x)) * s2e;
 
 	double value = P[15];
 	for (size_t i = 0; i < 15; i++)
