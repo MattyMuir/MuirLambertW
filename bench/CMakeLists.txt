@@ -1,10 +1,10 @@
 # EXECUTABLE PROJECT - bench
 
 # === Create Executable ===
-add_executable(benchw0 "benchw0.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"   "others/VebericLambertW.cc")
-add_executable(benchwm1 "benchwm1.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"  )
-add_executable(arraybench "arraybench.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc")
-add_executable(arraybenchsp "arraybenchsp.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc")
+add_executable(benchw0 "benchw0.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"   "others/VebericLambertW.cc" "others/MuirFukushima.h" "others/MuirFukushima.cpp" "others/MuirFukushimaConstants.h")
+add_executable(benchwm1 "benchwm1.cpp" "Timer.h" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h"   "others/MuirFukushima.h" "others/MuirFukushima.cpp" "others/MuirFukushimaConstants.h")
+add_executable(arraybench "arraybench.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc" "others/MuirFukushima.h" "others/MuirFukushima.cpp" "others/MuirFukushimaConstants.h")
+add_executable(arraybenchsp "arraybenchsp.cpp" "others/BarryLambertW.cpp" "others/BarryLambertW.h" "others/FukushimaLambertW.cc" "others/FukushimaLambertW.h" "others/VebericLambertW.cc" "others/VebericLambertWOld.cc" "others/MuirFukushima.h" "others/MuirFukushima.cpp" "others/MuirFukushimaConstants.h")
 
 # === Libraries ===
 find_package(boost_math REQUIRED CONFIG)

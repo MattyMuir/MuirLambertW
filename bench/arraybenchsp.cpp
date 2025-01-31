@@ -109,13 +109,14 @@ float VebericOldWm1MadeFloat(float f)
 int main()
 {
 	// === Parameters ===
-	static constexpr size_t ArrSize = 256;
+	static constexpr size_t ArrSize = 50'000;
 	static constexpr size_t Repeats = 1000;
-	float binMin = -15;
-	float binMax = 15;
-	size_t binNum = 500;
+	float binMin = 0.985366846936;
+	float binMax = 8.21006850684;
+	size_t binNum = 1;
 	size_t benchNum = 7;
 	float binWidth = (binMax - binMin) / binNum;
+	bool UseThroughput = true;
 	// ==================
 
 	std::ofstream file{ "arraybench.dat" };
@@ -133,16 +134,16 @@ int main()
 			// Create array
 			float min = binMin + binIdx * binWidth;
 			float max = binMin + (binIdx + 1) * binWidth;
-			std::vector<float> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
+			std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
 			// Time functions
-			binTimings[0] += TimeFunction(BarryW0MadeFloat, src);
-			binTimings[1] += TimeFunction(VebericW0MadeFloat, src);
-			binTimings[2] += TimeFunction(VebericOldW0MadeFloat, src);
+			//binTimings[0] += TimeFunction(BarryW0MadeFloat, src);
+			//binTimings[1] += TimeFunction(VebericW0MadeFloat, src);
+			//binTimings[2] += TimeFunction(VebericOldW0MadeFloat, src);
 			//binTimings[3] += TimeFunction(Fukushima::LambertWm1, src);
-			binTimings[4] += TimeFunction(boost::math::lambert_w0<float>, src);
-			binTimings[5] += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
-			binTimings[6] += TimeFunction([](float x) { return MuirW0(x); }, src);
+			binTimings[4] += TimeFunction(boost::math::lambert_wm1<float>, src);
+			binTimings[5] += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
+			binTimings[6] += TimeFunction([](float x) { return MuirWm1(x); }, src);
 		}
 
 		std::cout << repeat << '\n';
@@ -159,7 +160,12 @@ int main()
 		file << std::format("{:.4} {:.4}", min, max);
 
 		for (double time : binTimings)
-			file << std::format(" {:.10}", time / Repeats);
+		{
+			if (UseThroughput)
+				file << std::format(" {:.4}", Repeats / time * ArrSize * 1e-6);
+			else
+				file << std::format(" {:.10}", time / Repeats);
+		}
 		file << '\n';
 	}
 }

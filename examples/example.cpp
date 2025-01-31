@@ -1,9 +1,16 @@
 #include <iostream>
 #include <format>
+#include <fstream>
 
 #include <ReferenceLambertW.h>
 #include <flttestlib.h>
 #include <MuirLambertW.h>
+
+#include "../bench/others/BarryLambertW.h"
+#include "../bench/others/VebericLambertW.h"
+#include "../bench/others/FukushimaLambertW.h"
+#include "../bench/others/MuirFukushima.h"
+#include <boost/math/special_functions/lambert_w.hpp>
 
 #define TIMER_NPRINT
 #include "../bench/Timer.h"
@@ -42,10 +49,36 @@ double ExpMapWm1(double x)
 	return EM_UP / (1 + exp(x - 62)) * 1.185064864233981e-27;
 }
 
+using FloatTy = float;
+std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFunc, const std::vector<FloatTy>& mins, const std::vector<FloatTy>& maxs)
+{
+	static constexpr size_t Iter = 10'000;
+	static std::mt19937_64 gen{ std::random_device{}() };
+
+	std::vector<UIntType<FloatTy>> errs;
+	for (size_t binIdx = 0; binIdx < mins.size(); binIdx++)
+	{
+		UIntType<FloatTy> maxError = 0;
+		std::uniform_real_distribution<FloatTy> dist{ mins[binIdx], maxs[binIdx] };
+		for (size_t i = 0; i < Iter; i++)
+		{
+			FloatTy x = ExpMapWm1(dist(gen));
+
+			auto exact = referenceFunc(x);
+			FloatTy approx = approxFunc(x);
+			UIntType<FloatTy> err = ULPDistance(approx, exact);
+			maxError = std::max(maxError, err);
+		}
+
+		errs.push_back(maxError);
+	}
+
+	return errs;
+}
+
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
-
-	MaxULPRounded(ReferenceWm1f, MakeSerial<float, MuirWm1>, []() { return dist(gen); }, 0);
+	static ReciprocalDistributionEx<double> dist{ EM_UP, 1e29, false };
+	MaxULPRounded(ReferenceW0, Overload<double, MuirFukushimaW0>, []() { return dist(gen); }, 0);
 }
