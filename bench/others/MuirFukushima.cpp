@@ -4,7 +4,16 @@
 #include <limits>
 #include <numbers>
 
+#include <immintrin.h>
+
 #include "MuirFukushimaConstants.h"
+
+static inline double CmpBlend(double a, double b, double t, double f)
+{
+	__m128d m = _mm_cmplt_sd(_mm_set_sd(a), _mm_set_sd(b));
+	__m128d res = _mm_blendv_pd(_mm_set_sd(f), _mm_set_sd(t), m);
+	return res[0];
+}
 
 template <typename FloatTy>
 static inline FloatTy SchroderStep(FloatTy w, FloatTy y)
@@ -104,7 +113,7 @@ float MuirFukushimaW0(float x)
 	return 0.0f;
 }
 
-int IntegerPartW0(double x)
+static inline int IntegerPartW0(double x)
 {
 	DECLARE_W0_G;
 
@@ -136,12 +145,30 @@ int IntegerPartW0(double x)
 	return n - 1;
 }
 
-double MuirFukushimaW0(double x)
+template <size_t NumIter>
+static inline void BisectionW0(double* wp, double* yp, double x, int n)
 {
 	DECLARE_W0_E;
 	DECLARE_W0_A;
-	DECLARE_W0_B;
 
+	// Bisection
+	double y = x * E[n + 1];
+	double w = n;
+	double b = 0.5;
+	for (size_t j = 0; j < NumIter; j++, b *= 0.5)
+	{
+		const double wj = w + b;
+		const double yj = y * A[j];
+		w = CmpBlend(wj, yj, wj, w);
+		y = CmpBlend(wj, yj, yj, y);
+	}
+
+	*wp = w;
+	*yp = y;
+}
+
+double MuirFukushimaW0(double x)
+{
 	// Edge cases
 	if (abs(x) < 0.05) return NearZeroSeries(x);
 	if (x < -0.35) return NearBranchW0(x);
@@ -149,26 +176,12 @@ double MuirFukushimaW0(double x)
 	// Get integer part
 	int n = IntegerPartW0(x);
 
-	// Determine number of bisections
-	int jmax = 8;
-	if (x <= -0.36) jmax = 12;
-	else if (x <= -0.3) jmax = 11;
-	else if (n <= 0) jmax = 10;
-	else if (n <= 1) jmax = 9;
-
 	// Bisection
-	double y = x * E[n + 1];
-	double w = n;
-	for (int j = 0; j < jmax; ++j)
-	{
-		const double wj = w + B[j];
-		const double yj = y * A[j];
-		if (wj < yj)
-		{
-			w = wj;
-			y = yj;
-		}
-	}
+	double w, y;
+	if (x <= -0.3) BisectionW0<11>(&w, &y, x, n);
+	else if (n <= 0) BisectionW0<10>(&w, &y, x, n);
+	else if (n <= 1) BisectionW0<9>(&w, &y, x, n);
+	else BisectionW0<8>(&w, &y, x, n);
 
 	return SchroderStep(w, y);
 }
