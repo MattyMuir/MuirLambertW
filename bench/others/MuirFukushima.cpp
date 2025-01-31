@@ -8,13 +8,6 @@
 
 #include "MuirFukushimaConstants.h"
 
-static inline double CmpBlend(double a, double b, double t, double f)
-{
-	__m128d m = _mm_cmplt_sd(_mm_set_sd(a), _mm_set_sd(b));
-	__m128d res = _mm_blendv_pd(_mm_set_sd(f), _mm_set_sd(t), m);
-	return res[0];
-}
-
 template <typename FloatTy>
 static inline FloatTy SchroderStep(FloatTy w, FloatTy y)
 {
@@ -152,19 +145,21 @@ static inline void BisectionW0(double* wp, double* yp, double x, int n)
 	DECLARE_W0_A;
 
 	// Bisection
-	double y = x * E[n + 1];
-	double w = n;
-	double b = 0.5;
-	for (size_t j = 0; j < NumIter; j++, b *= 0.5)
+	__m128d y = _mm_set_sd(x * E[n + 1]);
+	__m128d w = _mm_set_sd(n);
+	__m128d half = _mm_set_sd(0.5);
+	__m128d b = half;
+	for (size_t j = 0; j < NumIter; j++)
 	{
-		const double wj = w + b;
-		const double yj = y * A[j];
-		w = CmpBlend(wj, yj, wj, w);
-		y = CmpBlend(wj, yj, yj, y);
+		__m128d wj = _mm_add_sd(w, b);
+		__m128d yj = _mm_mul_sd(y, _mm_set_sd(A[j]));
+		w = _mm_blendv_pd(w, wj, _mm_cmplt_sd(wj, yj));
+		y = _mm_blendv_pd(y, yj, _mm_cmplt_sd(wj, yj));
+		b = _mm_mul_sd(b, half);
 	}
 
-	*wp = w;
-	*yp = y;
+	*wp = w[0];
+	*yp = y[0];
 }
 
 double MuirFukushimaW0(double x)
