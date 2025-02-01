@@ -115,13 +115,13 @@ int main()
 			std::vector<double> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
 			// Time functions
-			//binTimings[0] += TimeFunction(BarryLambertW0, src);
-			//binTimings[1] += TimeFunction(utl::LambertW<0>, src);
-			//binTimings[2] += TimeFunction(veberic_old::LambertW<0>, src);
+			binTimings[0] += TimeFunction(BarryLambertW0, src);
+			binTimings[1] += TimeFunction(utl::LambertW<0>, src);
+			binTimings[2] += TimeFunction(veberic_old::LambertW<0>, src);
 			binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
-			//binTimings[4] += TimeFunction(boost::math::lambert_w0<double>, src);
-			//binTimings[5] += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
-			//binTimings[6] += TimeFunction([](double x) { return MuirW0(x); }, src);
+			binTimings[4] += TimeFunction(boost::math::lambert_w0<double>, src);
+			binTimings[5] += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
+			binTimings[6] += TimeFunction([](double x) { return MuirW0(x); }, src);
 			binTimings[7] += TimeFunction([](double x) { return MuirFukushimaW0(x); }, src);
 		}
 

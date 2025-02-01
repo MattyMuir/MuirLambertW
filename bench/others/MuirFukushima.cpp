@@ -138,21 +138,20 @@ static inline int IntegerPartW0(double x)
 	return n - 1;
 }
 
-template <size_t NumIter>
-static inline void BisectionW0(double* wp, double* yp, double x, int n)
+template <size_t StartIter, size_t NumIter>
+static inline void BisectionW0(double* wp, double* yp, double wi, double yi)
 {
-	DECLARE_W0_E;
 	DECLARE_W0_A;
 
-	// Bisection
-	__m128d y = _mm_set_sd(x * E[n + 1]);
-	__m128d w = _mm_set_sd(n);
+	__m128d y = _mm_set_sd(yi);
+	__m128d w = _mm_set_sd(wi);
 	__m128d half = _mm_set_sd(0.5);
-	__m128d b = half;
+	constexpr double BStart = 0.5 / (1 << StartIter);
+	__m128d b = _mm_set_sd(BStart);
 	for (size_t j = 0; j < NumIter; j++)
 	{
 		__m128d wj = _mm_add_sd(w, b);
-		__m128d yj = _mm_mul_sd(y, _mm_set_sd(A[j]));
+		__m128d yj = _mm_mul_sd(y, _mm_set_sd(A[StartIter + j]));
 		w = _mm_blendv_pd(w, wj, _mm_cmplt_sd(wj, yj));
 		y = _mm_blendv_pd(y, yj, _mm_cmplt_sd(wj, yj));
 		b = _mm_mul_sd(b, half);
@@ -164,6 +163,8 @@ static inline void BisectionW0(double* wp, double* yp, double x, int n)
 
 double MuirFukushimaW0(double x)
 {
+	DECLARE_W0_E;
+
 	// Edge cases
 	if (abs(x) < 0.05) return NearZeroSeries(x);
 	if (x < -0.35) return NearBranchW0(x);
@@ -171,12 +172,15 @@ double MuirFukushimaW0(double x)
 	// Get integer part
 	int n = IntegerPartW0(x);
 
-	// Bisection
-	double w, y;
-	if (x <= -0.3) BisectionW0<11>(&w, &y, x, n);
-	else if (n <= 0) BisectionW0<10>(&w, &y, x, n);
-	else if (n <= 1) BisectionW0<9>(&w, &y, x, n);
-	else BisectionW0<8>(&w, &y, x, n);
+	// Do the initial 8 bisections
+	double w = n;
+	double y = x * E[n + 1];
+	BisectionW0<0, 8>(&w, &y, w, y);
+
+	// Perform remaining bisections if necessary
+	if (x <= -0.3) BisectionW0<8, 3>(&w, &y, w, y);
+	else if (n <= 0) BisectionW0<8, 2>(&w, &y, w, y);
+	else if (n <= 1) BisectionW0<8, 1>(&w, &y, w, y);
 
 	return SchroderStep(w, y);
 }
