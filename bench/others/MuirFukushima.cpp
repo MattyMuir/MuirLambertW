@@ -161,6 +161,7 @@ float MuirFukushimaW0(float x)
 	DECLARE_W0F_E;
 
 	// Edge cases
+	if (x >= 2.5268146e+15f) return std::numeric_limits<float>::quiet_NaN();
 	if (std::abs(x) < 0.05f) return NearZeroSeries(x);
 	if (x < -0.33f) return NearBranch<float, false>(x);
 
@@ -239,6 +240,7 @@ double MuirFukushimaW0(double x)
 	DECLARE_W0_E;
 
 	// Edge cases
+	if (x >= 3.990495411719435e+29) return std::numeric_limits<double>::quiet_NaN();
 	if (abs(x) < 0.05) return NearZeroSeries(x);
 	if (x < -0.35) return NearBranch<double, false>(x);
 
@@ -313,7 +315,7 @@ float MuirFukushimaWm1(float x)
 	DECLARE_WM1F_E;
 
 	// Edge cases
-	if (x >= 0.0f) return std::numeric_limits<float>::quiet_NaN();
+	if (x >= -4.052533e-13f) return std::numeric_limits<float>::quiet_NaN();
 	if (x < -0.33f) return NearBranch<float, true>(x);
 
 	// Get integer part
@@ -387,7 +389,7 @@ double MuirFukushimaWm1(double x)
 	DECLARE_WM1_E;
 
 	// Edge cases
-	if (x >= 0) return std::numeric_limits<double>::quiet_NaN();
+	if (x >= -1.0264389699511283e-26) return std::numeric_limits<double>::quiet_NaN();
 	if (x < -0.35) return NearBranch<double, true>(x);
 
 	// Get integer part
