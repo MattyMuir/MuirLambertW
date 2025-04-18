@@ -33,5 +33,5 @@ All functions guarantee results within a fixed number of Units in the Last Place
 ## Dependencies
 The main implementation has no dependencies, but the benchmarks and tests require
 - Boost
-- MPFR (And PkgConfig to manage)
-- ReferenceLambertW
+- [flttestlib](https://github.com/MattyMuir/flttestlib)
+- [ReferenceLambertW](https://github.com/MattyMuir/ReferenceLambertW)
