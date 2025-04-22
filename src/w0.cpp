@@ -29,7 +29,7 @@ static inline __m256d LogFast(__m256d x)
     punn = _mm256_sub_epi64(punn, _mm256_slli_epi64(exp, 52));
     __m256d mantissa = _mm256_castsi256_pd(punn);
 
-    // Compute approximation
+    // Polynomial approximation coefficients for algorithm 2, index 1, order 4
     static constexpr double P[] = {
         -1.74883843293730611990,
         2.84123605882110430443,
@@ -88,15 +88,15 @@ static inline __m256d LogAccurate(__m256d x)
 // ========== General ==========
 static inline __m256d FirstApprox(__m256d x)
 {
+    // Rational approximation coefficients for algorithm 2, index 2, order 5/3
     static constexpr double P[] = {
         0,
-        0                       + 0.8115268950222906,
-        -0.8115800403884023     + 3.3053448229779,
-        -2.089061607466412      + 3.7148636123100385,
-        -0.9192571857805398     + 1,
+        0.8115268950222906,
+        2.4937647825894977,
+        1.6258020048436266,
+        0.08074281421946017,
         -0.0025394283830904394
     };
-
     static constexpr double Q[] = {
         0.8115268950222906,
         3.3053448229779,
@@ -118,6 +118,7 @@ static inline __m256d FirstApprox(__m256d x)
 
 static inline __m256d SecondApprox(__m256d x)
 {
+    // Rational approximation coefficients for algorithm 2, index 3, order 3/2
     static constexpr double P[] = {
         266.74662101711755,
         180.72015154289477,
@@ -191,6 +192,7 @@ static inline __m256d AddEm(__m256d x)
 
 static inline __m256d NearBranchSeries(__m256d p)
 {
+    // Polynomial approximation coefficients for algorithm 2, index 4, order 15
     static constexpr double P[] = {
         -1.00000000000000000000,
         0.99999999999998689937,

@@ -11,6 +11,7 @@ static inline double AddEm(double x)
 // (-0.3578794411714423215955237701, -0.3178794411714423215955237]
 static inline double Approx1(double x)
 {
+    // Polynomial approximation coefficients for algorithm 1, index 2, order 11
     static constexpr double P[] = {
         -0.9999999985048207,
         0.9999999514985546,
@@ -39,6 +40,7 @@ static inline double Approx1(double x)
 // (-0.3178794411714423215955237, -0.2]
 static inline double Approx2(double x)
 {
+    // Polynomial approximation coefficients for algorithm 1, index 3, order 11
     static constexpr double P[] = {
         -0.9999994388735746,
         0.9999908283563685,
@@ -67,6 +69,7 @@ static inline double Approx2(double x)
 // (-0.2, -0.15]
 static inline double Approx3(double x)
 {
+    // Rational approximation coefficients for algorithm 1, index 4, order 5/4
     static constexpr double P[] = {
         -2.00000016065932383e-01L,
         -2.43056034919570645e+00L,
@@ -75,7 +78,6 @@ static inline double Approx3(double x)
         -7.13659960146842413e+00L,
         -1.70369315166269611e-01L
     };
-
     static constexpr double Q[] = {
         1.00000000000000000e+00L,
         7.15279775097383673e+00L,
@@ -98,6 +100,7 @@ static inline double Approx3(double x)
 // (-0.15, -0.1]
 static inline double Approx4(double x)
 {
+    // Rational approximation coefficients for algorithm 1, index 5, order 5/4
     static constexpr double P[] = {
         -1.00000000204783974e-01L,
         -1.68062750181694521e+00L,
@@ -106,7 +109,6 @@ static inline double Approx4(double x)
         -4.96135934908649410e+00L,
         -8.96693172288665332e-02L
     };
-
     static constexpr double Q[] = {
         1.00000000000000000e+00L,
         6.80627486726167287e+00L,
@@ -130,6 +132,8 @@ static inline double Approx4(double x)
 static inline double Approx5(double x)
 {
     static constexpr double Y = 1.08633995056152344e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 6, order 5/5
     static constexpr double P[] = {
         -8.63399505615014331e-02,
         -1.64303871814816464e+00,
@@ -161,6 +165,7 @@ static inline double Approx5(double x)
 // [-0.051, 0.051]
 static inline double Approx6(double x)
 {
+    // Polynomial approximation coefficients for algorithm 1, index 7, order 13
     static constexpr double P[] = {
         0.0,
         1.0,
@@ -189,6 +194,8 @@ static inline double Approx6(double x)
 static inline double Approx7(double x)
 {
     static constexpr double Y = 8.19659233093261719e-01;
+
+    // Rational approximation coefficients for algorithm 1, index 8, order 6/6
     static constexpr double P[] = {
         1.80340766906685177e-01,
         3.28178241493119307e-01,
@@ -223,6 +230,8 @@ static inline double Approx7(double x)
 static inline double Approx8(double x)
 {
     static constexpr double Y = 5.50335884094238281e-01;
+
+    // Rational approximation coefficients for algorithm 1, index 9, order 7/7
     static constexpr double P[] = {
         4.49664083944098322e-01,
         1.90417666196776909e+00,
@@ -259,6 +268,8 @@ static inline double Approx8(double x)
 static inline double Approx9(double x)
 {
     static constexpr double Y = 1.16239356994628906e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 10, order 7/7
     static constexpr double P[] = {
         -1.16230494982099475e+00,
         -3.38528144432561136e+00,
@@ -295,6 +306,8 @@ static inline double Approx9(double x)
 static inline double Approx10(double x)
 {
     static constexpr double Y = 1.80937194824218750e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 11, order 8/8
     static constexpr double P[] = {
         -1.80690935424793635e+00,
         -3.66995929380314602e+00,
@@ -333,6 +346,8 @@ static inline double Approx10(double x)
 static inline double Approx11(double x)
 {
     static constexpr double Y = -1.40297317504882812e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 12, order 8/8
     static constexpr double P[] = {
         1.97011826279311924e+00,
         1.05639945701546704e+00,
@@ -373,6 +388,8 @@ static inline double Approx11(double x)
 static inline double Approx12(double x)
 {
     static constexpr double Y = -2.73572921752929688e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 13, order 8/8
     static constexpr double P[] = {
         3.30547638424076217e+00,
         1.64050071277550167e+00,
@@ -413,6 +430,8 @@ static inline double Approx12(double x)
 static inline double Approx13(double x)
 {
     static constexpr double Y = -4.01286315917968750e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 14, order 8/8
     static constexpr double P[] = {
         5.07714858354309672e+00,
         -3.32994414518701458e+00,
@@ -453,6 +472,8 @@ static inline double Approx13(double x)
 static inline double Approx14(double x)
 {
     static constexpr double Y = -5.70115661621093750e+00;
+
+    // Rational approximation coefficients for algorithm 1, index 15, order 10/10
     static constexpr double P[] = {
         6.42275660145116698e+00,
         1.33047964073367945e+00,
@@ -495,6 +516,7 @@ static inline double Approx14(double x)
 
 static inline double NearBranchW0(double x)
 {
+    // Polynomial approximation coefficients for algorithm 1, index 1, order 10
     static constexpr double P[] = {
         -0.9999999999999999,
         0.9999999999999364,

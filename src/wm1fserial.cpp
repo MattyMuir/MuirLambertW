@@ -5,6 +5,7 @@ static inline float NearBranchWm1(float x)
 	static constexpr double e2 = 5.43656365691809;
 	double p = sqrt(e2 * x + 2.0);
 
+	// Polynomial approximation coefficients for algorithm 7, index 1, order 5
 	static constexpr double P[] = {
 		-0.9999999811456308,
 		-1.0000044654258957,
@@ -23,6 +24,7 @@ static inline float NearBranchWm1(float x)
 
 static inline float GeneralWm1(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 2, order 5/3
 	static constexpr double P[] = {
 		-87.77561192149614,
 		-184.9753116484922,
@@ -31,7 +33,6 @@ static inline float GeneralWm1(float x)
 		-14.653530143154867,
 		-0.999363416489587
 	};
-
 	static constexpr double Q[] = {
 		87.77537609045154,
 		60.84479581959989,

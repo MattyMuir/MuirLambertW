@@ -18,7 +18,6 @@ static inline __m256d LogFast(__m256d x)
     // === Constants ===
     __m256d ln2 = _mm256_set1_pd(0.69314718055994530942);
     __m256d denormScale = _mm256_set1_pd(4503599627370496.0);               // 2^52
-    static constexpr double denormOffset = 36.043653389117156090;           // ln(2^52)
     // =================
 
     // Fix for denormalized values
@@ -32,9 +31,9 @@ static inline __m256d LogFast(__m256d x)
     punn = _mm256_sub_epi64(punn, _mm256_slli_epi64(exp, 52));
     __m256d mantissa = _mm256_castsi256_pd(punn);
 
-    // Compute approximation
+    // Polynomial approximation coefficients for algorithm 6, index 1, order 4
     static constexpr double P[] = {
-        -1.7289291561920494e+00 - denormOffset,
+        -37.772582545309206, //-1.7289291561920494e+00 - denormOffset (ln(2^52)),
         2.78901155791566960e+00,
         -1.44093748876198707e+00,
         4.36015488686681152e-01,
@@ -94,11 +93,16 @@ static inline __m256d Approx(__m256d x)
     __m256d negOne = _mm256_set1_pd(-1.0);
     // =================
 
+    // Rational approximation coefficients for algorithm 6, index 2, order 3/1
     static constexpr double P[] = {
         -3.836813614374928,
         -6.420188447784658,
         -3.950370152775716,
         -0.9985569509992126
+    };
+    static constexpr double Q[] = {
+        3.8333830077075923,
+        1.0
     };
 
     __m256d logX = LogFast(_mm256_sub_pd(_mm256_setzero_pd(), x));
@@ -108,7 +112,7 @@ static inline __m256d Approx(__m256d x)
     for (size_t i = 0; i < 3; i++)
         numer = _mm256_fmadd_pd(numer, t, _mm256_set1_pd(P[2 - i]));
 
-    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(3.8333830077075923));
+    __m256d denom = _mm256_add_pd(t, _mm256_set1_pd(Q[0]));
 
     return _mm256_div_pd(numer, denom);
 }
@@ -155,6 +159,7 @@ static inline __m256d AddEm(__m256d x)
 
 static inline __m256d NearBranchSeries(__m256d p)
 {
+    // Polynomial approximation coefficients for algorithm 6, index 3, order 19
     static constexpr double P[] = {
         -1,
         -1.0000000000000016,

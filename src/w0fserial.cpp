@@ -2,6 +2,7 @@
 
 static inline float FirstApprox(float x)
 {
+	// Rational approximation coefficients for algorithm 3, index 2, order 7/7
 	static constexpr double P[] = {
 		0,
 		152.91909285006932,
@@ -12,7 +13,6 @@ static inline float FirstApprox(float x)
 		148.54000057530493,
 		4.0539143590175835
 	};
-
 	static constexpr double Q[] = {
 		152.91909349763372,
 		1177.8147226529784,
@@ -37,6 +37,7 @@ static inline float FirstApprox(float x)
 
 static inline float SecondApprox(float x)
 {
+	// Rational approximation coefficients for algorithm 3, index 3, order 6/5
 	static constexpr double P[] = {
 		245182.20097823755,
 		280243.5212428723,
@@ -46,7 +47,6 @@ static inline float SecondApprox(float x)
 		184.83613670644033,
 		0.9984483567344636
 	};
-
 	static constexpr double Q[] = {
 		432788.26007218857,
 		216948.13159273885,
@@ -73,6 +73,7 @@ static inline float NearBranchW0(float x)
 {
 	static constexpr double e2 = 5.43656365691809;
 
+	// Polynomial approximation coefficients for algorithm 3, index 1, order 6
 	static constexpr double P[] = {
 		-0.9999999781289544,
 		0.9999966080647236,

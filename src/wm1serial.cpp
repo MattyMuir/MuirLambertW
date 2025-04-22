@@ -3,6 +3,7 @@
 // [0.4, 0.79]
 static inline double Approx1(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 3, order 9
 	static constexpr double P[] = {
 		-0.9999999941229416,
 		-1.414213666694153,
@@ -25,6 +26,7 @@ static inline double Approx1(double t)
 // [0.79 - 1.22]
 static inline double Approx2(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 4, order 9
 	static constexpr double P[] = {
 		-0.9999991052138872,
 		-1.4142228432466455,
@@ -47,6 +49,7 @@ static inline double Approx2(double t)
 // [1.22 - 1.72]
 static inline double Approx3(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 5, order 9
 	static constexpr double P[] = {
 		-0.9999837643007623,
 		-1.414330676006523,
@@ -69,6 +72,7 @@ static inline double Approx3(double t)
 // [1.72 - 2.35]
 static inline double Approx4(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 6, order 9
 	static constexpr double P[] = {
 		-0.9999000278350678,
 		-1.4147589111597965,
@@ -91,6 +95,7 @@ static inline double Approx4(double t)
 // [2.35 - 3.18]
 static inline double Approx5(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 7, order 9
 	static constexpr double P[] = {
 		-0.999850714771072,
 		-1.4149825109462812,
@@ -113,6 +118,7 @@ static inline double Approx5(double t)
 // [3.18 - 4.05]
 static inline double Approx6(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 8, order 9
 	static constexpr double P[] = {
 		-1.0012901826225655,
 		-1.4110383515930187,
@@ -135,6 +141,7 @@ static inline double Approx6(double t)
 // [4.05 - 5.05]
 static inline double Approx7(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 9, order 10
 	static constexpr double P[] = {
 		-1.0028916969770962,
 		-1.4076729621938682,
@@ -158,6 +165,7 @@ static inline double Approx7(double t)
 // [5.05 - 6.23]
 static inline double Approx8(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 10, order 10
 	static constexpr double P[] = {
 		-1.013212250947975,
 		-1.3875232838247968,
@@ -181,6 +189,7 @@ static inline double Approx8(double t)
 // [6.23 - 7.64]
 static inline double Approx9(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 11, order 10
 	static constexpr double P[] = {
 		-1.038199841859314,
 		-1.347795831945563,
@@ -204,6 +213,7 @@ static inline double Approx9(double t)
 // [7.64 - 9.34]
 static inline double Approx10(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 12, order 10
 	static constexpr double P[] = {
 		-1.086569307966438,
 		-1.2849090746914886,
@@ -227,6 +237,7 @@ static inline double Approx10(double t)
 // [9.34 - 11.42]
 static inline double Approx11(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 13, order 10
 	static constexpr double P[] = {
 		-1.1671802393239774,
 		-1.19904203435459,
@@ -250,6 +261,7 @@ static inline double Approx11(double t)
 // [11.42 - 13.98]
 static inline double Approx12(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 14, order 9
 	static constexpr double P[] = {
 		-1.3684016349998525,
 		-1.0299502440550017,
@@ -272,6 +284,7 @@ static inline double Approx12(double t)
 // [13.98 - 17.18]
 static inline double Approx13(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 15, order 9
 	static constexpr double P[] = {
 		-1.555380238870257,
 		-0.909839477001033,
@@ -294,6 +307,7 @@ static inline double Approx13(double t)
 // [17.18 - 21.22]
 static inline double Approx14(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 16, order 10
 	static constexpr double P[] = {
 		-1.6677047157193747,
 		-0.8512494500185794,
@@ -317,6 +331,7 @@ static inline double Approx14(double t)
 // [21.22 - 24.5]
 static inline double Approx15(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 17, order 8
 	static constexpr double P[] = {
 		-2.183000555560201,
 		-0.6235321806288036,
@@ -338,6 +353,7 @@ static inline double Approx15(double t)
 // [24.5 - 27.26]
 static inline double Approx16(double t)
 {
+	// Polynomial approximation coefficients for algorithm 5, index 18, order 7
 	static constexpr double P[] = {
 		-2.5717293698125787,
 		-0.499417770415564,
@@ -370,6 +386,7 @@ static inline double NearBranchWm1(double x)
 
 	if (x < -0.367544284167)
 	{
+		// Polynomial approximation coefficients for algorithm 5, index 1, order 7
 		static constexpr double P[] = {
 			-1.0,
 			-1.0000000000000107,
@@ -388,6 +405,7 @@ static inline double NearBranchWm1(double x)
 		return value;
 	}
 
+	// Polynomial approximation coefficients for algorithm 5, index 2, order 15
 	static constexpr double P[] = {
 		-0.9999999999999998,
 		-1.0000000000002183,

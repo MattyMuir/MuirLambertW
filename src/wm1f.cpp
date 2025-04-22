@@ -67,6 +67,7 @@ static inline __m256 NearBranchWm1(__m256 x)
 	// Compute p
 	__m256 p = _mm256_mul_ps(_mm256_sqrt_ps(AddEm(x)), rt2e);
 
+	// Polynomial approximation coefficients for algorithm 8, index 3, order 8
 	static constexpr float P[] = {
 		-1.0000000212255025,
 		-0.9999950257094332,
@@ -88,6 +89,7 @@ static inline __m256 NearBranchWm1(__m256 x)
 
 static inline __m256 FirstApprox(__m256 t)
 {
+	// Polynomial approximation coefficients for algorithm 8, index 1, order 7
 	static constexpr float P[] = {
 		-0.9999947770248371,
 		-1.4142802274833077,
@@ -108,6 +110,7 @@ static inline __m256 FirstApprox(__m256 t)
 
 static inline __m256 SecondApprox(__m256 t)
 {
+	// Polynomial approximation coefficients for algorithm 8, index 2, order 7
 	static constexpr float P[] = {
 		-1.0918049,
 		-1.2658587,

@@ -56,12 +56,12 @@ static inline __m256 LogAccurate(__m256 x)
 
 static inline __m256 FirstApprox(__m256 x)
 {
+	// Rational approximation coefficients for algorithm 4, index 1, order 2/2
 	static constexpr float P[] = {
 		0.0f,
 		1.0173324233f,
 		1.62516706451f,
 	};
-
 	static constexpr float Q[] = {
 		1.0173324233f,
 		2.61423411949f,
@@ -81,13 +81,16 @@ static inline __m256 FirstApprox(__m256 x)
 
 static inline __m256 SecondApprox(__m256 x)
 {
+	// Rational approximation coefficients for algorithm 4, index 2, order 2/1
 	static constexpr float P[] = {
 		3.69555171276f,
 		2.77242714985f,
 		0.987426086605f
 	};
-
-	static constexpr float Q = 6.45416961763f;
+	static constexpr float Q[] = {
+		6.45416961763f,
+		1.0f
+	};
 
 	__m256 t = LogApprox(x);
 
@@ -95,7 +98,7 @@ static inline __m256 SecondApprox(__m256 x)
 	for (size_t i = 0; i < 2; i++)
 		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[1 - i]));
 
-	__m256 denom = _mm256_add_ps(t, _mm256_set1_ps(Q));
+	__m256 denom = _mm256_add_ps(t, _mm256_set1_ps(Q[0]));
 
 	return _mm256_div_ps(numer, denom);
 }
@@ -111,6 +114,7 @@ static inline __m256 NearBranchW0(__m256 x)
 {
 	__m256 rt2e = _mm256_set1_ps(2.331644f);
 
+	// Polynomial approximation coefficients for algorithm 4, index 3, order 6
 	static constexpr float P[] = {
 		-0.999999966739467f,
 		0.9999951977820332f,
