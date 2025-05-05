@@ -10,6 +10,7 @@
 #include "../bench/others/VebericLambertW.h"
 #include "../bench/others/FukushimaLambertW.h"
 #include "../bench/others/MuirFukushima.h"
+#include "../bench/others/PsemLambertW.h"
 #include <boost/math/special_functions/lambert_w.hpp>
 
 #define TIMER_NPRINT
@@ -78,6 +79,8 @@ std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFu
 
 int main()
 {
-	double x = -0.2;
-	std::cout << std::format("{}\n", MuirW0(x));
+	static std::mt19937_64 gen{ std::random_device{}() };
+	static ReciprocalDistributionEx<double> dist{ 1e10, INFINITY, false};
+
+	MaxULPRounded(ReferenceW0, PsemLambertW0, []() { return dist(gen); }, 0);
 }
