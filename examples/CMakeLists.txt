@@ -1,7 +1,7 @@
 # EXECUTABLE PROJECT - example
 
 # === Create Executable ===
-add_executable(example "example.cpp" "../bench/others/FukushimaLambertW.cc" "../bench/others/VebericLambertW.cc" "../bench/others/VebericLambertWOld.cc" "../bench/others/BarryLambertW.cpp" "../bench/others/MuirFukushima.cpp" "../bench/others/PsemLambertW.cpp")
+add_executable(example "example.cpp" "../bench/others/FukushimaLambertW.cc" "../bench/others/VebericLambertW.cc" "../bench/others/VebericLambertWOld.cc" "../bench/others/BarryLambertW.cpp" "../bench/others/MuirFukushima.cpp" "../bench/others/PsemLambertW.cpp" "../bench/others/FukushimaMinimax.cpp")
 
 # === Libraries ===
 target_link_libraries(example PUBLIC MuirLambertW)

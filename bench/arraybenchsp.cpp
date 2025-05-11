@@ -17,6 +17,7 @@
 #include "others/VebericLambertW.h"
 #include "others/VebericLambertWOld.h"
 #include "others/MuirFukushima.h"
+#include "others/FukushimaMinimax.h"
 
 #define FORMAT_CSV 1
 
@@ -112,22 +113,22 @@ float VebericOldWm1MadeFloat(float f)
 int main()
 {
 	// === Parameters ===
-	static constexpr size_t ArrSize = 10'000;
-	static constexpr size_t Repeats = 1000;
-	float binMin = 0.313261687518;
-	float binMax = 9.21037715924;
-	size_t binNum = 1;
-	size_t benchNum = 8;
+	static constexpr size_t ArrSize = 256;
+	static constexpr size_t Repeats = 10'000;
+	float binMin = -15.0f;
+	float binMax = 15.0f;
+	size_t binNum = 500;
+	size_t benchNum = 9;
 	float binWidth = (binMax - binMin) / binNum;
-	bool UseThroughput = true;
+	bool UseThroughput = false;
 	// ==================
 
 #if FORMAT_CSV
 	std::ofstream file{ "arraybench.csv" };
-	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima\n";
+	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,fukushimaminimax\n";
 #else
 	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima\n";
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima fukushimaminimax\n";
 #endif
 
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
@@ -153,6 +154,7 @@ int main()
 			binTimings[5] += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
 			binTimings[6] += TimeFunction([](float x) { return MuirW0(x); }, src);
 			binTimings[7] += TimeFunction([](float x) { return MuirFukushimaW0(x); }, src);
+			binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxW0(x); }, src);
 		}
 
 		std::cout << repeat << '\n';

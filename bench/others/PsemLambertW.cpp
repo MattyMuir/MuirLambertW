@@ -62,7 +62,8 @@ double PsemLambertWm1(double x)
 			(-22.9809693297808 + (-104.692066099727 - 95.2085341727207 * x) * x) * x);
 
 		double k1 = log(-x);
-		double k2 = k1 - log(-k1) + log(-k1) / k1;
+		double lk1 = log(-k1);
+		double k2 = k1 - lk1 + lk1 / k1;
 		V = k0 + k2;
 	}
 	

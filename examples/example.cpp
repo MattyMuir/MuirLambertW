@@ -11,6 +11,7 @@
 #include "../bench/others/FukushimaLambertW.h"
 #include "../bench/others/MuirFukushima.h"
 #include "../bench/others/PsemLambertW.h"
+#include "../bench/others/FukushimaMinimax.h"
 #include <boost/math/special_functions/lambert_w.hpp>
 
 #define TIMER_NPRINT
@@ -80,7 +81,7 @@ std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFu
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ 1e10, INFINITY, false};
+	static ReciprocalDistributionEx<float> dist{ EM_UPf, -0.1, false};
 
-	MaxULPRounded(ReferenceW0, PsemLambertW0, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceW0, Overload<float, FukushimaMinimaxW0>, []() { return dist(gen); }, 0);
 }
