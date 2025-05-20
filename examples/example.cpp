@@ -81,7 +81,7 @@ std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFu
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, -0.1, false};
+	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false};
 
-	MaxULPRounded(ReferenceW0, Overload<float, FukushimaMinimaxW0>, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceW0, Overload<double, FukushimaMinimaxW0>, []() { return dist(gen); }, 0);
 }
