@@ -1,6 +1,6 @@
 #pragma once
-float FukushimaMinimaxW0(float x);
-double FukushimaMinimaxW0(double x);
+float FukushimaMinimaxW0(float z);
+double FukushimaMinimaxW0(double z);
 
-float FukushimaMinimaxWm1(float x);
-double FukushimaMinimaxWm1(double x);
+float FukushimaMinimaxWm1(float z);
+double FukushimaMinimaxWm1(double z);
