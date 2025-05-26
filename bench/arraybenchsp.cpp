@@ -19,7 +19,7 @@
 #include "others/MuirFukushima.h"
 #include "others/FukushimaMinimax.h"
 
-#define FORMAT_CSV 0
+#define FORMAT_CSV 1
 
 using Function1Df = float(*)(float);
 using SimdFunction1Df = __m256(*)(__m256);
@@ -118,7 +118,7 @@ int main()
 	float binMin = -15.0f;
 	float binMax = 15.0f;
 	size_t binNum = 500;
-	size_t benchNum = 9;
+	size_t benchNum = 10;
 	float binWidth = (binMax - binMin) / binNum;
 	bool UseThroughput = false;
 	// ==================
@@ -128,7 +128,7 @@ int main()
 	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,fukushimaminimax\n";
 #else
 	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima fukushimaminimax\n";
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima fukushimaminimax muirserialv2\n";
 #endif
 
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
@@ -155,6 +155,7 @@ int main()
 			binTimings[6] += TimeFunction([](float x) { return MuirWm1(x); }, src);
 			binTimings[7] += TimeFunction([](float x) { return MuirFukushimaWm1(x); }, src);
 			binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxWm1(x); }, src);
+			binTimings[9] += TimeFunction([](float x) { return MuirWm1v2(x); }, src);
 		}
 
 		std::cout << repeat << '\n';

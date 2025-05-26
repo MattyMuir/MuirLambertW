@@ -78,10 +78,39 @@ std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFu
 	return errs;
 }
 
+float AddEmf(float x)
+{
+	return (x + 0.36787945f) - 9.149756e-09f;
+}
+
+float Approx(float x)
+{
+	static constexpr double e2 = 5.43656365691809;
+	double p = sqrt(e2 * x + 2.0);
+
+	static constexpr double P[] = {
+		-1.0000000289164983219173,0.7484377282132577749822601,0.3718673404409796721564797,-0.3760756806217422409838732,0.06188486908948103343472952
+	};
+
+	static constexpr double Q[] = {
+		1,-1.748435627144009813001159,1.043209266905849599870069,-0.2369809021813308821994934,0.0145973490111531148723476
+	};
+
+	double numer = P[4];
+	for (size_t i = 0; i < 4; i++)
+		numer = numer * p + P[3 - i];
+
+	double denom = Q[4];
+	for (size_t i = 0; i < 4; i++)
+		denom = denom * p + Q[3 - i];
+
+	return numer / denom;
+}
+
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ 0, INFINITY, false};
+	static ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
 
-	MaxULPRounded(ReferenceW0, Overload<float, FukushimaMinimaxW0>, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceWm1f, MuirWm1v2, []() { return dist(gen); }, 0);
 }
