@@ -110,7 +110,7 @@ float Approx(float x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, 0, false };
+	static ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
 
-	MaxULPRounded(ReferenceWm1f, MuirWm1v2, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceW0f, MuirW0v2, []() { return dist(gen); }, 0);
 }
