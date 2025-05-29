@@ -78,31 +78,38 @@ std::vector<UIntType<FloatTy>> GetMaximumError(auto referenceFunc, auto approxFu
 	return errs;
 }
 
-float AddEmf(float x)
+static inline double AddEm(double x)
+{
+	static constexpr double emHigh = 0.36787944117144232160;
+	static constexpr double emLow = -1.2428753672788363168e-17;
+
+	return (x + emHigh) + emLow;
+}
+
+static inline float AddEmf(float x)
 {
 	return (x + 0.36787945f) - 9.149756e-09f;
 }
 
-float Approx(float x)
+double Approx(double x)
 {
-	static constexpr double e2 = 5.43656365691809;
-	double p = sqrt(e2 * x + 2.0);
+	double t = sqrt(AddEm(x));
 
 	static constexpr double P[] = {
-		-1.0000000289164983219173,0.7484377282132577749822601,0.3718673404409796721564797,-0.3760756806217422409838732,0.06188486908948103343472952
+		-0.999999999999999998781454,-2.218532275103755425409341,1.09193891725289689417007,5.676164924352752669529278,4.333697663393533268812102,1.069483295881317351836729,0.06209728006746276596365885
 	};
 
 	static constexpr double Q[] = {
-		1,-1.748435627144009813001159,1.043209266905849599870069,-0.2369809021813308821994934,0.0145973490111531148723476
+		1,4.550176256700878418784205,7.705264281250672121011024,5.98062498820306285618724,2.106065724108968678807767,0.2831366693201161636277512,0.008433340110008441063524488
 	};
 
-	double numer = P[4];
-	for (size_t i = 0; i < 4; i++)
-		numer = numer * p + P[3 - i];
+	double numer = P[6];
+	for (size_t i = 0; i < 6; i++)
+		numer = numer * t + P[5 - i];
 
-	double denom = Q[4];
-	for (size_t i = 0; i < 4; i++)
-		denom = denom * p + Q[3 - i];
+	double denom = Q[6];
+	for (size_t i = 0; i < 6; i++)
+		denom = denom * t + Q[5 - i];
 
 	return numer / denom;
 }
@@ -110,7 +117,7 @@ float Approx(float x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false };
+	static ReciprocalDistributionEx<double> dist{ EM_UP, -0.2, false };
 
-	MaxULPRounded(ReferenceW0f, MuirW0v2, []() { return dist(gen); }, 0);
+	MaxULPRounded(ReferenceW0, Approx, []() { return dist(gen); }, 0);
 }
