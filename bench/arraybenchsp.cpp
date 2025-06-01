@@ -155,7 +155,7 @@ int main()
 			binTimings[6] += TimeFunction([](float x) { return MuirW0(x); }, src);
 			binTimings[7] += TimeFunction([](float x) { return MuirFukushimaW0(x); }, src);
 			binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxW0(x); }, src);
-			binTimings[9] += TimeFunction([](float x) { return MuirW0v2(x); }, src);
+			//binTimings[9] += TimeFunction([](float x) { return MuirW0v2(x); }, src);
 		}
 
 		std::cout << repeat << '\n';

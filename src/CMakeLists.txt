@@ -4,7 +4,7 @@
 include(GNUInstallDirs)
 
 # === Create Library ===
-add_library(MuirLambertW  "w0.cpp"   "wm1.cpp"        "wm1f.cpp"   "w0f.cpp"   "wm1serial.cpp" "w0serial.cpp"  "wm1fserial.cpp" "w0fserial.cpp")
+add_library(MuirLambertW  "w0.cpp"   "wm1.cpp"        "wm1f.cpp"   "w0f.cpp"   "wm1serial.cpp" "w0serial.cpp"  "wm1fserial.cpp" "w0fserial.cpp" "w0serialv2.cpp")
 
 find_package(sleef REQUIRED)
 target_link_libraries(MuirLambertW PUBLIC sleef::sleef)

@@ -20,10 +20,10 @@
 static constexpr float EM_UPf = -0.36787942f;
 static constexpr double EM_UP = -0.3678794411714423;
 
-Intervalf ReferenceW0f(float x) { static ReferenceWf evaluator; return evaluator.W0(x); }
-Intervalf ReferenceWm1f(float x) { static ReferenceWf evaluator; return evaluator.Wm1(x); }
-Interval ReferenceW0(double x) { static ReferenceW evaluator; return evaluator.W0(x); }
-Interval ReferenceWm1(double x) { static ReferenceW evaluator; return evaluator.Wm1(x); }
+Intervalf ReferenceW0f(float x) { thread_local ReferenceWf evaluator; return evaluator.W0(x); }
+Intervalf ReferenceWm1f(float x) { thread_local ReferenceWf evaluator; return evaluator.Wm1(x); }
+Interval ReferenceW0(double x) { thread_local ReferenceW evaluator; return evaluator.W0(x); }
+Interval ReferenceWm1(double x) { thread_local ReferenceW evaluator; return evaluator.Wm1(x); }
 
 float ExpMapW0(float x)
 {
@@ -93,14 +93,14 @@ static inline float AddEmf(float x)
 
 double Approx(double x)
 {
-	double t = sqrt(AddEm(x));
+	double t = x / (1 + x);
 
 	static constexpr double P[] = {
-		-0.999999999999999998781454,-2.218532275103755425409341,1.09193891725289689417007,5.676164924352752669529278,4.333697663393533268812102,1.069483295881317351836729,0.06209728006746276596365885
+		3.821005607016648530645815,-0.835427227384345479175442,-0.1676110305829701516749124,0.0000697878890147964021931,0.0002706420731114464410675,4.073286490834762983453e-6,1.2696378656088000085754e-8,2.594658242216529757192e-12,-8.34652818821295159020687e-16
 	};
 
 	static constexpr double Q[] = {
-		1,4.550176256700878418784205,7.705264281250672121011024,5.98062498820306285618724,2.106065724108968678807767,0.2831366693201161636277512,0.008433340110008441063524488
+		1.,0.01279854337665376068872497,-0.0964334497380958423952366,-0.008782032545023475891919091,-0.0002154194241684539978467438,-1.62242239699663351508148e-6,-2.99518766936108213590929e-9,8.346528188212951590206866e-16
 	};
 
 	double numer = P[6];
@@ -111,13 +111,14 @@ double Approx(double x)
 	for (size_t i = 0; i < 6; i++)
 		denom = denom * t + Q[5 - i];
 
-	return numer / denom;
+	return t * (1 + numer / denom);
 }
 
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, -0.2, false };
+	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false};
 
-	MaxULPRounded(ReferenceW0, Approx, []() { return dist(gen); }, 0);
+	ErrorSearcher searcher{ ReferenceW0, MuirW0v2 };
+	searcher.MaxError([]() { return dist(gen); });
 }
