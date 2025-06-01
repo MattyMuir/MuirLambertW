@@ -86,9 +86,9 @@ int main()
 	// === Parameters ===
 	static constexpr size_t ArrSize = 256;
 	static constexpr size_t Repeats = 50'000;
-	double binMin = -6;
-	double binMax = 6;
-	size_t binNum = 250;
+	double binMin = -30;
+	double binMax = 30;
+	size_t binNum = 500;
 	size_t benchNum = 11;
 	double binWidth = (binMax - binMin) / binNum;
 	bool UseThroughput = false;
@@ -96,10 +96,10 @@ int main()
 
 #if FORMAT_CSV
 	std::ofstream file{ "arraybench.csv" };
-	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirserialv2\n";
+	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirv2\n";
 #else
 	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirserialv2\n";
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirv2\n";
 #endif
 
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
@@ -114,20 +114,20 @@ int main()
 			// Create array
 			double min = binMin + binIdx * binWidth;
 			double max = binMin + (binIdx + 1) * binWidth;
-			std::vector<double> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
+			std::vector<double> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
 			// Time functions
-			//binTimings[0] += TimeFunction(BarryLambertW0, src);
-			//binTimings[1] += TimeFunction(utl::LambertW<0>, src);
-			//binTimings[2] += TimeFunction(veberic_old::LambertW<0>, src);
-			//binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
-			binTimings[4] += TimeFunction(boost::math::lambert_w0<double>, src);
-			binTimings[5] += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
-			binTimings[6] += TimeFunction([](double x) { return MuirW0(x); }, src);
-			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaW0(x); }, src);
-			//binTimings[8] += TimeFunction(PsemLambertW0, src);
-			binTimings[9] += TimeFunction([](double x) { return FukushimaMinimaxW0(x); }, src);
-			//binTimings[10] += TimeFunction([](double x) { return MuirW0v2(x); }, src);
+			//binTimings[0] += TimeFunction(BarryLambertWm1, src);
+			//binTimings[1] += TimeFunction(utl::LambertW<-1>, src);
+			//binTimings[2] += TimeFunction(veberic_old::LambertW<-1>, src);
+			//binTimings[3] += TimeFunction(Fukushima::LambertWm1, src);
+			//binTimings[4] += TimeFunction(boost::math::lambert_wm1<double>, src);
+			binTimings[5] += TimeFunction([](__m256d x) { return MuirWm1(x); }, src);
+			binTimings[6] += TimeFunction([](double x) { return MuirWm1(x); }, src);
+			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaWm1(x); }, src);
+			//binTimings[8] += TimeFunction(PsemLambertWm1, src);
+			binTimings[9] += TimeFunction([](double x) { return FukushimaMinimaxWm1(x); }, src);
+			binTimings[10] += TimeFunction([](__m256d x) { return MuirWm1v2(x); }, src);
 		}
 
 		std::cout << repeat << '\n';

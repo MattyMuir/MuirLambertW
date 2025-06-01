@@ -10,3 +10,4 @@ float MuirWm1(float x);
 double MuirWm1(double x);
 __m256 MuirWm1(__m256 x);
 __m256d MuirWm1(__m256d x);
+__m256d MuirWm1v2(__m256d x);
