@@ -1,22 +1,9 @@
-#include <cfloat>
 #include <cmath>
 #include <cstdint>
-
 #include <immintrin.h>
 
 #define EQUAL 0x0
 #define LESS 0x11
-
-static inline __m256 LogApprox(__m256 x)
-{
-	// === Constants ===
-	__m256 off = _mm256_set1_ps(-88.0004469843f);
-	__m256 scale = _mm256_set1_ps(8.262958405176314e-8f);
-	// =================
-
-	__m256 punn = _mm256_cvtepi32_ps(_mm256_castps_si256(x));
-	return _mm256_fmadd_ps(punn, scale, off);
-}
 
 static inline __m256 LogAccurate(__m256 x)
 {
@@ -54,55 +41,6 @@ static inline __m256 LogAccurate(__m256 x)
 	return _mm256_fmadd_ps(t, approx, _mm256_mul_ps(ln2, _mm256_cvtepi32_ps(exp)));
 }
 
-static inline __m256 FirstApprox(__m256 x)
-{
-	// Rational approximation coefficients for algorithm 4, index 1, order 2/2
-	static constexpr float P[] = {
-		0.0f,
-		1.0173324233f,
-		1.62516706451f,
-	};
-	static constexpr float Q[] = {
-		1.0173324233f,
-		2.61423411949f,
-		1.0f
-	};
-
-	__m256 numer = _mm256_set1_ps(P[2]);
-	for (size_t i = 0; i < 2; i++)
-		numer = _mm256_fmadd_ps(numer, x, _mm256_set1_ps(P[1 - i]));
-
-	__m256 denom = _mm256_set1_ps(Q[2]);
-	for (size_t i = 0; i < 2; i++)
-		denom = _mm256_fmadd_ps(denom, x, _mm256_set1_ps(Q[1 - i]));
-
-	return _mm256_div_ps(numer, denom);
-}
-
-static inline __m256 SecondApprox(__m256 x)
-{
-	// Rational approximation coefficients for algorithm 4, index 2, order 2/1
-	static constexpr float P[] = {
-		3.69555171276f,
-		2.77242714985f,
-		0.987426086605f
-	};
-	static constexpr float Q[] = {
-		6.45416961763f,
-		1.0f
-	};
-
-	__m256 t = LogApprox(x);
-
-	__m256 numer = _mm256_set1_ps(P[2]);
-	for (size_t i = 0; i < 2; i++)
-		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[1 - i]));
-
-	__m256 denom = _mm256_add_ps(t, _mm256_set1_ps(Q[0]));
-
-	return _mm256_div_ps(numer, denom);
-}
-
 static inline __m256 AddEm(__m256 x)
 {
 	const __m256 emHigh = _mm256_set1_ps(0.36787945f);
@@ -110,82 +48,115 @@ static inline __m256 AddEm(__m256 x)
 	return _mm256_add_ps(_mm256_add_ps(x, emHigh), emLow);
 }
 
-static inline __m256 NearBranchW0(__m256 x)
+// [EM, -0.205466397497]
+static inline __m256 Approx1(__m256 t)
 {
-	__m256 rt2e = _mm256_set1_ps(2.331644f);
-
-	// Polynomial approximation coefficients for algorithm 4, index 3, order 6
 	static constexpr float P[] = {
-		-0.999999966739467f,
-		0.9999951977820332f,
-		-0.3332171041026461f,
-		0.15169332645744893f,
-		-0.07462906014376834f,
-		0.03188270977312735f,
-		-0.0077961216354129935f
+		-7.5383643613783287804368,0.75093710445194423096623,16.0853573089437500092647,5.2230201577831681638114
+	};
+	static constexpr float Q[] = {
+		7.5383643693344303338354,16.8258426675850213904358,9.4856801812012282150965,1.
 	};
 
-	__m256 p = _mm256_mul_ps(_mm256_sqrt_ps(AddEm(x)), rt2e);
+	__m256 numer = _mm256_set1_ps(P[3]);
+	for (size_t i = 0; i < 3; i++)
+		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[2 - i]));
 
-	__m256 res = _mm256_set1_ps(P[6]);
+	__m256 denom = _mm256_set1_ps(Q[3]);
+	for (size_t i = 0; i < 3; i++)
+		denom = _mm256_fmadd_ps(denom, t, _mm256_set1_ps(Q[2 - i]));
+
+	return _mm256_div_ps(numer, denom);
+}
+
+// [-0.205466397497, 25.5337217474]
+static inline __m256 Approx2(__m256 x, __m256 t)
+{
+	static constexpr float P[] = {
+		-10973.510261722770450288,23229.03330548828134504,21732.6338059439559095,-1758.10647708696266683,-924.4396303454805579442,-2.
+	};
+	static constexpr float Q[] = {
+		-29830.310685986906640648,-29465.753207256893110428,-5436.1389751146039623073,-73.338483763659317060332,1.
+	};
+
+	__m256 numer = _mm256_set1_ps(P[5]);
+	for (size_t i = 0; i < 5; i++)
+		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[4 - i]));
+
+	__m256 denom = _mm256_set1_ps(Q[4]);
+	for (size_t i = 0; i < 4; i++)
+		denom = _mm256_fmadd_ps(denom, t, _mm256_set1_ps(Q[3 - i]));
+
+	__m256 two = _mm256_set1_ps(2.0f);
+	__m256 res = _mm256_div_ps(numer, denom);
+	res = _mm256_fmadd_ps(t, two, res);
+	return _mm256_div_ps(x, res);
+}
+
+// [25.5337217474, FLT_MAX]
+static inline __m256 Approx3(__m256 x)
+{
+	static constexpr float P[] = {
+		-97.60169098646942404,135.11605369354352048,-104.86329655432149538,71.1427070578416942,-4.035664801369620418,-0.13376645763002767975,0.00160027854040215705
+	};
+	static constexpr float Q[] = {
+		-105.29972040791455897365,24.441774729384367267568,-30.459795510157873770576,-9.237885712512041305418,1.
+	};
+
+	__m256 lx = LogAccurate(x);
+	__m256 t = _mm256_sqrt_ps(lx);
+
+	__m256 numer = _mm256_set1_ps(P[6]);
 	for (size_t i = 0; i < 6; i++)
-		res = _mm256_fmadd_ps(res, p, _mm256_set1_ps(P[5 - i]));
+		numer = _mm256_fmadd_ps(numer, t, _mm256_set1_ps(P[5 - i]));
 
-	return res;
+	__m256 denom = _mm256_set1_ps(Q[4]);
+	for (size_t i = 0; i < 4; i++)
+		denom = _mm256_fmadd_ps(denom, t, _mm256_set1_ps(Q[3 - i]));
+
+	return _mm256_add_ps(_mm256_div_ps(numer, denom), lx);
 }
 
-static inline __m256 GeneralW0(__m256 x)
+static inline __m256 NearOriginW0(__m256 x)
 {
-	// === Constants ===
-	__m256 c23 = _mm256_set1_ps(2.0f / 3.0f);
-	__m256 one = _mm256_set1_ps(1.0f);
-	// =================
+	__m256 t = _mm256_sqrt_ps(AddEm(x));
 
-	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(1.6487212f), LESS);
-	__m256 w;
-	switch (_mm256_movemask_ps(useFirst))
-	{
-	case 0b00000000:
-		w = SecondApprox(x);
-		break;
-	case 0b11111111:
-		w = FirstApprox(x);
-		break;
-	default:
-		w = _mm256_blendv_ps(SecondApprox(x), FirstApprox(x), useFirst);
-	}
-
-	// === Fritsch Iteration ===
-	__m256 xov = _mm256_div_ps(x, w);
-	__m256 zn = _mm256_sub_ps(LogAccurate(xov), w);
-
-	__m256 temp = _mm256_add_ps(w, one);
-	__m256 temp2 = _mm256_fmadd_ps(zn, c23, temp);
-	temp2 = _mm256_mul_ps(temp, temp2);
-	temp2 = _mm256_add_ps(temp2, temp2);
-	__m256 temp3 = _mm256_sub_ps(temp2, _mm256_add_ps(zn, zn));
-	__m256 temp4 = _mm256_mul_ps(_mm256_div_ps(zn, temp), _mm256_sub_ps(temp2, zn));
-	w = _mm256_mul_ps(w, _mm256_add_ps(_mm256_div_ps(temp4, temp3), one));
-
-	return w;
-}
-
-__m256 MuirW0(__m256 x)
-{
-	__m256 isNearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.3f), LESS);
+	__m256 isNearBranch = _mm256_cmp_ps(x, _mm256_set1_ps(-0.205466397497f), LESS);
 	uint32_t nearBranchMask = _mm256_movemask_ps(isNearBranch);
 
 	__m256 result;
 	switch (nearBranchMask)
 	{
 	case 0b00000000: [[likely]]
-		result = GeneralW0(x);
+		result = Approx2(x, t);
 		break;
 	case 0b11111111: [[unlikely]]
-		result = NearBranchW0(x);
+		result = Approx1(t);
 		break;
 	default: [[unlikely]]
-		result = _mm256_blendv_ps(GeneralW0(x), NearBranchW0(x), isNearBranch);
+		result = _mm256_blendv_ps(Approx2(x, t), Approx1(t), isNearBranch);
+		break;
+	}
+
+	return result;
+}
+
+__m256 MuirW0(__m256 x)
+{
+	__m256 isNearOrigin = _mm256_cmp_ps(x, _mm256_set1_ps(25.5337217474f), LESS);
+	uint32_t nearOriginMask = _mm256_movemask_ps(isNearOrigin);
+
+	__m256 result;
+	switch (nearOriginMask)
+	{
+	case 0b00000000:
+		result = Approx3(x);
+		break;
+	case 0b11111111:
+		result = NearOriginW0(x);
+		break;
+	default: [[unlikely]]
+		result = _mm256_blendv_ps(Approx3(x), NearOriginW0(x), isNearOrigin);
 		break;
 	}
 

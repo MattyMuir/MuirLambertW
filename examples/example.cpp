@@ -91,33 +91,33 @@ static inline float AddEmf(float x)
 	return (x + 0.36787945f) - 9.149756e-09f;
 }
 
-double Approx(double x)
+float Approx(float x)
 {
-	static constexpr double P[] = {
-		-1.000000000000000184466216,-2.331643981596677769194561,-1.812187885818266586169491,-1.936631086156139413432747,-2.353553564102234010397186,-3.06673924788727042848621,-4.179344454070464099829718,-5.764202408685384529372391,-9.991799959165544566758904,7.772856089469904496805629,-208.143553505030026629325,1344.145189003117866322081,-7571.576057874906736835845,31232.91784598825033270358,-96986.89700202980067185836,216959.2797827161006792247,-334089.1543888774939916275,316915.0261048373092021537,-142989.3312531372659257569
+	static constexpr float P[] = {
+		-11089.023171444342130786,23498.15662493903975909,21895.11067192099536941,-1785.643970874572900134,-929.18158114045202158,-2.
 	};
-	static constexpr double Q[] = {
-		10156.418897780532896014,13172.431036164552615165,7640.6880165687387417486,2408.547730666887003544,419.08510873181925556487,35.677534877559887648587,1.
+	static constexpr float Q[] = {
+		-30144.366062071696207513,-29708.85325974028654316,-5466.3448772136362380436,-73.514332936450296809855,1.
 	};
 
-	double t = sqrt(AddEm(x));
+	float t = sqrtf(AddEmf(x));
 
-	double numer = P[18];
-	for (size_t i = 0; i < 18; i++)
-		numer = numer * t + P[17 - i];
+	float numer = P[5];
+	for (size_t i = 0; i < 5; i++)
+		numer = numer * t + P[4 - i];
 
-	double denom = Q[6];
-	for (size_t i = 0; i < 6; i++)
-		denom = denom * t + Q[5 - i];
+	float denom = Q[4];
+	for (size_t i = 0; i < 4; i++)
+		denom = denom * t + Q[3 - i];
 
-	return numer;
+	return x / (t * 2 + numer / denom);
 }
 
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, 0, false};
+	static ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false};
 
-	ErrorSearcher searcher{ ReferenceWm1, MakeSerial<double, MuirWm1v2> };
+	ErrorSearcher searcher{ ReferenceW0f, MakeSerial<float, MuirW0> };
 	searcher.MaxError([]() { return dist(gen); });
 }

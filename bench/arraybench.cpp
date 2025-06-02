@@ -127,7 +127,7 @@ int main()
 			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaWm1(x); }, src);
 			//binTimings[8] += TimeFunction(PsemLambertWm1, src);
 			binTimings[9] += TimeFunction([](double x) { return FukushimaMinimaxWm1(x); }, src);
-			binTimings[10] += TimeFunction([](__m256d x) { return MuirWm1v2(x); }, src);
+			//binTimings[10] += TimeFunction([](__m256d x) { return MuirWm1v2(x); }, src);
 		}
 
 		std::cout << repeat << '\n';
