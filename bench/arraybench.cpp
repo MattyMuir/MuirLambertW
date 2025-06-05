@@ -96,10 +96,10 @@ int main()
 
 #if FORMAT_CSV
 	std::ofstream file{ "arraybench.csv" };
-	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirv2\n";
+	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirserialv2\n";
 #else
 	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirv2\n";
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirserialv2\n";
 #endif
 
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
@@ -127,7 +127,7 @@ int main()
 			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaWm1(x); }, src);
 			//binTimings[8] += TimeFunction(PsemLambertWm1, src);
 			binTimings[9] += TimeFunction([](double x) { return FukushimaMinimaxWm1(x); }, src);
-			//binTimings[10] += TimeFunction([](__m256d x) { return MuirWm1v2(x); }, src);
+			binTimings[10] += TimeFunction([](double x) { return MuirWm1v2(x); }, src);
 		}
 
 		std::cout << repeat << '\n';

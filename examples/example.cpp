@@ -91,24 +91,24 @@ static inline float AddEmf(float x)
 	return (x + 0.36787945f) - 9.149756e-09f;
 }
 
-float Approx(float x)
+double Approx(double x)
 {
-	static constexpr float P[] = {
-		-11089.023171444342130786,23498.15662493903975909,21895.11067192099536941,-1785.643970874572900134,-929.18158114045202158,-2.
+	static constexpr double P[] = {
+		0.367879440562318100277058,0.01629579856329787014053,-1.95895520261828626809831,-2.41320385931197971594225,-0.86154030099045003352524,0.008792042127552119907556,0.0459800172381655582073877,0.00552259547416009664176818,0.00014590301513459501193605,2.536810387426921991311715e-8
 	};
-	static constexpr float Q[] = {
-		-30144.366062071696207513,-29708.85325974028654316,-5466.3448772136362380436,-73.514332936450296809855,1.
+	static constexpr double Q[] = {
+		1.,3.149216216684359316991575,3.546977408786420079754295,1.775881710680574587670422,0.4031482003338336551181654,0.03796487558820609631875625,0.001139529814620952218770483,2.909604174184339899208132e-6,-1.268405193713460995655858e-8
 	};
 
-	float t = sqrtf(AddEmf(x));
+	double t = sqrt(AddEm(x));
 
-	float numer = P[5];
-	for (size_t i = 0; i < 5; i++)
-		numer = numer * t + P[4 - i];
+	double numer = P[9];
+	for (size_t i = 0; i < 9; i++)
+		numer = numer * t + P[8 - i];
 
-	float denom = Q[4];
-	for (size_t i = 0; i < 4; i++)
-		denom = denom * t + Q[3 - i];
+	double denom = Q[8];
+	for (size_t i = 0; i < 8; i++)
+		denom = denom * t + Q[7 - i];
 
 	return x / (t * 2 + numer / denom);
 }
@@ -116,8 +116,8 @@ float Approx(float x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, INFINITY, false};
+	static ReciprocalDistributionEx<double> dist{ EM_UP, 0, false};
 
-	ErrorSearcher searcher{ ReferenceW0f, MakeSerial<float, MuirW0> };
+	ErrorSearcher searcher{ ReferenceWm1, MuirWm1v2 };
 	searcher.MaxError([]() { return dist(gen); });
 }
