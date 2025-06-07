@@ -58,35 +58,23 @@ static inline __m256 AddEm(__m256 x)
 	return _mm256_add_ps(_mm256_add_ps(x, emHigh), emLow);
 }
 
+// [EM, -0.307278738601]
 static inline __m256 NearBranchWm1(__m256 x)
 {
-	// === Constants ===
-	__m256 rt2e = _mm256_set1_ps(2.331644f);
-	// =================
-
-	// Compute p
-	__m256 p = _mm256_mul_ps(_mm256_sqrt_ps(AddEm(x)), rt2e);
-
-	// Polynomial approximation coefficients for algorithm 8, index 3, order 8
 	static constexpr float P[] = {
-		-1.0000000212255025,
-		-0.9999950257094332,
-		-0.3335221441109622,
-		-0.1500624689844515,
-		-0.09883211897476347,
-		0.029915601909860912,
-		-0.1889854031081707,
-		0.177910291677026,
-		-0.11266484471740043
+		-0.9999999820862636899409037,-2.331653425770667928726464,-1.811384580994698926256565,-1.96222368838886514852528,-1.961393601522052749815649,-6.23046445702523402424888,9.180235188603716180047407,-31.30984139409068550600034
 	};
 
-	__m256 res = _mm256_set1_ps(P[8]);
-	for (size_t i = 0; i < 8; i++)
-		res = _mm256_fmadd_ps(res, p, _mm256_set1_ps(P[7 - i]));
+	__m256 t = _mm256_sqrt_ps(AddEm(x));
+
+	__m256 res = _mm256_set1_ps(P[7]);
+	for (size_t i = 0; i < 7; i++)
+		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[6 - i]));
 
 	return res;
 }
 
+// [-0.307278738601, -0.00000224905596703]
 static inline __m256 FirstApprox(__m256 t)
 {
 	// Polynomial approximation coefficients for algorithm 8, index 1, order 7
@@ -108,6 +96,7 @@ static inline __m256 FirstApprox(__m256 t)
 	return res;
 }
 
+// [-0.00000224905596703, 0]
 static inline __m256 SecondApprox(__m256 t)
 {
 	// Polynomial approximation coefficients for algorithm 8, index 2, order 7

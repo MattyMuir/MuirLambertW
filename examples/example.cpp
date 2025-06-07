@@ -116,8 +116,8 @@ double Approx(double x)
 int main()
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<double> dist{ EM_UP, INFINITY, false};
+	static ReciprocalDistributionEx<float> dist{ EM_UPf, -0.307278738601, false};
 
-	ErrorSearcher searcher{ ReferenceW0, MakeSerial<double, MuirW0v2> };
+	ErrorSearcher searcher{ ReferenceWm1f, MakeSerial<float, MuirWm1> };
 	searcher.MaxError([]() { return dist(gen); });
 }
