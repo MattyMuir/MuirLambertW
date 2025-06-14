@@ -21,6 +21,8 @@
 #include "others/FukushimaMinimax.h"
 
 #define FORMAT_CSV 1
+#define RESET TimeFunction([](double x) { return sqrt(x); }, src)
+//#define RESET
 
 using Function1D = double(*)(double);
 using SimdFunction1D = __m256d(*)(__m256d);
@@ -96,10 +98,10 @@ int main()
 
 #if FORMAT_CSV
 	std::ofstream file{ "arraybench.csv" };
-	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirv2\n";
+	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,psem,fukushimaminimax,muirserialv2\n";
 #else
 	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirv2\n";
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax muirserialv2\n";
 #endif
 
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
@@ -117,17 +119,29 @@ int main()
 			std::vector<double> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
 			// Time functions
-			//binTimings[0] += TimeFunction(BarryLambertWm1, src);
-			//binTimings[1] += TimeFunction(utl::LambertW<-1>, src);
-			//binTimings[2] += TimeFunction(veberic_old::LambertW<-1>, src);
-			//binTimings[3] += TimeFunction(Fukushima::LambertWm1, src);
-			//binTimings[4] += TimeFunction(boost::math::lambert_wm1<double>, src);
+			//RESET;
+			//binTimings[0] += TimeFunction(BarryLambertW0, src);
+			//RESET;
+			//binTimings[1] += TimeFunction(utl::LambertW<0>, src);
+			//RESET;
+			//binTimings[2] += TimeFunction(veberic_old::LambertW<0>, src);
+			//RESET;
+			//binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
+			RESET;
+			binTimings[4] += TimeFunction(boost::math::lambert_w0<double>, src);
+			RESET;
 			binTimings[5] += TimeFunction([](__m256d x) { return MuirW0(x); }, src);
+			RESET;
 			binTimings[6] += TimeFunction([](double x) { return MuirW0(x); }, src);
-			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaWm1(x); }, src);
-			//binTimings[8] += TimeFunction(PsemLambertWm1, src);
+			RESET;
+			//binTimings[7] += TimeFunction([](double x) { return MuirFukushimaW0(x); }, src);
+			//RESET;
+			//binTimings[8] += TimeFunction(PsemLambertW0, src);
+			//RESET;
 			binTimings[9] += TimeFunction([](double x) { return FukushimaMinimaxW0(x); }, src);
-			//binTimings[10] += TimeFunction([](__m256d x) { return MuirW0v2(x); }, src);
+			RESET;
+			//binTimings[10] += TimeFunction([](double x) { return MuirW0v2(x); }, src);
+			//RESET;
 		}
 
 		std::cout << repeat << '\n';
