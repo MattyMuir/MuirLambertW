@@ -20,6 +20,7 @@
 #include "others/FukushimaMinimax.h"
 
 #define FORMAT_CSV 1
+#define RESET TimeFunction(sqrtf, src)
 
 using Function1Df = float(*)(float);
 using SimdFunction1Df = __m256(*)(__m256);
@@ -146,16 +147,27 @@ int main()
 			std::vector<float> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
 
 			// Time functions
+			//RESET;
 			//binTimings[0] += TimeFunction(BarryW0MadeFloat, src);
+			//RESET;
 			//binTimings[1] += TimeFunction(VebericW0MadeFloat, src);
+			//RESET;
 			//binTimings[2] += TimeFunction(VebericOldW0MadeFloat, src);
+			//RESET;
 			//binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
+			RESET;
 			binTimings[4] += TimeFunction(boost::math::lambert_w0<float>, src);
+			RESET;
 			binTimings[5] += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
+			RESET;
 			binTimings[6] += TimeFunction([](float x) { return MuirW0(x); }, src);
+			RESET;
 			//binTimings[7] += TimeFunction([](float x) { return MuirFukushimaW0(x); }, src);
+			//RESET;
 			binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxW0(x); }, src);
+			//RESET;
 			//binTimings[9] += TimeFunction([](__m256 x) { return MuirW0(x); }, src);
+			RESET;
 		}
 
 		std::cout << repeat << '\n';

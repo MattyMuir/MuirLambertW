@@ -4,10 +4,7 @@
 include(GNUInstallDirs)
 
 # === Create Library ===
-add_library(MuirLambertW             "wm1f.cpp"         "wm1fserial.cpp" "w0fserial.cpp"  "wm1.cpp" "w0f.cpp" "wm1serial.cpp" "w0.cpp" "w0serial.cpp")
-
-find_package(sleef REQUIRED)
-target_link_libraries(MuirLambertW PUBLIC sleef::sleef)
+add_library(MuirLambertW "wm1f.cpp" "wm1fserial.cpp" "w0fserial.cpp" "wm1.cpp" "w0f.cpp"  "w0.cpp" "w0serial.cpp" "wm1serial.cpp")
 
 # === Feature Enables ===
 if (MUIRW_MSVC_STATIC_RUNTIME)
