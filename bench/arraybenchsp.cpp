@@ -147,26 +147,26 @@ int main()
 			std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
 
 			// Time functions
-			RESET;
-			binTimings[0] += TimeFunction(BarryWm1MadeFloat, src);
-			RESET;
-			binTimings[1] += TimeFunction(VebericWm1MadeFloat, src);
+			//RESET;
+			//binTimings[0] += TimeFunction(BarryWm1MadeFloat, src);
+			//RESET;
+			//binTimings[1] += TimeFunction(VebericWm1MadeFloat, src);
 			//RESET;
 			//binTimings[2] += TimeFunction(VebericOldW0MadeFloat, src);
 			//RESET;
 			//binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
-			RESET;
-			binTimings[4] += TimeFunction(boost::math::lambert_wm1<float>, src);
+			//RESET;
+			//binTimings[4] += TimeFunction(boost::math::lambert_wm1<float>, src);
 			RESET;
 			binTimings[5] += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
 			RESET;
 			binTimings[6] += TimeFunction([](float x) { return MuirWm1(x); }, src);
-			RESET;
-			binTimings[7] += TimeFunction([](float x) { return MuirFukushimaWm1(x); }, src);
-			RESET;
-			binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxWm1(x); }, src);
 			//RESET;
-			//binTimings[9] += TimeFunction([](float x) { return MuirWm1v2(x); }, src);
+			//binTimings[7] += TimeFunction([](float x) { return MuirFukushimaWm1(x); }, src);
+			//RESET;
+			//binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxWm1(x); }, src);
+			RESET;
+			binTimings[9] += TimeFunction([](__m256 x) { return MuirWm1v2(x); }, src);
 			RESET;
 		}
 
