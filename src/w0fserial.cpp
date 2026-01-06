@@ -4,22 +4,22 @@
 static inline float Approx1(float x)
 {
 	static constexpr double P[] = {
-		-0.999999981377920024398681,0.08222516843865509649862124,0.3767400006110998370390504,0.04604539061352127522237554
+		-0.99999998137792002640,0.19171981912189134255,2.0481709954333991001,0.58367740020065787204
 	};
 	static constexpr double Q[] = {
-		1,0.9177734753926605706900684,0.2077166606126629054461969,0.008444149579041735852782045
+		1,2.1399210003726822886,1.1292648480285057145,0.10703914566775515597
 	};
 
-	static constexpr double e2 = 5.43656365691809;
-	double p = sqrt(e2 * x + 2.0);
+	static constexpr double em = 0.36787944117144233;
+	double t = sqrt(x + em);
 
 	double numer = P[3];
 	for (size_t i = 0; i < 3; i++)
-		numer = numer * p + P[2 - i];
+		numer = numer * t + P[2 - i];
 
 	double denom = Q[3];
 	for (size_t i = 0; i < 3; i++)
-		denom = denom * p + Q[2 - i];
+		denom = denom * t + Q[2 - i];
 
 	return numer / denom;
 }

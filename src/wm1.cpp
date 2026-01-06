@@ -84,7 +84,7 @@ static inline __m256d NearBranchWm1(__m256d x)
 }
 
 // [-0.277879441171, -4.1399377188e-8]
-static inline __m256d Approx1(__m256d t)
+static inline __m256d Approx1(__m256d t, __m256d lx)
 {
 	static constexpr double P[] = {
         8235.87902260375964,-6796.86008640717252,-12443.46895966978809,-6755.27589574189008,-1712.515332068415696,-203.4276623868737738,-8.30812032921245585,-0.02889732975016652775,0.0001706041325417818548
@@ -101,12 +101,12 @@ static inline __m256d Approx1(__m256d t)
     for (size_t i = 0; i < 6; i++)
         denom = _mm256_fmadd_pd(denom, t, _mm256_set1_pd(Q[5 - i]));
 
-    __m256d Y = _mm256_set1_pd(1.666015625);
-	return _mm256_sub_pd(_mm256_sub_pd(_mm256_div_pd(numer, denom), Y), _mm256_mul_pd(t, t));
+    __m256d Y = _mm256_set1_pd(0.666015625);
+	return _mm256_add_pd(_mm256_sub_pd(_mm256_div_pd(numer, denom), Y), lx);
 }
 
 // [-4.1399377188e-8, 0]
-static inline __m256d Approx2(__m256d t)
+static inline __m256d Approx2(__m256d t, __m256d lx)
 {
     static constexpr double P[] = {
         1.5345017051966636633904e6,818003.3778741981291433,79545.29566105822257325,-46046.38588902228941374,-9920.36315181685141171,-549.716885766328377834,-8.1390767501577030303,-0.010035795798761038978,0.00002549847367232381794,-5.0490220466432423419067e-8
@@ -123,8 +123,8 @@ static inline __m256d Approx2(__m256d t)
     for (size_t i = 0; i < 6; i++)
         denom = _mm256_fmadd_pd(denom, t, _mm256_set1_pd(Q[5 - i]));
 
-    __m256d Y = _mm256_set1_pd(3.9951171875);
-    return _mm256_sub_pd(_mm256_sub_pd(_mm256_div_pd(numer, denom), Y), _mm256_mul_pd(t, t));
+    __m256d Y = _mm256_set1_pd(2.9951171875);
+    return _mm256_add_pd(_mm256_sub_pd(_mm256_div_pd(numer, denom), Y), lx);
 }
 
 static inline __m256d GeneralWm1(__m256d x)
@@ -134,19 +134,20 @@ static inline __m256d GeneralWm1(__m256d x)
 
     __m256d negOne = _mm256_set1_pd(-1.0);
     __m256d negX = _mm256_sub_pd(_mm256_setzero_pd(), x);
-    __m256d t = _mm256_sqrt_pd(_mm256_sub_pd(negOne, LogAccurate(negX)));
+    __m256d lx = LogAccurate(negX);
+    __m256d t = _mm256_sqrt_pd(_mm256_sub_pd(negOne, lx));
 
     __m256d result;
     switch (useFirstMask)
     {
     case 0b0000:
-        result = Approx2(t);
+        result = Approx2(t, lx);
         break;
     case 0b1111:
-        result = Approx1(t);
+        result = Approx1(t, lx);
         break;
     default:
-        result = _mm256_blendv_pd(Approx2(t), Approx1(t), useFirst);
+        result = _mm256_blendv_pd(Approx2(t, lx), Approx1(t, lx), useFirst);
         break;
     }
 
