@@ -94,23 +94,23 @@ static inline float AddEmf(float x)
 float Approx(float x)
 {
 	static constexpr float P[] = {
-		2103.538895966433342674,-18492.4787689402541616248,4428.6774419532113647695,-171.385458185158872416365,1.00158289237695144114984
+		-34120.78392669408956,5199.530423442335303,63.39631437058543741,-2.5877024603665257607,0.0015828923769514411498
 	};
 	static constexpr float Q[] = {
-		-9738.4370098199988067853,3751.23599762249746210982,-165.078029162292346655659,1.
+		-9738.437009819998806785,3751.2359976224974621098,-165.07802916229234665566,1.
 	};
 
-	float t = log(-x);
+	float t = logf(-x);
 
-	double numer = P[4];
+	float numer = P[4];
 	for (size_t i = 0; i < 4; i++)
 		numer = numer * t + P[3 - i];
 
-	double denom = Q[3];
+	float denom = Q[3];
 	for (size_t i = 0; i < 3; i++)
 		denom = denom * t + Q[2 - i];
 
-	return numer / denom;
+	return numer / denom + t - 3.7197265625f;
 }
 
 int main()
@@ -118,6 +118,6 @@ int main()
 	static std::mt19937_64 gen{ std::random_device{}() };
 	static ReciprocalDistributionEx<float> dist{ EM_UPf, 0.0f, false};
 
-	ErrorSearcher searcher{ ReferenceWm1f, MakeSerial<float, MuirWm1> };
+	ErrorSearcher searcher{ ReferenceWm1f, Overload<float, MuirWm1> };
 	searcher.MaxError([]() { return dist(gen); });
 }
