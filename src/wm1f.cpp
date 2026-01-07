@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <cfloat>
+#include <cmath>
 
 #include <immintrin.h>
 
@@ -75,7 +76,7 @@ static inline __m256 NearBranchWm1(__m256 x)
 }
 
 // [-0.307278738601, -0.00000224905596703]
-static inline __m256 FirstApprox(__m256 t)
+static inline __m256 FirstApprox(__m256 lx)
 {
 	// Polynomial approximation coefficients for algorithm 8, index 1, order 7
 	static constexpr float P[] = {
@@ -89,6 +90,10 @@ static inline __m256 FirstApprox(__m256 t)
 		-1.1250272634544634e-05
 	};
 
+	// Compute t
+	__m256 negOne = _mm256_set1_ps(-1.0f);
+	__m256 t = _mm256_sqrt_ps(_mm256_sub_ps(negOne, lx));
+
 	__m256 res = _mm256_set1_ps(P[7]);
 	for (size_t i = 0; i < 7; i++)
 		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[6 - i]));
@@ -97,36 +102,30 @@ static inline __m256 FirstApprox(__m256 t)
 }
 
 // [-0.00000224905596703, 0]
-static inline __m256 SecondApprox(__m256 t)
+static inline __m256 SecondApprox(__m256 lx)
 {
-	// Polynomial approximation coefficients for algorithm 8, index 2, order 7
 	static constexpr float P[] = {
-		-1.0918049,
-		-1.2658587,
-		-0.77344185,
-		-0.033979293,
-		0.0036363874,
-		-0.0002548953,
-		1.0409415e-05,
-		-1.8701131e-07
+		2103.5388959664333427,-8754.041759120255355,677.4414443307139027,-6.307429022866525761,0.0015828923769514411498
+	};
+	static constexpr float Q[] = {
+		-9738.437009819998806785,3751.2359976224974621098,-165.07802916229234665566,1.
 	};
 
-	__m256 res = _mm256_set1_ps(P[7]);
-	for (size_t i = 0; i < 7; i++)
-		res = _mm256_fmadd_ps(res, t, _mm256_set1_ps(P[6 - i]));
+	__m256 numer = _mm256_set1_ps(P[4]);
+	for (size_t i = 0; i < 4; i++)
+		numer = _mm256_fmadd_ps(numer, lx, _mm256_set1_ps(P[3 - i]));
 
-	return res;
+	__m256 denom = _mm256_set1_ps(Q[3]);
+	for (size_t i = 0; i < 3; i++)
+		denom = _mm256_fmadd_ps(denom, lx, _mm256_set1_ps(Q[2 - i]));
+
+	return _mm256_add_ps(_mm256_div_ps(numer, denom), lx);
 }
 
 static inline __m256 GeneralWm1(__m256 x)
 {
-	// === Constants ===
-	__m256 negOne = _mm256_set1_ps(-1.0f);
-	// =================
-
-	// Compute t
-	__m256 t = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
-	t = _mm256_sqrt_ps(_mm256_sub_ps(negOne, t));
+	// Compute lx
+	__m256 lx = LogAccurate(_mm256_sub_ps(_mm256_setzero_ps(), x));
 
 	__m256 useFirst = _mm256_cmp_ps(x, _mm256_set1_ps(-0.00000224905596703), LESS);
 	uint32_t useFirstMask = _mm256_movemask_ps(useFirst);
@@ -135,13 +134,13 @@ static inline __m256 GeneralWm1(__m256 x)
 	switch (useFirstMask)
 	{
 	case 0b00000000:
-		result = SecondApprox(t);
+		result = SecondApprox(lx);
 		break;
 	case 0b11111111:
-		result = FirstApprox(t);
+		result = FirstApprox(lx);
 		break;
 	default: [[unlikely]]
-		result = _mm256_blendv_ps(SecondApprox(t), FirstApprox(t), useFirst);
+		result = _mm256_blendv_ps(SecondApprox(lx), FirstApprox(lx), useFirst);
 		break;
 	}
 
@@ -166,6 +165,9 @@ __m256 MuirWm1(__m256 x)
 		result = _mm256_blendv_ps(GeneralWm1(x), NearBranchWm1(x), isNearBranch);
 		break;
 	}
+
+	// Correctly return NaN
+	result = _mm256_blendv_ps(_mm256_set1_ps(NAN), result, x);
 
 	return result;
 }

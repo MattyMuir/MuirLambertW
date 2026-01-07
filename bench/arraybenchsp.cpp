@@ -17,12 +17,12 @@
 #include "others/VebericLambertW.h"
 #include "others/VebericLambertWOld.h"
 #include "others/MuirFukushima.h"
-#include "others/FukushimaMinimax.h"
 #include "others/PsemLambertW.h"
+#include "others/FukushimaMinimax.h"
 
 // === Parameters ===
 static constexpr size_t ArrSize = 256;
-static constexpr size_t Repeats = 500;
+static constexpr size_t Repeats = 2'000;
 float binMin = -15.0f;
 float binMax = 15.0f;
 size_t binNum = 500;
