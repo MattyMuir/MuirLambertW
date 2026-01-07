@@ -18,9 +18,40 @@
 #include "others/VebericLambertWOld.h"
 #include "others/MuirFukushima.h"
 #include "others/FukushimaMinimax.h"
+#include "others/PsemLambertW.h"
 
-#define FORMAT_CSV 0
+// === Parameters ===
+static constexpr size_t ArrSize = 256;
+static constexpr size_t Repeats = 500;
+float binMin = -15.0f;
+float binMax = 15.0f;
+size_t binNum = 500;
+size_t benchNum = 10;
+float binWidth = (binMax - binMin) / binNum;
+bool UseThroughput = false;
+// ==================
+
 #define RESET TimeFunction(sqrtf, src)
+
+#define MAKE_TEMPLATED_WRAPPER(name, func, targs)\
+template <int64_t Branch>\
+float name##_wrapper(float x)\
+{\
+	if constexpr (Branch == 0)\
+		return func##0 targs(x);\
+	if constexpr (Branch == -1)\
+		return func##m1 targs(x);\
+}
+
+#define MAKE_TEMPLATED_WRAPPER_SIMD(name, func, targs)\
+template <int64_t Branch>\
+__m256 name##_wrapper(__m256 x)\
+{\
+	if constexpr (Branch == 0)\
+		return func##0 targs(x);\
+	if constexpr (Branch == -1)\
+		return func##m1 targs(x);\
+}
 
 using Function1Df = float(*)(float);
 using SimdFunction1Df = __m256(*)(__m256);
@@ -81,61 +112,55 @@ float ExpMapWm1(float x)
 	return EM_UPf / (1 + exp(x - 14)) * 8.315287e-07;
 }
 
-float BarryW0MadeFloat(float f)
+void WriteToFile(const std::string& filepath, const std::vector<std::vector<double>>& timings)
 {
-	return BarryLambertW0(f);
+	std::cout << std::format("Saving results to {}\n", filepath);
+	std::ofstream file{ filepath };
+	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima psem fukushimaminimax\n";
+
+	for (size_t binIdx = 0; binIdx < binNum; binIdx++)
+	{
+		// Print bin range
+		const std::vector<double>& binTimings = timings[binIdx];
+		float min = binMin + binIdx * binWidth;
+		file << std::format("{:.4}{}{:.4}", min, ' ', min + binWidth);
+
+		for (double time : binTimings)
+		{
+			double result = UseThroughput ? (Repeats / time * ArrSize * 1e-6) : (time / Repeats);
+			file << std::format("{}{:.10}", ' ', result);
+		}
+		file << '\n';
+	}
 }
 
-float VebericW0MadeFloat(float f)
+float VebericFloatW0(float x) { return utl::LambertW<0>(x); }
+float VebericFloatWm1(float x) { return utl::LambertW<-1>(x); }
+float VebericOldFloatW0(float x) { return veberic_old::LambertW<0>(x); }
+float VebericOldFloatWm1(float x) { return veberic_old::LambertW<-1>(x); }
+
+MAKE_TEMPLATED_WRAPPER(Barry, BarryLambertW,)
+MAKE_TEMPLATED_WRAPPER(Veberic, VebericFloatW,)
+MAKE_TEMPLATED_WRAPPER(VebericOld, VebericOldFloatW,)
+MAKE_TEMPLATED_WRAPPER(Fukushima, Fukushima::LambertW,)
+MAKE_TEMPLATED_WRAPPER(Boost, boost::math::lambert_w, <float>)
+MAKE_TEMPLATED_WRAPPER(Psem, PsemLambertW,)
+MAKE_TEMPLATED_WRAPPER(MuirFukushima, MuirFukushimaW,)
+MAKE_TEMPLATED_WRAPPER(FukushimaMinimax, FukushimaMinimaxW,)
+MAKE_TEMPLATED_WRAPPER(ExpMap, ExpMapW,)
+MAKE_TEMPLATED_WRAPPER(Muir, MuirW,)
+MAKE_TEMPLATED_WRAPPER_SIMD(MuirSimd, MuirW,)
+
+template <int64_t Branch>
+std::vector<std::vector<double>> RunBenchmark()
 {
-	return utl::LambertW<0>(f);
-}
-
-float VebericOldW0MadeFloat(float f)
-{
-	return veberic_old::LambertW<0>(f);
-}
-
-float BarryWm1MadeFloat(float f)
-{
-	return BarryLambertWm1(f);
-}
-
-float VebericWm1MadeFloat(float f)
-{
-	return utl::LambertW<-1>(f);
-}
-
-float VebericOldWm1MadeFloat(float f)
-{
-	return veberic_old::LambertW<-1>(f);
-}
-
-int main()
-{
-	// === Parameters ===
-	static constexpr size_t ArrSize = 256;
-	static constexpr size_t Repeats = 10'000;
-	float binMin = -15.0f;
-	float binMax = 15.0f;
-	size_t binNum = 500;
-	size_t benchNum = 10;
-	float binWidth = (binMax - binMin) / binNum;
-	bool UseThroughput = false;
-	// ==================
-
-#if FORMAT_CSV
-	std::ofstream file{ "arraybench.csv" };
-	file << "min,max,barry,veberic,vebericold,fukushima,boost,muir,muirserial,muirfukushima,fukushimaminimax,muirserialv2\n";
-#else
-	std::ofstream file{ "arraybench.dat" };
-	file << "min max barry veberic vebericold fukushima boost muir muirserial muirfukushima fukushimaminimax muirserialv2\n";
-#endif
-
 	std::vector<std::vector<double>> timings(binNum, std::vector<double>(benchNum));
 
 	for (size_t repeat = 0; repeat < Repeats; repeat++)
 	{
+		if (repeat % 10 == 0)
+			std::cout << std::format("Progress: {:.3f}%\r", (double)repeat / Repeats * 100.0);
+
 		for (size_t binIdx = 0; binIdx < binNum; binIdx++)
 		{
 			// Get reference to timing bin
@@ -144,53 +169,51 @@ int main()
 			// Create array
 			float min = binMin + binIdx * binWidth;
 			float max = binMin + (binIdx + 1) * binWidth;
-			std::vector<float> src = CreateArray(ArrSize, ExpMapWm1(min), ExpMapWm1(max));
+			std::vector<float> src = CreateArray(ArrSize, ExpMap_wrapper<Branch>(min), ExpMap_wrapper<Branch>(max));
 
 			// Time functions
-			//RESET;
-			//binTimings[0] += TimeFunction(BarryWm1MadeFloat, src);
-			//RESET;
-			//binTimings[1] += TimeFunction(VebericWm1MadeFloat, src);
-			//RESET;
-			//binTimings[2] += TimeFunction(VebericOldW0MadeFloat, src);
-			//RESET;
-			//binTimings[3] += TimeFunction(Fukushima::LambertW0, src);
-			//RESET;
-			//binTimings[4] += TimeFunction(boost::math::lambert_wm1<float>, src);
 			RESET;
-			binTimings[5] += TimeFunction([](__m256 x) { return MuirWm1(x); }, src);
+			binTimings[0] += TimeFunction(Barry_wrapper<Branch>, src);
 			RESET;
-			binTimings[6] += TimeFunction([](float x) { return MuirWm1(x); }, src);
-			//RESET;
-			//binTimings[7] += TimeFunction([](float x) { return MuirFukushimaWm1(x); }, src);
-			//RESET;
-			//binTimings[8] += TimeFunction([](float x) { return FukushimaMinimaxWm1(x); }, src);
+			binTimings[1] += TimeFunction(Veberic_wrapper<Branch>, src);
 			RESET;
-			binTimings[9] += TimeFunction([](__m256 x) { return MuirWm1v2(x); }, src);
+			binTimings[2] += TimeFunction(VebericOld_wrapper<Branch>, src);
+			RESET;
+			binTimings[3] += TimeFunction(Fukushima_wrapper<Branch>, src);
+			RESET;
+			binTimings[4] += TimeFunction(Boost_wrapper<Branch>, src);
+			RESET;
+			binTimings[5] += TimeFunction(MuirSimd_wrapper<Branch>, src);
+			RESET;
+			binTimings[6] += TimeFunction(Muir_wrapper<Branch>, src);
+			RESET;
+			binTimings[7] += TimeFunction(MuirFukushima_wrapper<Branch>, src);
+			RESET;
+			binTimings[8] += TimeFunction(Psem_wrapper<Branch>, src);
+			RESET;
+			binTimings[9] += TimeFunction(FukushimaMinimax_wrapper<Branch>, src);
 			RESET;
 		}
-
-		std::cout << repeat << '\n';
 	}
 
-	char sep = FORMAT_CSV ? ',' : ' ';
-	for (size_t binIdx = 0; binIdx < binNum; binIdx++)
+	std::cout << "Finished!         \n";
+	return timings;
+}
+
+int main(int argc, char** argv)
+{
+	if (argc != 2)
 	{
-		// Get reference to timing bin
-		std::vector<double>& binTimings = timings[binIdx];
-
-		// Print bin range
-		float min = binMin + binIdx * binWidth;
-		float max = binMin + (binIdx + 1) * binWidth;
-		file << std::format("{:.4}{}{:.4}", min, sep, max);
-
-		for (double time : binTimings)
-		{
-			if (UseThroughput)
-				file << std::format("{}{:.4}", sep, Repeats / time * ArrSize * 1e-6);
-			else
-				file << std::format("{}{:.10}", sep, time / Repeats);
-		}
-		file << '\n';
+		std::cout << "Provide an argument specifying which branch to benchmark (0/-1)\n";
+		return -1;
 	}
+
+	int64_t branch = std::stoll(argv[1]);
+
+	std::vector<std::vector<double>> timings;
+	if (branch == 0) timings = RunBenchmark<0>();
+	else if (branch == -1) timings = RunBenchmark<-1>();
+	else { std::cout << "Invalid branch!\n"; return -1; }
+
+	WriteToFile(std::format("arraybenchf{}.dat", branch ? "m1" : "0"), timings);
 }
