@@ -22,7 +22,7 @@
 
 // === Parameters ===
 static constexpr size_t ArrSize = 256;
-static constexpr size_t Repeats = 10'000;
+static constexpr size_t Repeats = 100;
 double binMin = -30;
 double binMax = 30;
 size_t binNum = 500;
@@ -162,11 +162,11 @@ std::vector<std::vector<double>> RunBenchmark()
 			// Create array
 			double min = binMin + binIdx * binWidth;
 			double max = binMin + (binIdx + 1) * binWidth;
-			std::vector<double> src = CreateArray(ArrSize, ExpMapW0(min), ExpMapW0(max));
+			std::vector<double> src = CreateArray(ArrSize, ExpMap_wrapper<Branch>(min), ExpMap_wrapper<Branch>(max));
 
 			// Time functions
 			RESET;
-			binTimings[0] += TimeFunction(Barry_wrapper<Branch>, src);
+			binTimings[0] += TimeFunction(Barry_wrapper<Branch>, src);+
 			RESET;
 			binTimings[1] += TimeFunction(utl::LambertW<Branch>, src);
 			RESET;
@@ -187,8 +187,6 @@ std::vector<std::vector<double>> RunBenchmark()
 			binTimings[9] += TimeFunction(FukushimaMinimax_wrapper<Branch>, src);
 			RESET;
 		}
-
-		std::cout << repeat << '\n';
 	}
 
 	std::cout << "Finished!         \n";

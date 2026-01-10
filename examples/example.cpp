@@ -7,6 +7,7 @@
 #include <MuirLambertW.h>
 
 #include "../bench/others/BarryLambertW.h"
+#include "../bench/others/VebericLambertWOld.h"
 #include "../bench/others/VebericLambertW.h"
 #include "../bench/others/FukushimaLambertW.h"
 #include "../bench/others/MuirFukushima.h"
@@ -113,11 +114,48 @@ float Approx(float x)
 	return numer / denom + t - 3.7197265625f;
 }
 
-int main()
+template <typename Ty>
+using MapTy = Ty(*)(Ty);
+
+template <typename Ty>
+std::vector<UIntType<Ty>> ULPHistogramVals(auto referenceFunc, auto approxFunc, Ty min, Ty max, Ty step, MapTy<Ty> map = IdentityMap, size_t iter = 10'000)
 {
 	static std::mt19937_64 gen{ std::random_device{}() };
-	static ReciprocalDistributionEx<float> dist{ EM_UPf, 0.0f, false};
+	std::vector<UIntType<Ty>> errs;
 
-	ErrorSearcher searcher{ ReferenceWm1f, Overload<float, MuirWm1> };
-	searcher.MaxError([]() { return dist(gen); });
+	for (Ty low = min; low < max; low += step)
+	{
+		Ty high = low + step;
+		std::uniform_real_distribution<Ty> dist{ low, high };
+
+		UIntType<Ty> err = MaxULPRounded(referenceFunc, approxFunc, [&]() { return map(dist(gen)); }, iter);
+		errs.push_back(err);
+	}
+
+	return errs;
+}
+
+int main()
+{
+	std::vector<uint64_t> proposed = ULPHistogramVals(ReferenceW0, Overload<double, MuirW0>, -40.0, 0.0, 1.0, ExpMapW0);
+
+	std::vector<std::vector<uint64_t>> others;
+	others.push_back(ULPHistogramVals(ReferenceW0, BarryLambertW0,                           -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, veberic_old::LambertW<0>,                 -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, utl::LambertW<0>,                         -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, boost::math::lambert_w0<double>,          -40.0, 0.0, 1.0, ExpMapW0));
+	//others.push_back(ULPHistogramVals(ReferenceW0, PsemLambertW0,                            -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, Fukushima::LambertW0,                     -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, Overload<double, MuirFukushimaW0>,        -40.0, 0.0, 1.0, ExpMapW0));
+	others.push_back(ULPHistogramVals(ReferenceW0, Overload<double, FukushimaMinimaxW0>,     -40.0, 0.0, 1.0, ExpMapW0));
+
+	std::vector<uint64_t> mins = others[0];
+	size_t numRows = others[0].size();
+	size_t numCols = others.size();
+	for (size_t r = 0; r < numRows; r++)
+		for (size_t c = 1; c < numCols; c++)
+			mins[r] = std::min(mins[r], others[c][r]);
+
+	for (size_t r = 0; r < numRows; r++)
+		std::cout << std::format("{:.2f} {} {}\n", -40.0 + 1.0 * r, mins[r], proposed[r]);
 }

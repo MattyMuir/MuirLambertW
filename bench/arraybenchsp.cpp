@@ -22,7 +22,7 @@
 
 // === Parameters ===
 static constexpr size_t ArrSize = 256;
-static constexpr size_t Repeats = 2'000;
+static constexpr size_t Repeats = 100;
 float binMin = -15.0f;
 float binMax = 15.0f;
 size_t binNum = 500;
