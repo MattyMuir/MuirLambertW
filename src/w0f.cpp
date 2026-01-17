@@ -51,6 +51,7 @@ static inline __m256 AddEm(__m256 x)
 // [EM, -0.205466397497]
 static inline __m256 Approx1(__m256 t)
 {
+	// Rational approximation coefficients for algorithm 4, index 1, order 3/3
 	static constexpr float P[] = {
 		-7.5383643613783287804368,0.75093710445194423096623,16.0853573089437500092647,5.2230201577831681638114
 	};
@@ -72,6 +73,7 @@ static inline __m256 Approx1(__m256 t)
 // [-0.205466397497, 25.5337217474]
 static inline __m256 Approx2(__m256 x, __m256 t)
 {
+	// Rational approximation coefficients for algorithm 4, index 2, order 5/4
 	static constexpr float P[] = {
 		-10973.510261722770450288,23229.03330548828134504,21732.6338059439559095,-1758.10647708696266683,-924.4396303454805579442,-2.
 	};
@@ -96,6 +98,7 @@ static inline __m256 Approx2(__m256 x, __m256 t)
 // [25.5337217474, FLT_MAX]
 static inline __m256 Approx3(__m256 x)
 {
+	// Rational approximation coefficients for algorithm 4, index 3, order 6/4
 	static constexpr float P[] = {
 		-97.60169098646942404,135.11605369354352048,-104.86329655432149538,71.1427070578416942,-4.035664801369620418,-0.13376645763002767975,0.00160027854040215705
 	};

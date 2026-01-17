@@ -3,6 +3,7 @@
 // [EM, -0.103006243528]
 static inline float Approx1(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 1, order 4/4
 	static constexpr double P[] = {
 		-2.3178059085766222762974,4.044780548366448857825,4.6858627990364218546778,-11.0494082385605575260139,4.2394594417272972291861
 	};
@@ -27,6 +28,7 @@ static inline float Approx1(float x)
 // [-0.103006243528, -0.015006002401]
 static inline float Approx2(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 2, order 4/4
 	static constexpr double P[] = {
 		0.00159381916122638080327842,-0.41846203646231866905097,13.0754476452340109046875,-33.425418804170640678635,-87.607345098466053529541
 	};
@@ -50,6 +52,7 @@ static inline float Approx2(float x)
 // [-0.015006002401, -0.001643817602]
 static inline float Approx3(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 3, order 4/4
 	static constexpr double P[] = {
 		-12.09015688037941661084594,32135.56153372749530599325,-1.13911365007445329260617e7,6.600688192690400594562413e8,-2.136780678942179010830866e9
 	};
@@ -73,6 +76,7 @@ static inline float Approx3(float x)
 // [-0.001643817602, -0.000162503859467]
 static inline float Approx4(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 4, order 4/4
 	static constexpr double P[] = {
 		-14.56249821961777349366917,403320.3333527217959630796,-1.497879223894395170293063e9,9.62916113431681106029542e11,-6.03430015954642686243592e13
 	};
@@ -96,6 +100,7 @@ static inline float Approx4(float x)
 // [-0.000162503859467, -0.0000149302756129]
 static inline float Approx5(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 5, order 4/4
 	static constexpr double P[] = {
 		-17.08650746361654600776381,5.222231087162755069389663e6,-2.131519875253351417813282e11,1.530697004513275159292723e15,-1.204303030667624689962588e18
 	};
@@ -119,6 +124,7 @@ static inline float Approx5(float x)
 // [-0.0000149302756129, -0.0000012926744141]
 static inline float Approx6(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 6, order 4/4
 	static constexpr double P[] = {
 		-19.65363217176511804577991,6.981171686805223179114112e7,-3.292362508083415294297803e13,2.747338886132200042460241e18,-2.632688582480525381859841e22
 	};
@@ -142,6 +148,7 @@ static inline float Approx6(float x)
 // [-0.0000012926744141, -1.0640448601e-7]
 static inline float Approx7(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 7, order 4/4
 	static constexpr double P[] = {
 		-22.25842614929501931212822,9.624516363707524579641544e8,-5.492812670981184957840948e15,5.55616366190341123552896e21,-6.61117625096980985007073e26
 	};
@@ -165,6 +172,7 @@ static inline float Approx7(float x)
 // [-1.0640448601e-7, 0]
 static inline float Approx8(float x)
 {
+	// Rational approximation coefficients for algorithm 7, index 8, order 4/3
 	static constexpr double P[] = {
 		5114.3511421762101261432,-26247.164076947694742457,5539.2828488128405071193,-190.702382635947266295553,1.00144049343340160162538
 	};
